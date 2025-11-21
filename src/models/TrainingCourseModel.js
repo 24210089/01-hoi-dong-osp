@@ -28,7 +28,9 @@ class TrainingCourseModel extends BaseModel {
     if (!partial) {
       this.requiredFields.forEach((field) => {
         if (sanitized[field] === undefined || sanitized[field] === null) {
-          throw new Error(`Field ${field} is required for TrainingCourse model.`);
+          throw new Error(
+            `Field ${field} is required for TrainingCourse model.`
+          );
         }
       });
     }

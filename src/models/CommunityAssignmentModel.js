@@ -22,7 +22,9 @@ class CommunityAssignmentModel extends BaseModel {
 
     Object.entries(data).forEach(([key, value]) => {
       if (!this.allowedFields.includes(key)) {
-        throw new Error(`Field ${key} is not allowed in CommunityAssignment model.`);
+        throw new Error(
+          `Field ${key} is not allowed in CommunityAssignment model.`
+        );
       }
       sanitized[key] = value;
     });
@@ -30,7 +32,9 @@ class CommunityAssignmentModel extends BaseModel {
     if (!partial) {
       this.requiredFields.forEach((field) => {
         if (sanitized[field] === undefined || sanitized[field] === null) {
-          throw new Error(`Field ${field} is required for CommunityAssignment model.`);
+          throw new Error(
+            `Field ${field} is required for CommunityAssignment model.`
+          );
         }
       });
     }

@@ -18,7 +18,9 @@ class DepartureRecordModel extends BaseModel {
 
     Object.entries(data).forEach(([key, value]) => {
       if (!this.allowedFields.includes(key)) {
-        throw new Error(`Field ${key} is not allowed in DepartureRecords model.`);
+        throw new Error(
+          `Field ${key} is not allowed in DepartureRecords model.`
+        );
       }
       sanitized[key] = value;
     });
@@ -26,7 +28,9 @@ class DepartureRecordModel extends BaseModel {
     if (!partial) {
       this.requiredFields.forEach((field) => {
         if (sanitized[field] === undefined || sanitized[field] === null) {
-          throw new Error(`Field ${field} is required for DepartureRecords model.`);
+          throw new Error(
+            `Field ${field} is required for DepartureRecords model.`
+          );
         }
       });
     }

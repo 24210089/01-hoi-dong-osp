@@ -20,7 +20,9 @@ class VocationJourneyModel extends BaseModel {
 
     Object.entries(data).forEach(([key, value]) => {
       if (!this.allowedFields.includes(key)) {
-        throw new Error(`Field ${key} is not allowed in VocationJourney model.`);
+        throw new Error(
+          `Field ${key} is not allowed in VocationJourney model.`
+        );
       }
       sanitized[key] = value;
     });
@@ -28,7 +30,9 @@ class VocationJourneyModel extends BaseModel {
     if (!partial) {
       this.requiredFields.forEach((field) => {
         if (sanitized[field] === undefined || sanitized[field] === null) {
-          throw new Error(`Field ${field} is required for VocationJourney model.`);
+          throw new Error(
+            `Field ${field} is required for VocationJourney model.`
+          );
         }
       });
     }

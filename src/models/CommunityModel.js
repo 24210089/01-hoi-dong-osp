@@ -3,7 +3,14 @@ const BaseModel = require("./BaseModel");
 class CommunityModel extends BaseModel {
   constructor() {
     super({ tableName: "communities", primaryKey: "id" });
-    this.allowedFields = ["code", "name", "address", "type", "created_at", "updated_at"];
+    this.allowedFields = [
+      "code",
+      "name",
+      "address",
+      "type",
+      "created_at",
+      "updated_at",
+    ];
     this.requiredFields = ["code", "name", "type"];
   }
 

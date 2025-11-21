@@ -190,7 +190,9 @@ const getAuditLogsByTable = async (req, res) => {
     });
   } catch (error) {
     console.error("getAuditLogsByTable error:", error.message);
-    return res.status(500).json({ message: "Failed to fetch table audit logs" });
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch table audit logs" });
   }
 };
 
@@ -225,7 +227,9 @@ const getAuditLogsByRecord = async (req, res) => {
     });
   } catch (error) {
     console.error("getAuditLogsByRecord error:", error.message);
-    return res.status(500).json({ message: "Failed to fetch record audit logs" });
+    return res
+      .status(500)
+      .json({ message: "Failed to fetch record audit logs" });
   }
 };
 

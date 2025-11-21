@@ -35,7 +35,9 @@ const startServer = async () => {
 
     app.listen(PORT, () => {
       console.log(
-        `HR Records Management API listening on port ${PORT} (env: ${process.env.NODE_ENV || "development"})`
+        `HR Records Management API listening on port ${PORT} (env: ${
+          process.env.NODE_ENV || "development"
+        })`
       );
     });
   } catch (error) {

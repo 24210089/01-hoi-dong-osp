@@ -10,17 +10,14 @@ const communityRole = "superior_community";
 
 const SCORE_FIELD_MAPPINGS = {
   spiritual_life_score: ["spiritual_life_score", "spiritual_life", "spiritual"],
-  community_life_score: [
-    "community_life_score",
-    "community_life",
-    "community",
-  ],
+  community_life_score: ["community_life_score", "community_life", "community"],
   mission_score: ["mission_score", "mission"],
   personality_score: ["personality_score", "personality"],
   obedience_score: ["obedience_score", "obedience"],
 };
 
-const hasGlobalAccess = (user) => !!(user && globalAccessRoles.includes(user.role));
+const hasGlobalAccess = (user) =>
+  !!(user && globalAccessRoles.includes(user.role));
 
 const ensureEditorRole = (req, res) => {
   if (!req.user) {
@@ -58,9 +55,7 @@ const verifySisterScope = async (req, res, sisterId) => {
 
   if (req.user.role === communityRole) {
     if (!req.user.community_id) {
-      res
-        .status(403)
-        .json({ message: "User context missing community scope" });
+      res.status(403).json({ message: "User context missing community scope" });
       return null;
     }
 
@@ -328,9 +323,7 @@ const deleteEvaluation = async (req, res) => {
     await EvaluationModel.delete(id);
     await logAudit(req, "DELETE", id, existing, null);
 
-    return res
-      .status(200)
-      .json({ message: "Evaluation deleted successfully" });
+    return res.status(200).json({ message: "Evaluation deleted successfully" });
   } catch (error) {
     console.error("deleteEvaluation error:", error.message);
     return res.status(500).json({ message: "Failed to delete evaluation" });
@@ -407,7 +400,9 @@ const exportEvaluationPDF = async (req, res) => {
     }
 
     const evaluator = await validateEvaluator(evaluation.evaluator_id);
-    const evaluatorName = evaluator ? evaluator.username : evaluation.evaluator_id;
+    const evaluatorName = evaluator
+      ? evaluator.username
+      : evaluation.evaluator_id;
 
     const fileSafePeriod = (evaluation.evaluation_period || "evaluation")
       .replace(/[^a-zA-Z0-9-_]/g, "_")
@@ -436,14 +431,16 @@ const exportEvaluationPDF = async (req, res) => {
       .moveDown();
 
     doc.fontSize(12).font("Helvetica");
-    doc.text(`Nữ tu: ${
-      context.sister.religious_name || context.sister.birth_name
-    } (${context.sister.code || "N/A"})`);
+    doc.text(
+      `Nữ tu: ${context.sister.religious_name || context.sister.birth_name} (${
+        context.sister.code || "N/A"
+      })`
+    );
     doc.text(`Kỳ đánh giá: ${evaluation.evaluation_period}`);
     doc.text(`Người đánh giá: ${evaluatorName}`);
     doc.text(
       `Cộng đoàn: ${
-        context.assignment ? context.assignment.community_name : "Chưa phân" 
+        context.assignment ? context.assignment.community_name : "Chưa phân"
       }`
     );
     doc.text(`Ngày lập phiếu: ${formatDate(evaluation.created_at)}`);

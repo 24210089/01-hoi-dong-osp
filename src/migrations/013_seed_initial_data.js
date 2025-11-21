@@ -1,6 +1,7 @@
-const pool = require('../config/database');
+const pool = require("../config/database");
 
-const adminPasswordHash = '$2a$10$CwTycUXWue0Thq9StjUM0uJ8czPz7YT6CX4hY0MQipoZf7cFTdO2W'; // bcrypt hash for "password"
+const adminPasswordHash =
+  "$2a$10$CwTycUXWue0Thq9StjUM0uJ8czPz7YT6CX4hY0MQipoZf7cFTdO2W"; // bcrypt hash for "password"
 
 const up = async () => {
   const connection = await pool.getConnection();
@@ -34,7 +35,9 @@ const down = async () => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
-    await connection.query("DELETE FROM communities WHERE code IN ('MH-001','EDU-001');");
+    await connection.query(
+      "DELETE FROM communities WHERE code IN ('MH-001','EDU-001');"
+    );
     await connection.query("DELETE FROM users WHERE username = 'admin';");
     await connection.commit();
   } catch (error) {
@@ -46,7 +49,7 @@ const down = async () => {
 };
 
 module.exports = {
-  name: '013_seed_initial_data',
+  name: "013_seed_initial_data",
   up,
-  down
+  down,
 };

@@ -1,4 +1,4 @@
-const pool = require('../config/database');
+const pool = require("../config/database");
 
 const upQuery = `
   CREATE TABLE IF NOT EXISTS sisters (
@@ -32,10 +32,10 @@ const upQuery = `
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 `;
 
-const downQuery = 'DROP TABLE IF EXISTS sisters;';
+const downQuery = "DROP TABLE IF EXISTS sisters;";
 
 module.exports = {
-  name: '003_create_sisters_table',
+  name: "003_create_sisters_table",
   up: async () => {
     const connection = await pool.getConnection();
     try {
@@ -51,5 +51,5 @@ module.exports = {
     } finally {
       connection.release();
     }
-  }
+  },
 };

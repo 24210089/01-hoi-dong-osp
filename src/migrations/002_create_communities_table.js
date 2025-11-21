@@ -1,4 +1,4 @@
-const pool = require('../config/database');
+const pool = require("../config/database");
 
 const upQuery = `
   CREATE TABLE IF NOT EXISTS communities (
@@ -13,10 +13,10 @@ const upQuery = `
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 `;
 
-const downQuery = 'DROP TABLE IF EXISTS communities;';
+const downQuery = "DROP TABLE IF EXISTS communities;";
 
 module.exports = {
-  name: '002_create_communities_table',
+  name: "002_create_communities_table",
   up: async () => {
     const connection = await pool.getConnection();
     try {
@@ -32,5 +32,5 @@ module.exports = {
     } finally {
       connection.release();
     }
-  }
+  },
 };

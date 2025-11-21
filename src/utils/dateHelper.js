@@ -5,7 +5,8 @@ const normalizeDate = (dateInput) => {
     return null;
   }
 
-  const date = dateInput instanceof Date ? new Date(dateInput) : new Date(dateInput);
+  const date =
+    dateInput instanceof Date ? new Date(dateInput) : new Date(dateInput);
   return Number.isNaN(date.getTime()) ? null : date;
 };
 

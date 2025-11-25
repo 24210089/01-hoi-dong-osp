@@ -84,11 +84,14 @@ const logAudit = async (req, action, recordId, oldValue, newValue) => {
   }
 };
 
-const buildFilters = ({ status, search, minAge, maxAge }) => {
+const buildFilters = ({ status, search, minAge, maxAge, excludeLeft = false }) => {
   const clauses = [];
   const params = [];
 
-  if (status) {
+  if (excludeLeft) {
+    // Exclude records with status 'left' (show active only)
+    clauses.push("status = 'active'");
+  } else if (status) {
     clauses.push("status = ?");
     params.push(status);
   }
@@ -125,13 +128,16 @@ const getAllSisters = async (req, res) => {
       ? parseInt(req.query.maxAge, 10)
       : undefined;
     const search = req.query.search ? req.query.search.trim() : "";
-    const status = req.query.status || "";
+    // By default, exclude 'left' sisters (show active only)
+    const showAll = req.query.status === "all";
+    const status = showAll ? "" : (req.query.status || "");
 
     const { clauses, params } = buildFilters({
       status,
       search,
       minAge,
       maxAge,
+      excludeLeft: !showAll && !req.query.status, // exclude 'left' by default
     });
     const whereClause = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
 
@@ -252,8 +258,9 @@ const deleteSister = async (req, res) => {
       return res.status(404).json({ message: "Sister not found" });
     }
 
-    const inactiveStatus = "inactive";
-    const updated = await SisterModel.update(id, { status: inactiveStatus });
+    // Use 'left' status as defined in database ENUM('active','left')
+    const leftStatus = "left";
+    const updated = await SisterModel.update(id, { status: leftStatus });
     await logAudit(req, "DELETE", id, sister, updated);
 
     return res.status(200).json({ message: "Sister deactivated successfully" });
@@ -353,6 +360,16 @@ const searchSisters = async (req, res) => {
     if (req.query.missionField) {
       filters.push("mi.field = ?");
       params.push(req.query.missionField);
+    }
+
+    // Default to 'active' if status is not provided
+    if (req.query.status !== undefined) {
+        if (req.query.status) {
+            filters.push("s.status = ?");
+            params.push(req.query.status);
+        }
+    } else {
+        filters.push("s.status = 'active'");
     }
 
     const minAge = req.query.minAge

@@ -29,7 +29,7 @@ const logSisterAction = (action) =>
 
 router.use(authenticateToken);
 
-router.get("/", cacheMiddleware(60), sisterController.getAllSisters);
+router.get("/", sisterController.getAllSisters);
 router.get("/search", sisterController.searchSisters);
 router.get("/:id", sisterController.getSisterById);
 

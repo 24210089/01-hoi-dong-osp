@@ -65,12 +65,12 @@
                                     aria-expanded="false">...</a>
 
                                 <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#"><i
-                                            class="fas fa-times text-orange-red"></i>Close</a>
-                                    <a class="dropdown-item" href="#"><i
-                                            class="fas fa-cogs text-dark-pastel-green"></i>Edit</a>
-                                    <a class="dropdown-item" href="#"><i
-                                            class="fas fa-redo-alt text-orange-peel"></i>Refresh</a>
+                                    <a class="dropdown-item" href="#" id="btn-edit-sister"><i
+                                            class="fas fa-cogs text-dark-pastel-green"></i>Sửa</a>
+                                    <a class="dropdown-item" href="#" id="btn-delete-sister"><i
+                                            class="fas fa-times text-orange-red"></i>Xóa</a>
+                                    <a class="dropdown-item" href="all-sister.html"><i
+                                            class="fas fa-list text-orange-peel"></i>Danh sách</a>
                                 </div>
                             </div>
                         </div>
@@ -84,9 +84,9 @@
                                     <h3 class="text-dark-medium font-medium" id="detail-religious-name"></h3>
                                     <div class="header-elements">
                                         <ul>
-                                            <li><a href="#"><i class="far fa-edit"></i></a></li>
-                                            <li><a href="#"><i class="fas fa-print"></i></a></li>
-                                            <li><a href="#"><i class="fas fa-download"></i></a></li>
+                                            <li><a href="#" id="header-edit-sister" title="Sửa"><i class="far fa-edit"></i></a></li>
+                                            <li><a href="#" onclick="window.print()" title="In"><i class="fas fa-print"></i></a></li>
+                                            <li><a href="all-sister.html" title="Danh sách"><i class="fas fa-list"></i></a></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -260,6 +260,33 @@
                 error: function (xhr) {
                     console.error(xhr);
                     alert('Không thể tải thông tin Nữ tu.');
+                }
+            });
+
+            // Handle Edit button click
+            $('#btn-edit-sister, #header-edit-sister').on('click', function(e) {
+                e.preventDefault();
+                window.location.href = `edit-sister.html?id=${sisterId}`;
+            });
+
+            // Handle Delete button click
+            $('#btn-delete-sister').on('click', function(e) {
+                e.preventDefault();
+                if (confirm('Bạn có chắc chắn muốn xóa nữ tu này?')) {
+                    $.ajax({
+                        url: `http://localhost:5000/api/sisters/${sisterId}`,
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        },
+                        success: function() {
+                            alert('Xóa thành công!');
+                            window.location.href = 'all-sister.html';
+                        },
+                        error: function(xhr) {
+                            alert('Xóa thất bại: ' + (xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText));
+                        }
+                    });
                 }
             });
         });

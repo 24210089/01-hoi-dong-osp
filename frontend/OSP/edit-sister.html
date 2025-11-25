@@ -1,0 +1,438 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>OSP | Sửa thông tin Nữ tu</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="img/favicon.png">
+    <!-- Normalize CSS -->
+    <link rel="stylesheet" href="css/normalize.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" href="css/all.min.css">
+    <!-- Flaticon CSS -->
+    <link rel="stylesheet" href="fonts/flaticon.css">
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="css/animate.min.css">
+    <!-- Select 2 CSS -->
+    <link rel="stylesheet" href="css/select2.min.css">
+    <!-- Date Picker CSS -->
+    <link rel="stylesheet" href="css/datepicker.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .new-added-form .form-control {
+            background-color: #f0f1f3;
+            border: 1px solid #cfcfcf;
+            border-radius: 4px;
+        }
+
+        .new-added-form .form-control:focus {
+            background-color: #ffffff;
+            border-color: #ffae01;
+        }
+
+        .new-added-form .form-control::placeholder {
+            color: #888;
+            font-style: italic;
+        }
+
+        .current-photo {
+            max-width: 150px;
+            max-height: 150px;
+            border: 1px solid #ccc;
+            padding: 2px;
+            margin-bottom: 10px;
+        }
+    </style>
+    <!-- Modernize js -->
+    <script src="js/modernizr-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <!-- Preloader Start Here -->
+    <div id="preloader"></div>
+    <!-- Preloader End Here -->
+    <div id="wrapper" class="wrapper bg-ash">
+        <!-- Header Menu Area Start Here -->
+        <div id="header-placeholder"></div>
+        <!-- Header Menu Area End Here -->
+        <!-- Page Area Start Here -->
+        <div class="dashboard-page-one">
+            <!-- Sidebar Area Start Here -->
+            <div id="sidebar-placeholder"></div>
+            <!-- Sidebar Area End Here -->
+            <div class="dashboard-content-one">
+                <!-- Breadcubs Area Start Here -->
+                <div class="breadcrumbs-area">
+                    <h3>Nữ tu</h3>
+                    <ul>
+                        <li>
+                            <a href="index.html">Home</a>
+                        </li>
+                        <li>Sửa thông tin Nữ tu</li>
+                    </ul>
+                </div>
+                <!-- Breadcubs Area End Here -->
+                <!-- Edit Form Area Start Here -->
+                <div class="card height-auto">
+                    <div class="card-body">
+                        <div class="heading-layout1">
+                            <div class="item-title">
+                                <h3>Sửa thông tin Nữ tu</h3>
+                            </div>
+                        </div>
+                        <form class="new-added-form" id="edit-sister-form">
+                            <input type="hidden" name="id" id="sister-id">
+                            <div class="row">
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Mã số</label>
+                                    <input type="text" name="code" id="code" class="form-control" readonly
+                                        style="background-color: #e9ecef;">
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Tên khai sinh *</label>
+                                    <input type="text" name="birth_name" id="birth_name"
+                                        placeholder="Nhập tên khai sinh..." class="form-control" required>
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Tên dòng *</label>
+                                    <input type="text" name="religious_name" id="religious_name"
+                                        placeholder="Nhập tên dòng..." class="form-control" required>
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Ngày sinh *</label>
+                                    <input type="text" name="date_of_birth" id="date_of_birth"
+                                        placeholder="Chọn ngày sinh (dd/mm/yyyy)..." class="form-control air-datepicker"
+                                        data-position='bottom right' required>
+                                    <i class="far fa-calendar-alt"></i>
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Nơi sinh *</label>
+                                    <input type="text" name="place_of_birth" id="place_of_birth"
+                                        placeholder="Nhập nơi sinh..." class="form-control" required>
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Quốc tịch</label>
+                                    <input type="text" name="nationality" id="nationality"
+                                        placeholder="Nhập quốc tịch..." class="form-control">
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Tên cha</label>
+                                    <input type="text" name="father_name" id="father_name" placeholder="Nhập tên cha..."
+                                        class="form-control">
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Tên mẹ</label>
+                                    <input type="text" name="mother_name" id="mother_name" placeholder="Nhập tên mẹ..."
+                                        class="form-control">
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Tôn giáo gia đình</label>
+                                    <input type="text" name="family_religion" id="family_religion"
+                                        placeholder="Nhập tôn giáo gia đình..." class="form-control">
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Ngày rửa tội</label>
+                                    <input type="text" name="baptism_date" id="baptism_date"
+                                        placeholder="Chọn ngày rửa tội..." class="form-control air-datepicker"
+                                        data-position='bottom right'>
+                                    <i class="far fa-calendar-alt"></i>
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Nơi rửa tội</label>
+                                    <input type="text" name="baptism_place" id="baptism_place"
+                                        placeholder="Nhập nơi rửa tội..." class="form-control">
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Ngày thêm sức</label>
+                                    <input type="text" name="confirmation_date" id="confirmation_date"
+                                        placeholder="Chọn ngày thêm sức..." class="form-control air-datepicker"
+                                        data-position='bottom right'>
+                                    <i class="far fa-calendar-alt"></i>
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Ngày rước lễ lần đầu</label>
+                                    <input type="text" name="first_communion_date" id="first_communion_date"
+                                        placeholder="Chọn ngày rước lễ..." class="form-control air-datepicker"
+                                        data-position='bottom right'>
+                                    <i class="far fa-calendar-alt"></i>
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Số điện thoại</label>
+                                    <input type="text" name="phone" id="phone" placeholder="Nhập số điện thoại..."
+                                        class="form-control">
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Email</label>
+                                    <input type="email" name="email" id="email" placeholder="Nhập địa chỉ email..."
+                                        class="form-control">
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>Người liên hệ khẩn cấp</label>
+                                    <input type="text" name="emergency_contact_name" id="emergency_contact_name"
+                                        placeholder="Nhập tên người liên hệ..." class="form-control">
+                                </div>
+                                <div class="col-xl-3 col-lg-6 col-12 form-group">
+                                    <label>SĐT khẩn cấp</label>
+                                    <input type="text" name="emergency_contact_phone" id="emergency_contact_phone"
+                                        placeholder="Nhập SĐT người liên hệ..." class="form-control">
+                                </div>
+                                <div class="col-lg-6 col-12 form-group mg-t-30">
+                                    <label class="text-dark-medium">Ảnh hiện tại</label>
+                                    <div>
+                                        <img id="current-photo" src="img/figure/default-sister.png" alt="Ảnh nữ tu"
+                                            class="current-photo">
+                                    </div>
+                                    <label class="text-dark-medium mt-3">Tải lên ảnh mới (150px X 150px)</label>
+                                    <input type="file" name="photo" class="form-control-file" accept="image/*"
+                                        onchange="previewImage(this)">
+                                    <div class="mt-3">
+                                        <img id="photo-preview" src="#" alt="Ảnh xem trước"
+                                            style="max-width: 150px; max-height: 150px; display: none; border: 1px solid #ccc; padding: 2px;">
+                                    </div>
+                                </div>
+                                <div class="col-12 form-group mg-t-8">
+                                    <button type="submit"
+                                        class="btn-fill-lg btn-gradient-yellow btn-hover-bluedark">Cập nhật</button>
+                                    <a href="all-sister.html"
+                                        class="btn-fill-lg bg-blue-dark btn-hover-yellow">Quay lại</a>
+                                </div>
+                                <div class="col-12 form-group">
+                                    <div id="form-message" class="alert" style="display:none;"></div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- Edit Form Area End Here -->
+                <footer class="footer-wrap-layout1">
+                    <div class="copyright">© Copyrights <a href="http://zalo.me/0336216546">Khoadev</a> 2025. All rights
+                        reserved. Designed by <a href="#">Khoadev</a></div>
+                </footer>
+            </div>
+        </div>
+        <!-- Page Area End Here -->
+    </div>
+    <!-- jquery-->
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <!-- Plugins js -->
+    <script src="js/plugins.js"></script>
+    <!-- Popper js -->
+    <script src="js/popper.min.js"></script>
+    <!-- Bootstrap js -->
+    <script src="js/bootstrap.min.js"></script>
+    <!-- Select 2 Js -->
+    <script src="js/select2.min.js"></script>
+    <!-- Date Picker Js -->
+    <script src="js/datepicker.min.js"></script>
+    <!-- Scroll Up Js -->
+    <script src="js/jquery.scrollUp.min.js"></script>
+    <!-- Custom Js -->
+    <script src="js/main.js"></script>
+    <!-- Load Components Js -->
+    <script src="js/load-components.js"></script>
+
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#photo-preview').attr('src', e.target.result).show();
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $(document).ready(function () {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Get sister ID from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const sisterId = urlParams.get('id');
+
+            if (!sisterId) {
+                alert('Không tìm thấy ID nữ tu!');
+                window.location.href = 'all-sister.html';
+                return;
+            }
+
+            // Helper to format date from yyyy-mm-dd to dd/mm/yyyy
+            function formatDateToDisplay(dateStr) {
+                if (!dateStr) return '';
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return '';
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            }
+
+            // Helper to convert dd/mm/yyyy to yyyy-mm-dd for API
+            function formatDateToAPI(dateStr) {
+                if (!dateStr) return null;
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+                return dateStr;
+            }
+
+            // Load sister data
+            function loadSisterData() {
+                $.ajax({
+                    url: `http://localhost:5000/api/sisters/${sisterId}`,
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    success: function (sister) {
+                        // Fill form fields
+                        $('#sister-id').val(sister.id);
+                        $('#code').val(sister.code || '');
+                        $('#birth_name').val(sister.birth_name || '');
+                        $('#religious_name').val(sister.religious_name || '');
+                        $('#date_of_birth').val(formatDateToDisplay(sister.date_of_birth));
+                        $('#place_of_birth').val(sister.place_of_birth || '');
+                        $('#nationality').val(sister.nationality || '');
+                        $('#father_name').val(sister.father_name || '');
+                        $('#mother_name').val(sister.mother_name || '');
+                        $('#family_religion').val(sister.family_religion || '');
+                        $('#baptism_date').val(formatDateToDisplay(sister.baptism_date));
+                        $('#baptism_place').val(sister.baptism_place || '');
+                        $('#confirmation_date').val(formatDateToDisplay(sister.confirmation_date));
+                        $('#first_communion_date').val(formatDateToDisplay(sister.first_communion_date));
+                        $('#phone').val(sister.phone || '');
+                        $('#email').val(sister.email || '');
+                        $('#emergency_contact_name').val(sister.emergency_contact_name || '');
+                        $('#emergency_contact_phone').val(sister.emergency_contact_phone || '');
+
+                        // Set current photo
+                        if (sister.photo_url) {
+                            $('#current-photo').attr('src', 'http://localhost:5000' + sister.photo_url);
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error('Error loading sister:', xhr);
+                        if (xhr.status === 401) {
+                            window.location.href = 'login.html';
+                        } else if (xhr.status === 404) {
+                            alert('Không tìm thấy nữ tu!');
+                            window.location.href = 'all-sister.html';
+                        } else {
+                            alert('Không thể tải thông tin nữ tu.');
+                        }
+                    }
+                });
+            }
+
+            // Load data on page load
+            loadSisterData();
+
+            // Handle form submit
+            $('#edit-sister-form').on('submit', function (e) {
+                e.preventDefault();
+
+                const $form = $(this);
+                const $btn = $form.find('button[type="submit"]');
+                const $msg = $('#form-message');
+
+                $btn.prop('disabled', true).text('Đang cập nhật...');
+                $msg.hide().removeClass('alert-success alert-danger');
+
+                // Collect data
+                const formData = {};
+                $form.serializeArray().forEach(item => {
+                    // Skip id and code fields
+                    if (item.name === 'id' || item.name === 'code') return;
+
+                    if (item.value.trim() !== '') {
+                        if (['date_of_birth', 'baptism_date', 'confirmation_date', 'first_communion_date'].includes(item.name)) {
+                            formData[item.name] = formatDateToAPI(item.value);
+                        } else {
+                            formData[item.name] = item.value;
+                        }
+                    }
+                });
+
+                // Basic validation
+                if (!formData.birth_name || !formData.religious_name || !formData.date_of_birth || !formData.place_of_birth) {
+                    $msg.addClass('alert-danger').text('Vui lòng điền đầy đủ các trường bắt buộc (*).').show();
+                    $btn.prop('disabled', false).text('Cập nhật');
+                    return;
+                }
+
+                // Update sister data
+                $.ajax({
+                    url: `http://localhost:5000/api/sisters/${sisterId}`,
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        const photoInput = $form.find('input[name="photo"]')[0];
+
+                        // If new photo is selected, upload it
+                        if (photoInput.files && photoInput.files[0]) {
+                            const photoData = new FormData();
+                            photoData.append('photo', photoInput.files[0]);
+
+                            $.ajax({
+                                url: `http://localhost:5000/api/sisters/${sisterId}/photo`,
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                data: photoData,
+                                processData: false,
+                                contentType: false,
+                                success: function () {
+                                    $msg.addClass('alert-success').text('Cập nhật thành công!').show();
+                                    setTimeout(function () {
+                                        window.location.href = `sister-details.html?id=${sisterId}`;
+                                    }, 1500);
+                                },
+                                error: function () {
+                                    $msg.addClass('alert-warning').text('Cập nhật thành công nhưng tải ảnh thất bại.').show();
+                                    $btn.prop('disabled', false).text('Cập nhật');
+                                }
+                            });
+                        } else {
+                            $msg.addClass('alert-success').text('Cập nhật thành công!').show();
+                            setTimeout(function () {
+                                window.location.href = `sister-details.html?id=${sisterId}`;
+                            }, 1500);
+                        }
+                    },
+                    error: function (xhr) {
+                        let msg = 'Có lỗi xảy ra.';
+                        if (xhr.responseJSON) {
+                            if (xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            } else if (xhr.responseJSON.errors) {
+                                msg = xhr.responseJSON.errors.map(e => e.message).join('<br>');
+                            }
+                        }
+                        $msg.addClass('alert-danger').html(msg).show();
+                        $btn.prop('disabled', false).text('Cập nhật');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -58,40 +58,7 @@
                 <!-- Nữ tu Table Area Start Here -->
                 <div class="card height-auto">
                     <div class="card-body">
-                        <div class="heading-layout1">
-                            <div class="item-title">
-                                <h3>All Nữ tu Data</h3>
-                            </div>
-                            <div class="dropdown">
-                                <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown"
-                                    aria-expanded="false">...</a>
 
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="#"><i
-                                            class="fas fa-times text-orange-red"></i>Close</a>
-                                    <a class="dropdown-item" href="#"><i
-                                            class="fas fa-cogs text-dark-pastel-green"></i>Edit</a>
-                                    <a class="dropdown-item" href="#"><i
-                                            class="fas fa-redo-alt text-orange-peel"></i>Refresh</a>
-                                </div>
-                            </div>
-                        </div>
-                        <form class="mg-b-20">
-                            <div class="row gutters-8">
-                                <div class="col-3-xxxl col-xl-3 col-lg-3 col-12 form-group">
-                                    <input type="text" placeholder="Search by Roll ..." class="form-control">
-                                </div>
-                                <div class="col-4-xxxl col-xl-4 col-lg-3 col-12 form-group">
-                                    <input type="text" placeholder="Search by Name ..." class="form-control">
-                                </div>
-                                <div class="col-4-xxxl col-xl-3 col-lg-3 col-12 form-group">
-                                    <input type="text" placeholder="Search by Class ..." class="form-control">
-                                </div>
-                                <div class="col-1-xxxl col-xl-2 col-lg-3 col-12 form-group">
-                                    <button type="submit" class="fw-btn-fill btn-gradient-yellow">SEARCH</button>
-                                </div>
-                            </div>
-                        </form>
                         <div class="table-responsive">
                             <table class="table display data-table text-nowrap">
                                 <thead>
@@ -153,7 +120,7 @@
 
             function loadSisters() {
                 $.ajax({
-                    url: 'http://localhost:5000/api/sisters',
+                    url: 'http://localhost:5000/api/sisters?limit=1000',
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -203,20 +170,35 @@
                             `;
                             tbody.append(row);
                         });
-                        
+
                         // Re-initialize DataTables
                         $('.data-table').DataTable({
                             paging: true,
-                            searching: false,
-                            info: false,
-                            lengthChange: false,
-                            lengthMenu: [20, 50, 75, 100],
+                            searching: true,
+                            info: true,
+                            lengthChange: true,
+                            lengthMenu: [20, 50, 100],
                             columnDefs: [
                                 {
                                     targets: [0, -1], // column or columns numbers
                                     orderable: false, // set orderable for selected columns
                                 },
                             ],
+                            language: {
+                                search: "Tìm kiếm:",
+                                lengthMenu: "Hiển thị _MENU_ bản ghi",
+                                info: "Hiển thị _START_ đến _END_ của _TOTAL_ bản ghi",
+                                infoEmpty: "Hiển thị 0 đến 0 của 0 bản ghi",
+                                infoFiltered: "(được lọc từ _MAX_ bản ghi)",
+                                paginate: {
+                                    first: "Đầu",
+                                    last: "Cuối",
+                                    next: "Sau",
+                                    previous: "Trước"
+                                },
+                                emptyTable: "Không có dữ liệu trong bảng",
+                                zeroRecords: "Không tìm thấy kết quả phù hợp"
+                            }
                         });
                     },
                     error: function (xhr) {
@@ -233,21 +215,21 @@
             loadSisters();
 
             // Handle Delete
-            $(document).on('click', '.delete-sister', function(e) {
+            $(document).on('click', '.delete-sister', function (e) {
                 e.preventDefault();
                 const id = $(this).data('id');
-                if(confirm('Bạn có chắc chắn muốn xóa nữ tu này?')) {
-                     $.ajax({
+                if (confirm('Bạn có chắc chắn muốn xóa nữ tu này?')) {
+                    $.ajax({
                         url: `http://localhost:5000/api/sisters/${id}`,
                         method: 'DELETE',
                         headers: {
                             'Authorization': `Bearer ${token}`
                         },
-                        success: function() {
+                        success: function () {
                             alert('Xóa thành công');
                             loadSisters();
                         },
-                        error: function(xhr) {
+                        error: function (xhr) {
                             alert('Xóa thất bại: ' + (xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText));
                         }
                     });

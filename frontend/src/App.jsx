@@ -6,11 +6,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 // Contexts
-import {
-  AuthProvider,
-  NotificationProvider,
-  SidebarProvider,
-} from "@context";
+import { AuthProvider, NotificationProvider, SidebarProvider } from "@context";
 
 // Routes
 import AppRoutes from "./routes";
@@ -25,18 +21,18 @@ function App() {
         <NotificationProvider>
           <SidebarProvider>
             <AppRoutes />
-              <ToastContainer
-                position="top-right"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="colored"
-              />
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
           </SidebarProvider>
         </NotificationProvider>
       </AuthProvider>

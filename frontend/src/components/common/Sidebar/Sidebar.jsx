@@ -180,33 +180,10 @@ const Sidebar = ({ isOpen, onClose, isCompact = false, onToggleCompact }) => {
           isCompact ? "compact" : ""
         }`}
       >
-        {/* Sidebar Header */}
-        <div className="sidebar-header">
-          <div className="sidebar-brand">
-            <i className="fas fa-church"></i>
-            {!isCompact && <span className="brand-text">Quản Lý Hội Dòng</span>}
-          </div>
-
-          {/* Compact toggle button (desktop only) */}
-          {!isCompact && (
-            <button
-              className="sidebar-compact-toggle d-none d-lg-block"
-              onClick={onToggleCompact}
-              title="Thu gọn sidebar"
-            >
-              <i className="fas fa-angle-double-left"></i>
-            </button>
-          )}
-
-          <button className="sidebar-close d-lg-none" onClick={onClose}>
-            <i className="fas fa-times"></i>
-          </button>
-        </div>
-
-        {/* ← THÊM: Search Box (chỉ hiển thị khi không compact) */}
+        {/* Search Box with Compact Toggle */}
         {!isCompact && (
           <div className="sidebar-search">
-            <div className="search-wrapper">
+            <div className="search-wrapper flex-grow-1">
               <i className="fas fa-search search-icon"></i>
               <input
                 type="text"
@@ -224,6 +201,16 @@ const Sidebar = ({ isOpen, onClose, isCompact = false, onToggleCompact }) => {
                 </button>
               )}
             </div>
+            <button
+              className="sidebar-compact-toggle d-none d-lg-flex"
+              onClick={onToggleCompact}
+              title="Thu gọn sidebar"
+            >
+              <i className="fas fa-angle-double-left"></i>
+            </button>
+            <button className="sidebar-close d-lg-none" onClick={onClose}>
+              <i className="fas fa-times"></i>
+            </button>
           </div>
         )}
 

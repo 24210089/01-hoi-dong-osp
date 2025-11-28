@@ -10,7 +10,8 @@ const EVALUATION_ENDPOINTS = {
   DELETE: (id) => `/evaluations/${id}`,
   BY_SISTER: (sisterId) => `/sisters/${sisterId}/evaluations`,
   HISTORY: (sisterId) => `/sisters/${sisterId}/evaluations/history`,
-  BY_PERIOD: (sisterId, year) => `/sisters/${sisterId}/evaluations/year/${year}`,
+  BY_PERIOD: (sisterId, year) =>
+    `/sisters/${sisterId}/evaluations/year/${year}`,
   STATISTICS: "/evaluations/statistics",
   COMPARE: "/evaluations/compare",
   EXPORT: (id) => `/evaluations/${id}/export`,
@@ -33,7 +34,8 @@ const evaluationService = {
       console.error("Error fetching evaluations:", error);
       return {
         success: false,
-        error: error.response?.data?.message || "Lỗi khi tải danh sách đánh giá",
+        error:
+          error.response?.data?.message || "Lỗi khi tải danh sách đánh giá",
         data: { items: [], total: 0 },
       };
     }
@@ -68,7 +70,9 @@ const evaluationService = {
    */
   getBySister: async (sisterId, params = {}) => {
     try {
-      const response = await api.get(EVALUATION_ENDPOINTS.BY_SISTER(sisterId), { params });
+      const response = await api.get(EVALUATION_ENDPOINTS.BY_SISTER(sisterId), {
+        params,
+      });
       return {
         success: true,
         data: response.data,
@@ -77,7 +81,8 @@ const evaluationService = {
       console.error("Error fetching sister evaluations:", error);
       return {
         success: false,
-        error: error.response?.data?.message || "Lỗi khi tải đánh giá của nữ tu",
+        error:
+          error.response?.data?.message || "Lỗi khi tải đánh giá của nữ tu",
         data: [],
       };
     }
@@ -91,7 +96,9 @@ const evaluationService = {
    */
   getByPeriod: async (sisterId, year) => {
     try {
-      const response = await api.get(EVALUATION_ENDPOINTS.BY_PERIOD(sisterId, year));
+      const response = await api.get(
+        EVALUATION_ENDPOINTS.BY_PERIOD(sisterId, year)
+      );
       return {
         success: true,
         data: response.data,
@@ -175,7 +182,9 @@ const evaluationService = {
    */
   getStatistics: async (params = {}) => {
     try {
-      const response = await api.get(EVALUATION_ENDPOINTS.STATISTICS, { params });
+      const response = await api.get(EVALUATION_ENDPOINTS.STATISTICS, {
+        params,
+      });
       return {
         success: true,
         data: response.data,
@@ -217,7 +226,9 @@ const evaluationService = {
    */
   compare: async (evaluationIds) => {
     try {
-      const response = await api.post(EVALUATION_ENDPOINTS.COMPARE, { ids: evaluationIds });
+      const response = await api.post(EVALUATION_ENDPOINTS.COMPARE, {
+        ids: evaluationIds,
+      });
       return {
         success: true,
         data: response.data,

@@ -1,0 +1,20 @@
+/* src/features/bao-cao/components/ReportFilter/ReportFilter.css */
+
+.filter-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2d3748;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+}
+
+.offcanvas {
+  width: 400px !important;
+}
+
+@media (max-width: 576px) {
+  .offcanvas {
+    width: 100% !important;
+  }
+}

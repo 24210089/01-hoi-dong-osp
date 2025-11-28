@@ -95,7 +95,6 @@ const Header = ({ toggleSidebar, isSidebarOpen }) => {
           {/* Search (Desktop) */}
           <div className="header-search d-none d-lg-block me-3">
             <div className="search-wrapper">
-              <i className="fas fa-search search-icon"></i>
               <input
                 type="text"
                 className="form-control search-input"

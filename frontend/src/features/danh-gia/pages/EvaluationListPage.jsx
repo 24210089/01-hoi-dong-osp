@@ -46,7 +46,9 @@ const EvaluationListPage = () => {
   };
 
   const handleAdd = () => {
-    navigate(sisterId ? `/nu-tu/${sisterId}/danh-gia/create` : "/danh-gia/create");
+    navigate(
+      sisterId ? `/nu-tu/${sisterId}/danh-gia/create` : "/danh-gia/create"
+    );
   };
 
   const handleView = (evaluation) => {
@@ -101,9 +103,7 @@ const EvaluationListPage = () => {
       <Breadcrumb
         items={[
           { label: "Trang chủ", link: "/dashboard" },
-          ...(sisterId
-            ? [{ label: "Quản lý Nữ Tu", link: "/nu-tu" }]
-            : []),
+          ...(sisterId ? [{ label: "Quản lý Nữ Tu", link: "/nu-tu" }] : []),
           { label: "Đánh giá" },
         ]}
       />
@@ -226,8 +226,8 @@ const EvaluationListPage = () => {
                 </Nav.Item>
                 <Nav.Item>
                   <Nav.Link eventKey="semi_annual">
-                    <i className="fas fa-calendar-week me-2"></i>
-                    6 tháng ({evaluationsByType.semi_annual.length})
+                    <i className="fas fa-calendar-week me-2"></i>6 tháng (
+                    {evaluationsByType.semi_annual.length})
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>

@@ -157,11 +157,21 @@ const EvaluationFormPage = () => {
 
   // Calculate overall rating automatically
   useEffect(() => {
-    const { spiritual_life, community_life, apostolic_work, personal_development } = formik.values;
-    const values = [spiritual_life, community_life, apostolic_work, personal_development]
-      .filter(v => v !== "" && v !== null)
+    const {
+      spiritual_life,
+      community_life,
+      apostolic_work,
+      personal_development,
+    } = formik.values;
+    const values = [
+      spiritual_life,
+      community_life,
+      apostolic_work,
+      personal_development,
+    ]
+      .filter((v) => v !== "" && v !== null)
       .map(Number);
-    
+
     if (values.length > 0) {
       const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
       if (avg !== Number(formik.values.overall_rating)) {
@@ -191,7 +201,10 @@ const EvaluationFormPage = () => {
       <Breadcrumb
         items={[
           { label: "Trang chủ", link: "/dashboard" },
-          { label: "Đánh giá", link: sisterId ? `/nu-tu/${sisterId}/danh-gia` : "/danh-gia" },
+          {
+            label: "Đánh giá",
+            link: sisterId ? `/nu-tu/${sisterId}/danh-gia` : "/danh-gia",
+          },
           { label: isEdit ? "Chỉnh sửa" : "Thêm mới" },
         ]}
       />
@@ -562,24 +575,12 @@ const EvaluationFormPage = () => {
               </Card.Header>
               <Card.Body>
                 <ul className="mb-0 ps-3">
-                  <li className="mb-2">
-                    Điểm đánh giá từ 0-100
-                  </li>
-                  <li className="mb-2">
-                    Tổng điểm được tính tự động
-                  </li>
-                  <li className="mb-2">
-                    90-100: Xuất sắc
-                  </li>
-                  <li className="mb-2">
-                    75-89: Tốt
-                  </li>
-                  <li className="mb-2">
-                    60-74: Khá
-                  </li>
-                  <li>
-                    Dưới 60: Cần cải thiện
-                  </li>
+                  <li className="mb-2">Điểm đánh giá từ 0-100</li>
+                  <li className="mb-2">Tổng điểm được tính tự động</li>
+                  <li className="mb-2">90-100: Xuất sắc</li>
+                  <li className="mb-2">75-89: Tốt</li>
+                  <li className="mb-2">60-74: Khá</li>
+                  <li>Dưới 60: Cần cải thiện</li>
                 </ul>
               </Card.Body>
             </Card>

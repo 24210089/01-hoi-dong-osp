@@ -65,7 +65,9 @@ const educationService = {
    */
   getBySister: async (sisterId, params = {}) => {
     try {
-      const response = await api.get(EDUCATION_ENDPOINTS.BY_SISTER(sisterId), { params });
+      const response = await api.get(EDUCATION_ENDPOINTS.BY_SISTER(sisterId), {
+        params,
+      });
       return {
         success: true,
         data: response.data,
@@ -150,7 +152,9 @@ const educationService = {
    */
   getCertificates: async (sisterId) => {
     try {
-      const response = await api.get(EDUCATION_ENDPOINTS.CERTIFICATES(sisterId));
+      const response = await api.get(
+        EDUCATION_ENDPOINTS.CERTIFICATES(sisterId)
+      );
       return {
         success: true,
         data: response.data,
@@ -159,7 +163,8 @@ const educationService = {
       console.error("Error fetching certificates:", error);
       return {
         success: false,
-        error: error.response?.data?.message || "Lỗi khi tải danh sách chứng chỉ",
+        error:
+          error.response?.data?.message || "Lỗi khi tải danh sách chứng chỉ",
         data: [],
       };
     }
@@ -172,7 +177,9 @@ const educationService = {
    */
   getStatistics: async (params = {}) => {
     try {
-      const response = await api.get(EDUCATION_ENDPOINTS.STATISTICS, { params });
+      const response = await api.get(EDUCATION_ENDPOINTS.STATISTICS, {
+        params,
+      });
       return {
         success: true,
         data: response.data,

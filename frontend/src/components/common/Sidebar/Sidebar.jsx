@@ -184,7 +184,6 @@ const Sidebar = ({ isOpen, onClose, isCompact = false, onToggleCompact }) => {
         {!isCompact && (
           <div className="sidebar-search">
             <div className="search-wrapper flex-grow-1">
-              <i className="fas fa-search search-icon"></i>
               <input
                 type="text"
                 className="form-control search-input"

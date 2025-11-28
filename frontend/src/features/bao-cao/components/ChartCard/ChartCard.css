@@ -1,0 +1,55 @@
+/* src/features/bao-cao/components/ChartCard/ChartCard.css */
+
+.chart-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  height: 100%;
+}
+
+.chart-card-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1.25rem;
+}
+
+.chart-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.chart-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.chart-subtitle {
+  font-size: 0.875rem;
+  color: #718096;
+  margin-top: 0.25rem;
+}
+
+.chart-actions {
+  border: none;
+  background-color: transparent;
+  padding: 0.25rem 0.5rem;
+}
+
+.chart-actions:hover,
+.chart-actions:focus {
+  background-color: #f7fafc;
+}
+
+.chart-card-body {
+  padding: 1.5rem;
+  min-height: 300px;
+}
+
+.chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}

@@ -1,0 +1,85 @@
+/* src/features/bao-cao/pages/SisterReportPage.css */
+
+.summary-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.summary-card .card-body {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.summary-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.75rem;
+  flex-shrink: 0;
+}
+
+.summary-icon.bg-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.summary-icon.bg-success {
+  background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+}
+
+.summary-icon.bg-info {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.summary-icon.bg-warning {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.summary-info {
+  flex: 1;
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  color: #718096;
+  margin-bottom: 0.25rem;
+}
+
+.summary-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.report-table-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.report-table {
+  margin-bottom: 0;
+}
+
+.report-table thead th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #2d3748;
+  border-bottom: 2px solid #e9ecef;
+  padding: 1rem 0.75rem;
+}
+
+.report-table tbody td {
+  padding: 0.875rem 0.75rem;
+  vertical-align: middle;
+}
+
+.report-table tfoot tr {
+  border-top: 2px solid #e9ecef;
+}

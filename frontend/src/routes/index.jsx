@@ -54,6 +54,18 @@ import { EducationListPage } from "@features/hoc-van";
 // Su Vu (Mission)
 import { MissionListPage, MissionDetailPage } from "@features/su-vu";
 
+// Bao Cao (Reports)
+import {
+  ReportDashboardPage,
+  ReportListPage,
+  ReportDetailPage,
+  ReportGeneratePage,
+  SisterReportPage,
+  JourneyReportPage,
+  HealthReportPage,
+  EvaluationReportPage,
+} from "@features/bao-cao";
+
 // Not Found
 import NotFoundPage from "@pages/NotFound/NotFoundPage";
 
@@ -157,10 +169,17 @@ const AppRoutes = () => {
           {/* Su Vu (Mission) */}
           <Route path="/su-vu" element={<MissionListPage />} />
           <Route path="/su-vu/:id" element={<MissionDetailPage />} />
-          <Route
-            path="/nu-tu/:sisterId/su-vu"
-            element={<MissionListPage />}
-          />
+          <Route path="/nu-tu/:sisterId/su-vu" element={<MissionListPage />} />
+
+          {/* Bao Cao (Reports) */}
+          <Route path="/bao-cao" element={<ReportDashboardPage />} />
+          <Route path="/bao-cao/list" element={<ReportListPage />} />
+          <Route path="/bao-cao/generate" element={<ReportGeneratePage />} />
+          <Route path="/bao-cao/:id" element={<ReportDetailPage />} />
+          <Route path="/bao-cao/nu-tu" element={<SisterReportPage />} />
+          <Route path="/bao-cao/hanh-trinh" element={<JourneyReportPage />} />
+          <Route path="/bao-cao/suc-khoe" element={<HealthReportPage />} />
+          <Route path="/bao-cao/danh-gia" element={<EvaluationReportPage />} />
 
           {/* Redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

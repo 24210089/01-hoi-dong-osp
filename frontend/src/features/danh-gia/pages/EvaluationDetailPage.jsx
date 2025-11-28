@@ -169,26 +169,42 @@ const EvaluationDetailPage = () => {
               <Row className="g-3">
                 <Col md={6}>
                   <div className="info-item">
-                    <small className="text-muted d-block mb-1">Loại đánh giá</small>
-                    <div className="fw-semibold">{evaluation.type_label || "-"}</div>
+                    <small className="text-muted d-block mb-1">
+                      Loại đánh giá
+                    </small>
+                    <div className="fw-semibold">
+                      {evaluation.type_label || "-"}
+                    </div>
                   </div>
                 </Col>
                 <Col md={6}>
                   <div className="info-item">
-                    <small className="text-muted d-block mb-1">Kỳ đánh giá</small>
-                    <div className="fw-semibold">{evaluation.period || "-"}</div>
+                    <small className="text-muted d-block mb-1">
+                      Kỳ đánh giá
+                    </small>
+                    <div className="fw-semibold">
+                      {evaluation.period || "-"}
+                    </div>
                   </div>
                 </Col>
                 <Col md={6}>
                   <div className="info-item">
-                    <small className="text-muted d-block mb-1">Ngày đánh giá</small>
-                    <div className="fw-semibold">{formatDate(evaluation.evaluation_date) || "-"}</div>
+                    <small className="text-muted d-block mb-1">
+                      Ngày đánh giá
+                    </small>
+                    <div className="fw-semibold">
+                      {formatDate(evaluation.evaluation_date) || "-"}
+                    </div>
                   </div>
                 </Col>
                 <Col md={6}>
                   <div className="info-item">
-                    <small className="text-muted d-block mb-1">Người đánh giá</small>
-                    <div className="fw-semibold">{evaluation.evaluator || "-"}</div>
+                    <small className="text-muted d-block mb-1">
+                      Người đánh giá
+                    </small>
+                    <div className="fw-semibold">
+                      {evaluation.evaluator || "-"}
+                    </div>
                   </div>
                 </Col>
               </Row>
@@ -207,7 +223,9 @@ const EvaluationDetailPage = () => {
               <Card.Body>
                 <div className="text-center">
                   <div className="d-flex align-items-baseline justify-content-center mb-2">
-                    <span className="display-4 fw-bold">{evaluation.overall_rating}</span>
+                    <span className="display-4 fw-bold">
+                      {evaluation.overall_rating}
+                    </span>
                     <span className="text-muted ms-1">/100</span>
                   </div>
                   <Badge
@@ -335,7 +353,11 @@ const EvaluationDetailPage = () => {
                       src={evaluation.sister_avatar}
                       alt={evaluation.sister_name}
                       className="rounded-circle"
-                      style={{ width: "80px", height: "80px", objectFit: "cover" }}
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        objectFit: "cover",
+                      }}
                     />
                   ) : (
                     <i className="fas fa-user fa-2x text-muted"></i>

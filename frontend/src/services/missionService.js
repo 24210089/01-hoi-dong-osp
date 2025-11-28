@@ -93,7 +93,9 @@ const missionService = {
    */
   getBySister: async (sisterId, params = {}) => {
     try {
-      const response = await api.get(MISSION_ENDPOINTS.BY_SISTER(sisterId), { params });
+      const response = await api.get(MISSION_ENDPOINTS.BY_SISTER(sisterId), {
+        params,
+      });
       return {
         success: true,
         data: response.data,
@@ -203,7 +205,9 @@ const missionService = {
      */
     getList: async (sisterId) => {
       try {
-        const response = await api.get(MISSION_ENDPOINTS.JOURNEY.LIST(sisterId));
+        const response = await api.get(
+          MISSION_ENDPOINTS.JOURNEY.LIST(sisterId)
+        );
         return {
           success: true,
           data: response.data,
@@ -212,7 +216,8 @@ const missionService = {
         console.error("Error fetching journey list:", error);
         return {
           success: false,
-          error: error.response?.data?.message || "Lỗi khi tải hành trình ơn gọi",
+          error:
+            error.response?.data?.message || "Lỗi khi tải hành trình ơn gọi",
           data: [],
         };
       }
@@ -225,7 +230,9 @@ const missionService = {
      */
     getTimeline: async (sisterId) => {
       try {
-        const response = await api.get(MISSION_ENDPOINTS.JOURNEY.TIMELINE(sisterId));
+        const response = await api.get(
+          MISSION_ENDPOINTS.JOURNEY.TIMELINE(sisterId)
+        );
         return {
           success: true,
           data: response.data,
@@ -234,7 +241,8 @@ const missionService = {
         console.error("Error fetching journey timeline:", error);
         return {
           success: false,
-          error: error.response?.data?.message || "Lỗi khi tải timeline hành trình",
+          error:
+            error.response?.data?.message || "Lỗi khi tải timeline hành trình",
           data: [],
         };
       }
@@ -248,7 +256,9 @@ const missionService = {
      */
     getDetail: async (sisterId, id) => {
       try {
-        const response = await api.get(MISSION_ENDPOINTS.JOURNEY.DETAIL(sisterId, id));
+        const response = await api.get(
+          MISSION_ENDPOINTS.JOURNEY.DETAIL(sisterId, id)
+        );
         return {
           success: true,
           data: response.data,
@@ -257,7 +267,8 @@ const missionService = {
         console.error("Error fetching journey detail:", error);
         return {
           success: false,
-          error: error.response?.data?.message || "Lỗi khi tải chi tiết hành trình",
+          error:
+            error.response?.data?.message || "Lỗi khi tải chi tiết hành trình",
         };
       }
     },
@@ -270,7 +281,10 @@ const missionService = {
      */
     create: async (sisterId, data) => {
       try {
-        const response = await api.post(MISSION_ENDPOINTS.JOURNEY.CREATE(sisterId), data);
+        const response = await api.post(
+          MISSION_ENDPOINTS.JOURNEY.CREATE(sisterId),
+          data
+        );
         return {
           success: true,
           data: response.data,
@@ -293,7 +307,10 @@ const missionService = {
      */
     update: async (sisterId, id, data) => {
       try {
-        const response = await api.put(MISSION_ENDPOINTS.JOURNEY.UPDATE(sisterId, id), data);
+        const response = await api.put(
+          MISSION_ENDPOINTS.JOURNEY.UPDATE(sisterId, id),
+          data
+        );
         return {
           success: true,
           data: response.data,
@@ -335,9 +352,12 @@ const missionService = {
      */
     filterByStage: async (stage) => {
       try {
-        const response = await api.get(MISSION_ENDPOINTS.JOURNEY.FILTER_BY_STAGE, {
-          params: { stage },
-        });
+        const response = await api.get(
+          MISSION_ENDPOINTS.JOURNEY.FILTER_BY_STAGE,
+          {
+            params: { stage },
+          }
+        );
         return {
           success: true,
           data: response.data,
@@ -359,7 +379,9 @@ const missionService = {
      */
     getCurrentStage: async (sisterId) => {
       try {
-        const response = await api.get(MISSION_ENDPOINTS.JOURNEY.CURRENT_STAGE(sisterId));
+        const response = await api.get(
+          MISSION_ENDPOINTS.JOURNEY.CURRENT_STAGE(sisterId)
+        );
         return {
           success: true,
           data: response.data,
@@ -368,7 +390,8 @@ const missionService = {
         console.error("Error fetching current stage:", error);
         return {
           success: false,
-          error: error.response?.data?.message || "Lỗi khi tải giai đoạn hiện tại",
+          error:
+            error.response?.data?.message || "Lỗi khi tải giai đoạn hiện tại",
         };
       }
     },
@@ -388,7 +411,8 @@ const missionService = {
         console.error("Error fetching journey statistics:", error);
         return {
           success: false,
-          error: error.response?.data?.message || "Lỗi khi tải thống kê hành trình",
+          error:
+            error.response?.data?.message || "Lỗi khi tải thống kê hành trình",
         };
       }
     },
@@ -405,7 +429,9 @@ const missionService = {
      */
     getList: async (sisterId) => {
       try {
-        const response = await api.get(MISSION_ENDPOINTS.ASSIGNMENT.LIST(sisterId));
+        const response = await api.get(
+          MISSION_ENDPOINTS.ASSIGNMENT.LIST(sisterId)
+        );
         return {
           success: true,
           data: response.data,
@@ -414,7 +440,8 @@ const missionService = {
         console.error("Error fetching assignment list:", error);
         return {
           success: false,
-          error: error.response?.data?.message || "Lỗi khi tải danh sách bổ nhiệm",
+          error:
+            error.response?.data?.message || "Lỗi khi tải danh sách bổ nhiệm",
           data: [],
         };
       }
@@ -428,7 +455,9 @@ const missionService = {
      */
     getDetail: async (sisterId, id) => {
       try {
-        const response = await api.get(MISSION_ENDPOINTS.ASSIGNMENT.DETAIL(sisterId, id));
+        const response = await api.get(
+          MISSION_ENDPOINTS.ASSIGNMENT.DETAIL(sisterId, id)
+        );
         return {
           success: true,
           data: response.data,
@@ -437,7 +466,8 @@ const missionService = {
         console.error("Error fetching assignment detail:", error);
         return {
           success: false,
-          error: error.response?.data?.message || "Lỗi khi tải chi tiết bổ nhiệm",
+          error:
+            error.response?.data?.message || "Lỗi khi tải chi tiết bổ nhiệm",
         };
       }
     },
@@ -450,7 +480,10 @@ const missionService = {
      */
     create: async (sisterId, data) => {
       try {
-        const response = await api.post(MISSION_ENDPOINTS.ASSIGNMENT.CREATE(sisterId), data);
+        const response = await api.post(
+          MISSION_ENDPOINTS.ASSIGNMENT.CREATE(sisterId),
+          data
+        );
         return {
           success: true,
           data: response.data,
@@ -473,7 +506,10 @@ const missionService = {
      */
     update: async (sisterId, id, data) => {
       try {
-        const response = await api.put(MISSION_ENDPOINTS.ASSIGNMENT.UPDATE(sisterId, id), data);
+        const response = await api.put(
+          MISSION_ENDPOINTS.ASSIGNMENT.UPDATE(sisterId, id),
+          data
+        );
         return {
           success: true,
           data: response.data,
@@ -515,7 +551,9 @@ const missionService = {
      */
     getCurrent: async (sisterId) => {
       try {
-        const response = await api.get(MISSION_ENDPOINTS.ASSIGNMENT.CURRENT(sisterId));
+        const response = await api.get(
+          MISSION_ENDPOINTS.ASSIGNMENT.CURRENT(sisterId)
+        );
         return {
           success: true,
           data: response.data,
@@ -524,7 +562,8 @@ const missionService = {
         console.error("Error fetching current assignment:", error);
         return {
           success: false,
-          error: error.response?.data?.message || "Lỗi khi tải bổ nhiệm hiện tại",
+          error:
+            error.response?.data?.message || "Lỗi khi tải bổ nhiệm hiện tại",
         };
       }
     },
@@ -536,7 +575,9 @@ const missionService = {
      */
     getHistory: async (sisterId) => {
       try {
-        const response = await api.get(MISSION_ENDPOINTS.ASSIGNMENT.HISTORY(sisterId));
+        const response = await api.get(
+          MISSION_ENDPOINTS.ASSIGNMENT.HISTORY(sisterId)
+        );
         return {
           success: true,
           data: response.data,
@@ -545,7 +586,8 @@ const missionService = {
         console.error("Error fetching assignment history:", error);
         return {
           success: false,
-          error: error.response?.data?.message || "Lỗi khi tải lịch sử bổ nhiệm",
+          error:
+            error.response?.data?.message || "Lỗi khi tải lịch sử bổ nhiệm",
           data: [],
         };
       }

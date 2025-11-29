@@ -36,7 +36,7 @@ const UserMenu = ({ user, onLogout }) => {
 
   // Get user role label
   const getRoleLabel = (role) => {
-    if (!role || typeof role !== 'string') return "Người dùng";
+    if (!role || typeof role !== "string") return "Người dùng";
     const roles = {
       admin: "Quản trị viên",
       be_tren_tong: "Bề Trên Tổng",
@@ -50,21 +50,24 @@ const UserMenu = ({ user, onLogout }) => {
   // Safe string getter - ensures we always return a string
   const safeString = (value, defaultValue = "") => {
     if (value === null || value === undefined) return defaultValue;
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
+    if (typeof value === "string") return value;
+    if (typeof value === "number") return String(value);
     return defaultValue; // Don't render objects
   };
 
-  const userName = safeString(user.full_name) || safeString(user.username) || "User";
+  const userName =
+    safeString(user.full_name) || safeString(user.username) || "User";
   const userEmail = safeString(user.email);
   const userRole = safeString(user.role, "user");
 
   // Get avatar URL
   const getAvatar = () => {
-    if (user.avatar && typeof user.avatar === 'string') {
+    if (user.avatar && typeof user.avatar === "string") {
       return user.avatar;
     }
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=667eea&color=fff&size=40&bold=true`;
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      userName
+    )}&background=667eea&color=fff&size=40&bold=true`;
   };
 
   // Close dropdown when clicking outside
@@ -95,7 +98,10 @@ const UserMenu = ({ user, onLogout }) => {
   };
 
   return (
-    <div className={`user-menu-dropdown dropdown ${isOpen ? 'show' : ''}`} ref={dropdownRef}>
+    <div
+      className={`user-menu-dropdown dropdown ${isOpen ? "show" : ""}`}
+      ref={dropdownRef}
+    >
       <button
         type="button"
         className="user-menu-toggle btn btn-link"
@@ -103,20 +109,24 @@ const UserMenu = ({ user, onLogout }) => {
         aria-expanded={isOpen}
       >
         <div className="user-info d-flex align-items-center">
-          <img
-            src={getAvatar()}
-            alt={userName}
-            className="user-avatar"
-          />
+          <img src={getAvatar()} alt={userName} className="user-avatar" />
           <div className="user-details d-none d-lg-block ms-2">
             <div className="user-name">{userName}</div>
             <div className="user-role">{getRoleLabel(userRole)}</div>
           </div>
-          <i className={`fas fa-chevron-${isOpen ? 'up' : 'down'} ms-2 d-none d-lg-inline`}></i>
+          <i
+            className={`fas fa-chevron-${
+              isOpen ? "up" : "down"
+            } ms-2 d-none d-lg-inline`}
+          ></i>
         </div>
       </button>
 
-      <div className={`dropdown-menu user-menu-dropdown-menu ${isOpen ? 'show' : ''}`}>
+      <div
+        className={`dropdown-menu user-menu-dropdown-menu ${
+          isOpen ? "show" : ""
+        }`}
+      >
         {/* User Info Header */}
         <div className="dropdown-header">
           <div className="d-flex align-items-center">
@@ -145,12 +155,20 @@ const UserMenu = ({ user, onLogout }) => {
           Thông tin cá nhân
         </Link>
 
-        <Link to="/settings" className="dropdown-item" onClick={handleItemClick}>
+        <Link
+          to="/settings"
+          className="dropdown-item"
+          onClick={handleItemClick}
+        >
           <i className="fas fa-cog me-2"></i>
           Cài đặt
         </Link>
 
-        <Link to="/settings/preferences" className="dropdown-item" onClick={handleItemClick}>
+        <Link
+          to="/settings/preferences"
+          className="dropdown-item"
+          onClick={handleItemClick}
+        >
           <i className="fas fa-key me-2"></i>
           Đổi mật khẩu
         </Link>
@@ -166,7 +184,11 @@ const UserMenu = ({ user, onLogout }) => {
         <div className="dropdown-divider"></div>
 
         {/* Logout */}
-        <button type="button" className="dropdown-item text-danger" onClick={handleLogoutClick}>
+        <button
+          type="button"
+          className="dropdown-item text-danger"
+          onClick={handleLogoutClick}
+        >
           <i className="fas fa-sign-out-alt me-2"></i>
           Đăng xuất
         </button>

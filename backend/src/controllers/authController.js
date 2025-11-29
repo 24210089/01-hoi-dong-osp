@@ -79,24 +79,28 @@ const login = async (req, res) => {
     const user = await UserModel.findByUsername(username);
 
     if (!user || !user.is_active) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
     const token = buildToken(user);
     await UserModel.updateLastLogin(user.id);
 
     return res.status(200).json({
-      token,
-      user: sanitizeUser({ ...user, last_login: new Date() }),
+      success: true,
+      data: {
+        token,
+        user: sanitizeUser({ ...user, last_login: new Date() }),
+      },
+      message: "Đăng nhập thành công",
     });
   } catch (error) {
     console.error("Login error:", error.message);
-    return res.status(500).json({ message: "Failed to login" });
+    return res.status(500).json({ success: false, message: "Failed to login" });
   }
 };
 
@@ -142,18 +146,18 @@ const logout = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const dbUser = await UserModel.findById(req.user.id);
     if (!dbUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    return res.status(200).json({ user: sanitizeUser(dbUser) });
+    return res.status(200).json({ success: true, data: sanitizeUser(dbUser) });
   } catch (error) {
     console.error("Get profile error:", error.message);
-    return res.status(500).json({ message: "Failed to fetch profile" });
+    return res.status(500).json({ success: false, message: "Failed to fetch profile" });
   }
 };
 

@@ -19,10 +19,11 @@ const validateChangePassword = [
     .withMessage("newPassword must be at least 6 characters"),
 ];
 
+// Chỉ admin mới có quyền đăng ký tài khoản mới
 router.post(
   "/register",
-  // authenticateToken, // Temporarily disabled for public signup
-  // authorize("admin"), // Temporarily disabled for public signup
+  authenticateToken,
+  authorize("admin"),
   ...validateUserCreate,
   handleValidationErrors,
   authController.register

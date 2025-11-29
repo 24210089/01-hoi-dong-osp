@@ -22,10 +22,16 @@ const LoginPage = () => {
       if (result.success) {
         navigate("/dashboard");
       } else {
-        setError("Tên đăng nhập hoặc mật khẩu không đúng");
+        setError(result.error || "Tên đăng nhập hoặc mật khẩu không đúng");
       }
     } catch (err) {
-      setError("Có lỗi xảy ra. Vui lòng thử lại.");
+      console.error("Login error:", err);
+      // Lấy message lỗi từ backend
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Có lỗi xảy ra. Vui lòng thử lại.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

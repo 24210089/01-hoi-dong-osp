@@ -33,14 +33,14 @@ import "./AuditLogPage.css";
 
 const AuditLogPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // State
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  
+
   // Pagination
   const [pagination, setPagination] = useState({
     page: 1,
@@ -109,7 +109,7 @@ const AuditLogPage = () => {
       });
 
       const result = await auditLogService.getAll(params);
-      
+
       if (result.success) {
         setLogs(result.data.data || []);
         setPagination((prev) => ({
@@ -211,7 +211,7 @@ const AuditLogPage = () => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
     setPagination((prev) => ({ ...prev, page: 1 }));
-    
+
     // Update URL
     const newParams = new URLSearchParams(searchParams);
     if (value) {
@@ -236,7 +236,9 @@ const AuditLogPage = () => {
         const url = window.URL.createObjectURL(result.data);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `audit-log-${new Date().toISOString().split("T")[0]}.xlsx`;
+        link.download = `audit-log-${
+          new Date().toISOString().split("T")[0]
+        }.xlsx`;
         link.click();
         window.URL.revokeObjectURL(url);
       }
@@ -471,9 +473,7 @@ const AuditLogPage = () => {
                             )}
                           </span>
                         </td>
-                        <td className="description-cell">
-                          {log.description}
-                        </td>
+                        <td className="description-cell">{log.description}</td>
                         <td>
                           <div className="user-info">
                             <i className="fas fa-user-circle me-2 text-muted"></i>
@@ -557,18 +557,22 @@ const AuditLogPage = () => {
               <Row className="mb-3">
                 <Col md={6}>
                   <strong>Địa chỉ IP:</strong>
-                  <p><code>{selectedLog.ipAddress}</code></p>
+                  <p>
+                    <code>{selectedLog.ipAddress}</code>
+                  </p>
                 </Col>
                 <Col md={6}>
                   <strong>User Agent:</strong>
-                  <p><small>{selectedLog.userAgent}</small></p>
+                  <p>
+                    <small>{selectedLog.userAgent}</small>
+                  </p>
                 </Col>
               </Row>
               <div className="mb-3">
                 <strong>Mô tả:</strong>
                 <p>{selectedLog.description}</p>
               </div>
-              
+
               {(selectedLog.oldData || selectedLog.newData) && (
                 <Row>
                   {selectedLog.oldData && (

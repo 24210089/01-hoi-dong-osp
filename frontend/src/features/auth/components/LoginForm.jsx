@@ -67,11 +67,7 @@ const LoginForm = ({ onSubmit, loading, error, onClearError }) => {
         />
 
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <Form.Check
-            type="checkbox"
-            label="Ghi nhớ đăng nhập"
-            id="remember"
-          />
+          <Form.Check type="checkbox" label="Ghi nhớ đăng nhập" id="remember" />
           <Link to="/forgot-password" className="text-primary small">
             Quên mật khẩu?
           </Link>

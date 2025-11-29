@@ -53,73 +53,334 @@ const MOCK_ROLES = [
 // Mock data for permissions grouped by module
 const MOCK_PERMISSIONS = [
   // Nữ tu
-  { id: 1, key: "sisters.view", name: "Xem danh sách nữ tu", module: "Nữ Tu", icon: "users" },
-  { id: 2, key: "sisters.create", name: "Thêm nữ tu mới", module: "Nữ Tu", icon: "user-plus" },
-  { id: 3, key: "sisters.edit", name: "Chỉnh sửa thông tin nữ tu", module: "Nữ Tu", icon: "user-edit" },
-  { id: 4, key: "sisters.delete", name: "Xóa nữ tu", module: "Nữ Tu", icon: "user-minus" },
-  { id: 5, key: "sisters.export", name: "Xuất dữ liệu nữ tu", module: "Nữ Tu", icon: "file-export" },
-  
+  {
+    id: 1,
+    key: "sisters.view",
+    name: "Xem danh sách nữ tu",
+    module: "Nữ Tu",
+    icon: "users",
+  },
+  {
+    id: 2,
+    key: "sisters.create",
+    name: "Thêm nữ tu mới",
+    module: "Nữ Tu",
+    icon: "user-plus",
+  },
+  {
+    id: 3,
+    key: "sisters.edit",
+    name: "Chỉnh sửa thông tin nữ tu",
+    module: "Nữ Tu",
+    icon: "user-edit",
+  },
+  {
+    id: 4,
+    key: "sisters.delete",
+    name: "Xóa nữ tu",
+    module: "Nữ Tu",
+    icon: "user-minus",
+  },
+  {
+    id: 5,
+    key: "sisters.export",
+    name: "Xuất dữ liệu nữ tu",
+    module: "Nữ Tu",
+    icon: "file-export",
+  },
+
   // Hành trình
-  { id: 6, key: "journey.view", name: "Xem hành trình ơn gọi", module: "Hành Trình", icon: "route" },
-  { id: 7, key: "journey.create", name: "Thêm giai đoạn mới", module: "Hành Trình", icon: "plus-circle" },
-  { id: 8, key: "journey.edit", name: "Chỉnh sửa hành trình", module: "Hành Trình", icon: "edit" },
-  { id: 9, key: "journey.delete", name: "Xóa giai đoạn", module: "Hành Trình", icon: "trash" },
-  
+  {
+    id: 6,
+    key: "journey.view",
+    name: "Xem hành trình ơn gọi",
+    module: "Hành Trình",
+    icon: "route",
+  },
+  {
+    id: 7,
+    key: "journey.create",
+    name: "Thêm giai đoạn mới",
+    module: "Hành Trình",
+    icon: "plus-circle",
+  },
+  {
+    id: 8,
+    key: "journey.edit",
+    name: "Chỉnh sửa hành trình",
+    module: "Hành Trình",
+    icon: "edit",
+  },
+  {
+    id: 9,
+    key: "journey.delete",
+    name: "Xóa giai đoạn",
+    module: "Hành Trình",
+    icon: "trash",
+  },
+
   // Cộng đoàn
-  { id: 10, key: "community.view", name: "Xem danh sách cộng đoàn", module: "Cộng Đoàn", icon: "building" },
-  { id: 11, key: "community.create", name: "Thêm cộng đoàn mới", module: "Cộng Đoàn", icon: "plus" },
-  { id: 12, key: "community.edit", name: "Chỉnh sửa cộng đoàn", module: "Cộng Đoàn", icon: "edit" },
-  { id: 13, key: "community.delete", name: "Xóa cộng đoàn", module: "Cộng Đoàn", icon: "trash" },
-  { id: 14, key: "community.assign", name: "Phân công nữ tu", module: "Cộng Đoàn", icon: "user-check" },
-  
+  {
+    id: 10,
+    key: "community.view",
+    name: "Xem danh sách cộng đoàn",
+    module: "Cộng Đoàn",
+    icon: "building",
+  },
+  {
+    id: 11,
+    key: "community.create",
+    name: "Thêm cộng đoàn mới",
+    module: "Cộng Đoàn",
+    icon: "plus",
+  },
+  {
+    id: 12,
+    key: "community.edit",
+    name: "Chỉnh sửa cộng đoàn",
+    module: "Cộng Đoàn",
+    icon: "edit",
+  },
+  {
+    id: 13,
+    key: "community.delete",
+    name: "Xóa cộng đoàn",
+    module: "Cộng Đoàn",
+    icon: "trash",
+  },
+  {
+    id: 14,
+    key: "community.assign",
+    name: "Phân công nữ tu",
+    module: "Cộng Đoàn",
+    icon: "user-check",
+  },
+
   // Sức khỏe
-  { id: 15, key: "health.view", name: "Xem hồ sơ sức khỏe", module: "Sức Khỏe", icon: "heartbeat" },
-  { id: 16, key: "health.create", name: "Thêm hồ sơ sức khỏe", module: "Sức Khỏe", icon: "notes-medical" },
-  { id: 17, key: "health.edit", name: "Chỉnh sửa hồ sơ sức khỏe", module: "Sức Khỏe", icon: "edit" },
-  { id: 18, key: "health.delete", name: "Xóa hồ sơ sức khỏe", module: "Sức Khỏe", icon: "trash" },
-  
+  {
+    id: 15,
+    key: "health.view",
+    name: "Xem hồ sơ sức khỏe",
+    module: "Sức Khỏe",
+    icon: "heartbeat",
+  },
+  {
+    id: 16,
+    key: "health.create",
+    name: "Thêm hồ sơ sức khỏe",
+    module: "Sức Khỏe",
+    icon: "notes-medical",
+  },
+  {
+    id: 17,
+    key: "health.edit",
+    name: "Chỉnh sửa hồ sơ sức khỏe",
+    module: "Sức Khỏe",
+    icon: "edit",
+  },
+  {
+    id: 18,
+    key: "health.delete",
+    name: "Xóa hồ sơ sức khỏe",
+    module: "Sức Khỏe",
+    icon: "trash",
+  },
+
   // Đánh giá
-  { id: 19, key: "evaluation.view", name: "Xem đánh giá", module: "Đánh Giá", icon: "star" },
-  { id: 20, key: "evaluation.create", name: "Tạo đánh giá mới", module: "Đánh Giá", icon: "star-half-alt" },
-  { id: 21, key: "evaluation.edit", name: "Chỉnh sửa đánh giá", module: "Đánh Giá", icon: "edit" },
-  { id: 22, key: "evaluation.approve", name: "Phê duyệt đánh giá", module: "Đánh Giá", icon: "check-circle" },
-  
+  {
+    id: 19,
+    key: "evaluation.view",
+    name: "Xem đánh giá",
+    module: "Đánh Giá",
+    icon: "star",
+  },
+  {
+    id: 20,
+    key: "evaluation.create",
+    name: "Tạo đánh giá mới",
+    module: "Đánh Giá",
+    icon: "star-half-alt",
+  },
+  {
+    id: 21,
+    key: "evaluation.edit",
+    name: "Chỉnh sửa đánh giá",
+    module: "Đánh Giá",
+    icon: "edit",
+  },
+  {
+    id: 22,
+    key: "evaluation.approve",
+    name: "Phê duyệt đánh giá",
+    module: "Đánh Giá",
+    icon: "check-circle",
+  },
+
   // Học vấn
-  { id: 23, key: "education.view", name: "Xem thông tin học vấn", module: "Học Vấn", icon: "graduation-cap" },
-  { id: 24, key: "education.create", name: "Thêm bằng cấp", module: "Học Vấn", icon: "plus" },
-  { id: 25, key: "education.edit", name: "Chỉnh sửa học vấn", module: "Học Vấn", icon: "edit" },
-  { id: 26, key: "education.delete", name: "Xóa bằng cấp", module: "Học Vấn", icon: "trash" },
-  
+  {
+    id: 23,
+    key: "education.view",
+    name: "Xem thông tin học vấn",
+    module: "Học Vấn",
+    icon: "graduation-cap",
+  },
+  {
+    id: 24,
+    key: "education.create",
+    name: "Thêm bằng cấp",
+    module: "Học Vấn",
+    icon: "plus",
+  },
+  {
+    id: 25,
+    key: "education.edit",
+    name: "Chỉnh sửa học vấn",
+    module: "Học Vấn",
+    icon: "edit",
+  },
+  {
+    id: 26,
+    key: "education.delete",
+    name: "Xóa bằng cấp",
+    module: "Học Vấn",
+    icon: "trash",
+  },
+
   // Sứ vụ
-  { id: 27, key: "mission.view", name: "Xem sứ vụ", module: "Sứ Vụ", icon: "briefcase" },
-  { id: 28, key: "mission.create", name: "Tạo sứ vụ mới", module: "Sứ Vụ", icon: "plus" },
-  { id: 29, key: "mission.edit", name: "Chỉnh sửa sứ vụ", module: "Sứ Vụ", icon: "edit" },
-  { id: 30, key: "mission.assign", name: "Phân công sứ vụ", module: "Sứ Vụ", icon: "user-tag" },
-  
+  {
+    id: 27,
+    key: "mission.view",
+    name: "Xem sứ vụ",
+    module: "Sứ Vụ",
+    icon: "briefcase",
+  },
+  {
+    id: 28,
+    key: "mission.create",
+    name: "Tạo sứ vụ mới",
+    module: "Sứ Vụ",
+    icon: "plus",
+  },
+  {
+    id: 29,
+    key: "mission.edit",
+    name: "Chỉnh sửa sứ vụ",
+    module: "Sứ Vụ",
+    icon: "edit",
+  },
+  {
+    id: 30,
+    key: "mission.assign",
+    name: "Phân công sứ vụ",
+    module: "Sứ Vụ",
+    icon: "user-tag",
+  },
+
   // Báo cáo
-  { id: 31, key: "report.view", name: "Xem báo cáo", module: "Báo Cáo", icon: "chart-bar" },
-  { id: 32, key: "report.create", name: "Tạo báo cáo mới", module: "Báo Cáo", icon: "file-alt" },
-  { id: 33, key: "report.export", name: "Xuất báo cáo", module: "Báo Cáo", icon: "file-export" },
-  { id: 34, key: "report.print", name: "In báo cáo", module: "Báo Cáo", icon: "print" },
-  
+  {
+    id: 31,
+    key: "report.view",
+    name: "Xem báo cáo",
+    module: "Báo Cáo",
+    icon: "chart-bar",
+  },
+  {
+    id: 32,
+    key: "report.create",
+    name: "Tạo báo cáo mới",
+    module: "Báo Cáo",
+    icon: "file-alt",
+  },
+  {
+    id: 33,
+    key: "report.export",
+    name: "Xuất báo cáo",
+    module: "Báo Cáo",
+    icon: "file-export",
+  },
+  {
+    id: 34,
+    key: "report.print",
+    name: "In báo cáo",
+    module: "Báo Cáo",
+    icon: "print",
+  },
+
   // Người dùng
-  { id: 35, key: "users.view", name: "Xem danh sách người dùng", module: "Người Dùng", icon: "users-cog" },
-  { id: 36, key: "users.create", name: "Tạo tài khoản mới", module: "Người Dùng", icon: "user-plus" },
-  { id: 37, key: "users.edit", name: "Chỉnh sửa người dùng", module: "Người Dùng", icon: "user-edit" },
-  { id: 38, key: "users.delete", name: "Xóa người dùng", module: "Người Dùng", icon: "user-times" },
-  { id: 39, key: "users.permissions", name: "Quản lý phân quyền", module: "Người Dùng", icon: "shield-alt" },
-  
+  {
+    id: 35,
+    key: "users.view",
+    name: "Xem danh sách người dùng",
+    module: "Người Dùng",
+    icon: "users-cog",
+  },
+  {
+    id: 36,
+    key: "users.create",
+    name: "Tạo tài khoản mới",
+    module: "Người Dùng",
+    icon: "user-plus",
+  },
+  {
+    id: 37,
+    key: "users.edit",
+    name: "Chỉnh sửa người dùng",
+    module: "Người Dùng",
+    icon: "user-edit",
+  },
+  {
+    id: 38,
+    key: "users.delete",
+    name: "Xóa người dùng",
+    module: "Người Dùng",
+    icon: "user-times",
+  },
+  {
+    id: 39,
+    key: "users.permissions",
+    name: "Quản lý phân quyền",
+    module: "Người Dùng",
+    icon: "shield-alt",
+  },
+
   // Cài đặt
-  { id: 40, key: "settings.view", name: "Xem cài đặt", module: "Cài Đặt", icon: "cog" },
-  { id: 41, key: "settings.edit", name: "Thay đổi cài đặt", module: "Cài Đặt", icon: "cogs" },
-  { id: 42, key: "settings.backup", name: "Sao lưu & khôi phục", module: "Cài Đặt", icon: "database" },
-  { id: 43, key: "settings.audit", name: "Xem nhật ký hoạt động", module: "Cài Đặt", icon: "history" },
+  {
+    id: 40,
+    key: "settings.view",
+    name: "Xem cài đặt",
+    module: "Cài Đặt",
+    icon: "cog",
+  },
+  {
+    id: 41,
+    key: "settings.edit",
+    name: "Thay đổi cài đặt",
+    module: "Cài Đặt",
+    icon: "cogs",
+  },
+  {
+    id: 42,
+    key: "settings.backup",
+    name: "Sao lưu & khôi phục",
+    module: "Cài Đặt",
+    icon: "database",
+  },
+  {
+    id: 43,
+    key: "settings.audit",
+    name: "Xem nhật ký hoạt động",
+    module: "Cài Đặt",
+    icon: "history",
+  },
 ];
 
 // Initial role permissions mapping
 const INITIAL_ROLE_PERMISSIONS = {
-  1: MOCK_PERMISSIONS.map(p => p.id), // Admin has all
-  2: [1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32, 33, 34, 35, 40], // Bề Trên Tổng
+  1: MOCK_PERMISSIONS.map((p) => p.id), // Admin has all
+  2: [
+    1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25,
+    27, 28, 29, 30, 31, 32, 33, 34, 35, 40,
+  ], // Bề Trên Tổng
   3: [1, 5, 6, 10, 15, 19, 23, 27, 31, 32, 33, 34], // Thư ký
   4: [1, 6, 10, 14, 15, 16, 17, 19, 20, 21, 23, 27, 31], // Bề Trên Cộng Đoàn
 };
@@ -132,7 +393,9 @@ const PermissionsPage = () => {
   const [error, setError] = useState("");
   const [roles] = useState(MOCK_ROLES);
   const [permissions] = useState(MOCK_PERMISSIONS);
-  const [rolePermissions, setRolePermissions] = useState(INITIAL_ROLE_PERMISSIONS);
+  const [rolePermissions, setRolePermissions] = useState(
+    INITIAL_ROLE_PERMISSIONS
+  );
   const [selectedRole, setSelectedRole] = useState(null);
 
   useEffect(() => {
@@ -147,16 +410,16 @@ const PermissionsPage = () => {
     // Don't allow changing admin permissions
     if (roleId === 1) return;
 
-    setRolePermissions(prev => {
+    setRolePermissions((prev) => {
       const currentPermissions = prev[roleId] || [];
       let newPermissions;
-      
+
       if (checked) {
         newPermissions = [...currentPermissions, permissionId];
       } else {
-        newPermissions = currentPermissions.filter(id => id !== permissionId);
+        newPermissions = currentPermissions.filter((id) => id !== permissionId);
       }
-      
+
       return {
         ...prev,
         [roleId]: newPermissions,
@@ -167,19 +430,23 @@ const PermissionsPage = () => {
   const handleSelectAll = (roleId, modulePermissions, checked) => {
     if (roleId === 1) return;
 
-    setRolePermissions(prev => {
+    setRolePermissions((prev) => {
       const currentPermissions = prev[roleId] || [];
-      const modulePermissionIds = modulePermissions.map(p => p.id);
-      
+      const modulePermissionIds = modulePermissions.map((p) => p.id);
+
       let newPermissions;
       if (checked) {
         // Add all module permissions
-        newPermissions = [...new Set([...currentPermissions, ...modulePermissionIds])];
+        newPermissions = [
+          ...new Set([...currentPermissions, ...modulePermissionIds]),
+        ];
       } else {
         // Remove all module permissions
-        newPermissions = currentPermissions.filter(id => !modulePermissionIds.includes(id));
+        newPermissions = currentPermissions.filter(
+          (id) => !modulePermissionIds.includes(id)
+        );
       }
-      
+
       return {
         ...prev,
         [roleId]: newPermissions,
@@ -193,12 +460,12 @@ const PermissionsPage = () => {
 
   const hasAllModulePermissions = (roleId, modulePermissions) => {
     const rolePerms = rolePermissions[roleId] || [];
-    return modulePermissions.every(p => rolePerms.includes(p.id));
+    return modulePermissions.every((p) => rolePerms.includes(p.id));
   };
 
   const hasSomeModulePermissions = (roleId, modulePermissions) => {
     const rolePerms = rolePermissions[roleId] || [];
-    return modulePermissions.some(p => rolePerms.includes(p.id));
+    return modulePermissions.some((p) => rolePerms.includes(p.id));
   };
 
   const handleSave = async () => {
@@ -208,11 +475,11 @@ const PermissionsPage = () => {
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Save to localStorage for persistence
       localStorage.setItem("rolePermissions", JSON.stringify(rolePermissions));
-      
+
       setSuccess("Lưu phân quyền thành công!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
@@ -253,7 +520,8 @@ const PermissionsPage = () => {
       <Container fluid className="py-4">
         <Alert variant="danger">
           <i className="fas fa-exclamation-triangle me-2"></i>
-          Bạn không có quyền truy cập trang này. Chỉ quản trị viên mới có thể quản lý phân quyền.
+          Bạn không có quyền truy cập trang này. Chỉ quản trị viên mới có thể
+          quản lý phân quyền.
         </Alert>
       </Container>
     );
@@ -289,11 +557,7 @@ const PermissionsPage = () => {
             Phân quyền truy cập cho từng vai trò trong hệ thống
           </p>
         </div>
-        <Button 
-          variant="primary" 
-          onClick={handleSave}
-          disabled={saving}
-        >
+        <Button variant="primary" onClick={handleSave} disabled={saving}>
           {saving ? (
             <>
               <Spinner size="sm" className="me-2" />
@@ -326,10 +590,14 @@ const PermissionsPage = () => {
       <Row className="g-3 mb-4">
         {roles.map((role) => (
           <Col key={role.id} md={6} lg={3}>
-            <Card 
-              className={`role-card h-100 ${selectedRole === role.id ? 'border-primary' : ''}`}
-              onClick={() => setSelectedRole(selectedRole === role.id ? null : role.id)}
-              style={{ cursor: 'pointer' }}
+            <Card
+              className={`role-card h-100 ${
+                selectedRole === role.id ? "border-primary" : ""
+              }`}
+              onClick={() =>
+                setSelectedRole(selectedRole === role.id ? null : role.id)
+              }
+              style={{ cursor: "pointer" }}
             >
               <Card.Body>
                 <div className="d-flex justify-content-between align-items-start mb-2">
@@ -343,10 +611,18 @@ const PermissionsPage = () => {
                 </div>
                 <p className="text-muted mb-2 small">{role.description}</p>
                 <div className="d-flex align-items-center">
-                  <div className="progress flex-grow-1" style={{ height: '6px' }}>
-                    <div 
-                      className="progress-bar bg-success" 
-                      style={{ width: `${(getPermissionCount(role.id) / permissions.length) * 100}%` }}
+                  <div
+                    className="progress flex-grow-1"
+                    style={{ height: "6px" }}
+                  >
+                    <div
+                      className="progress-bar bg-success"
+                      style={{
+                        width: `${
+                          (getPermissionCount(role.id) / permissions.length) *
+                          100
+                        }%`,
+                      }}
                     ></div>
                   </div>
                   <small className="ms-2 text-muted">
@@ -380,7 +656,7 @@ const PermissionsPage = () => {
                   {roles.map((role) => (
                     <th key={role.id} className="text-center role-column">
                       <Badge bg={getRoleBadge(role.key)}>{role.name}</Badge>
-                      {role.key === 'admin' && (
+                      {role.key === "admin" && (
                         <div className="small text-muted mt-1">
                           <i className="fas fa-lock"></i> Toàn quyền
                         </div>
@@ -406,25 +682,38 @@ const PermissionsPage = () => {
                         </td>
                         {roles.map((role) => (
                           <td key={role.id} className="text-center">
-                            {role.key !== 'admin' && (
+                            {role.key !== "admin" && (
                               <Form.Check
                                 type="checkbox"
-                                checked={hasAllModulePermissions(role.id, modulePermissions)}
+                                checked={hasAllModulePermissions(
+                                  role.id,
+                                  modulePermissions
+                                )}
                                 ref={(el) => {
                                   if (el) {
-                                    el.indeterminate = 
-                                      hasSomeModulePermissions(role.id, modulePermissions) && 
-                                      !hasAllModulePermissions(role.id, modulePermissions);
+                                    el.indeterminate =
+                                      hasSomeModulePermissions(
+                                        role.id,
+                                        modulePermissions
+                                      ) &&
+                                      !hasAllModulePermissions(
+                                        role.id,
+                                        modulePermissions
+                                      );
                                   }
                                 }}
                                 onChange={(e) =>
-                                  handleSelectAll(role.id, modulePermissions, e.target.checked)
+                                  handleSelectAll(
+                                    role.id,
+                                    modulePermissions,
+                                    e.target.checked
+                                  )
                                 }
                                 title={`Chọn tất cả quyền ${module}`}
                                 className="module-checkbox"
                               />
                             )}
-                            {role.key === 'admin' && (
+                            {role.key === "admin" && (
                               <i className="fas fa-check-circle text-success"></i>
                             )}
                           </td>
@@ -436,8 +725,10 @@ const PermissionsPage = () => {
                           <td className="permission-name ps-4">
                             <div className="d-flex align-items-center">
                               <i
-                                className={`fas fa-${permission.icon || "key"} text-muted me-2`}
-                                style={{ width: '20px' }}
+                                className={`fas fa-${
+                                  permission.icon || "key"
+                                } text-muted me-2`}
+                                style={{ width: "20px" }}
                               ></i>
                               <span>{permission.name}</span>
                             </div>
@@ -480,17 +771,29 @@ const PermissionsPage = () => {
               <Row>
                 <Col md={6}>
                   <ul className="mb-0 small">
-                    <li><strong>Quản trị viên (Admin):</strong> Có toàn quyền, không thể thay đổi</li>
-                    <li><strong>Bề Trên Tổng:</strong> Quản lý toàn bộ Hội Dòng</li>
-                    <li><strong>Thư ký:</strong> Hỗ trợ báo cáo và hồ sơ</li>
-                    <li><strong>Bề Trên Cộng Đoàn:</strong> Quản lý cộng đoàn được phân công</li>
+                    <li>
+                      <strong>Quản trị viên (Admin):</strong> Có toàn quyền,
+                      không thể thay đổi
+                    </li>
+                    <li>
+                      <strong>Bề Trên Tổng:</strong> Quản lý toàn bộ Hội Dòng
+                    </li>
+                    <li>
+                      <strong>Thư ký:</strong> Hỗ trợ báo cáo và hồ sơ
+                    </li>
+                    <li>
+                      <strong>Bề Trên Cộng Đoàn:</strong> Quản lý cộng đoàn được
+                      phân công
+                    </li>
                   </ul>
                 </Col>
                 <Col md={6}>
                   <ul className="mb-0 small">
                     <li>Tick vào ô checkbox để cấp quyền</li>
                     <li>Bỏ tick để thu hồi quyền</li>
-                    <li>Nhấn <strong>Lưu thay đổi</strong> sau khi chỉnh sửa</li>
+                    <li>
+                      Nhấn <strong>Lưu thay đổi</strong> sau khi chỉnh sửa
+                    </li>
                     <li>Người dùng cần đăng nhập lại để nhận quyền mới</li>
                   </ul>
                 </Col>

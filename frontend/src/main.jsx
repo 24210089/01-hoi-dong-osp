@@ -13,7 +13,9 @@ if (userData) {
     const parsed = JSON.parse(userData);
     console.log("📦 Parsed user:", parsed);
     if (parsed.password !== undefined) {
-      console.log("❌ Found password field - this is form data, not user data!");
+      console.log(
+        "❌ Found password field - this is form data, not user data!"
+      );
       localStorage.removeItem("user");
       localStorage.removeItem("token");
       console.log("✅ Cleared corrupted data!");

@@ -37,7 +37,8 @@ const auditLogService = {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.message || "Lỗi khi tải nhật ký người dùng",
+        error:
+          error.response?.data?.message || "Lỗi khi tải nhật ký người dùng",
       };
     }
   },
@@ -45,7 +46,10 @@ const auditLogService = {
   // Get audit logs by entity
   getByEntity: async (entityType, entityId, params = {}) => {
     try {
-      const response = await api.get(`/audit-logs/entity/${entityType}/${entityId}`, { params });
+      const response = await api.get(
+        `/audit-logs/entity/${entityType}/${entityId}`,
+        { params }
+      );
       return { success: true, data: response.data };
     } catch (error) {
       return {

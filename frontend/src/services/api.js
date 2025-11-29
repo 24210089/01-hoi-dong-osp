@@ -56,11 +56,13 @@ api.interceptors.response.use(
           break;
 
         case 401:
-          // Unauthorized - redirect to login
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          window.location.href = "/login";
-          toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+          // Unauthorized - only redirect if not on login page
+          if (!window.location.pathname.includes("/login")) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "/login";
+            toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+          }
           break;
 
         case 403:

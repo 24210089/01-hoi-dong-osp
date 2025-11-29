@@ -14,7 +14,7 @@ const authService = {
       const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, credentials);
 
       // Save token and user to localStorage
-      if (response.success && response.data.token) {
+      if (response.success && response.data?.token) {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.user));
       }

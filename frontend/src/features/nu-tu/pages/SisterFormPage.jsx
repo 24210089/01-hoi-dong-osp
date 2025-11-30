@@ -12,21 +12,17 @@ import {
   Tab,
 } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
-import { sisterService, communityService } from "@services";
+import { sisterService, communityService, lookupService } from "@services";
 import { useForm } from "@hooks";
 import Input from "@components/forms/Input";
 import Select from "@components/forms/Select";
+import SelectWithAdd from "@components/forms/SelectWithAdd";
 import DatePicker from "@components/forms/DatePicker";
 import TextArea from "@components/forms/TextArea";
 import FileUpload from "@components/forms/FileUpload";
+import MultiFileUpload from "@components/forms/MultiFileUpload";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
-import {
-  JOURNEY_STAGES,
-  JOURNEY_STAGE_LABELS,
-  SISTER_STATUS,
-  SISTER_STATUS_LABELS,
-} from "@utils/constants";
 import { isValidEmail, isValidPhone } from "@utils/validators";
 
 const SisterFormPage = () => {
@@ -37,6 +33,8 @@ const SisterFormPage = () => {
   const [loading, setLoading] = useState(isEditMode);
   const [submitting, setSubmitting] = useState(false);
   const [communities, setCommunities] = useState([]);
+  const [journeyStages, setJourneyStages] = useState([]);
+  const [sisterStatuses, setSisterStatuses] = useState([]);
 
   const {
     values,
@@ -83,29 +81,46 @@ const SisterFormPage = () => {
     emergency_contact_phone: "",
 
     // Status
-    current_stage: JOURNEY_STAGES.ASPIRANT,
-    status: SISTER_STATUS.ACTIVE,
+    current_stage: "",
+    status: "",
     current_community_id: "",
+
+    // Documents - Tài liệu
+    documents: [],
+
+    // Notes - Ghi chú
+    notes: "",
 
     // Avatar
     photo_url: "",
   });
 
   useEffect(() => {
-    fetchCommunities();
+    fetchLookupData();
     if (isEditMode) {
       fetchSisterData();
     }
   }, [id]);
 
-  const fetchCommunities = async () => {
+  const fetchLookupData = async () => {
     try {
-      const response = await communityService.getList({ page_size: 100 });
-      if (response.success) {
-        setCommunities(response.data.items);
+      const [communitiesRes, stagesRes, statusesRes] = await Promise.all([
+        communityService.getList({ page_size: 100 }),
+        lookupService.getJourneyStages(),
+        lookupService.getSisterStatuses(),
+      ]);
+
+      if (communitiesRes.success) {
+        setCommunities(communitiesRes.data.items || []);
+      }
+      if (stagesRes.success) {
+        setJourneyStages(stagesRes.data || []);
+      }
+      if (statusesRes.success) {
+        setSisterStatuses(statusesRes.data || []);
       }
     } catch (error) {
-      console.error("Error fetching communities:", error);
+      console.error("Error fetching lookup data:", error);
     }
   };
 
@@ -127,8 +142,10 @@ const SisterFormPage = () => {
     const newErrors = {};
 
     // Required fields - using database column names
-    if (!values.birth_name) newErrors.birth_name = "Họ tên khai sinh là bắt buộc";
-    if (!values.date_of_birth) newErrors.date_of_birth = "Ngày sinh là bắt buộc";
+    if (!values.birth_name)
+      newErrors.birth_name = "Họ tên khai sinh là bắt buộc";
+    if (!values.date_of_birth)
+      newErrors.date_of_birth = "Ngày sinh là bắt buộc";
 
     // Email validation
     if (values.email && !isValidEmail(values.email)) {
@@ -260,6 +277,18 @@ const SisterFormPage = () => {
                       <Nav.Link eventKey="status">
                         <i className="fas fa-info-circle me-2"></i>
                         Trạng thái
+                      </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                      <Nav.Link eventKey="documents">
+                        <i className="fas fa-folder-open me-2"></i>
+                        Tài liệu
+                      </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
+                      <Nav.Link eventKey="notes">
+                        <i className="fas fa-sticky-note me-2"></i>
+                        Ghi chú
                       </Nav.Link>
                     </Nav.Item>
                   </Nav>
@@ -572,58 +601,121 @@ const SisterFormPage = () => {
                     <Tab.Pane eventKey="status">
                       <Row className="g-3">
                         <Col md={6}>
-                          <Select
+                          <SelectWithAdd
                             label="Giai đoạn hiện tại"
                             name="current_stage"
                             value={values.current_stage}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                          >
-                            {Object.entries(JOURNEY_STAGE_LABELS).map(
-                              ([value, label]) => (
-                                <option key={value} value={value}>
-                                  {label}
-                                </option>
-                              )
-                            )}
-                          </Select>
+                            options={journeyStages}
+                            valueKey="code"
+                            labelKey="name"
+                            colorKey="color"
+                            showColor
+                            placeholder="Chọn giai đoạn"
+                            addNewLabel="Thêm giai đoạn mới"
+                            onAddNew={async (data) => {
+                              try {
+                                const res = await lookupService.createJourneyStage(data);
+                                if (res.success) {
+                                  setJourneyStages([...journeyStages, res.data]);
+                                  setFieldValue("current_stage", res.data.code);
+                                }
+                                return res;
+                              } catch (error) {
+                                console.error("Error creating stage:", error);
+                                return { success: false };
+                              }
+                            }}
+                          />
                         </Col>
 
                         <Col md={6}>
-                          <Select
+                          <SelectWithAdd
                             label="Trạng thái"
                             name="status"
                             value={values.status}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                          >
-                            {Object.entries(SISTER_STATUS_LABELS).map(
-                              ([value, label]) => (
-                                <option key={value} value={value}>
-                                  {label}
-                                </option>
-                              )
-                            )}
-                          </Select>
+                            options={sisterStatuses}
+                            valueKey="code"
+                            labelKey="name"
+                            colorKey="color"
+                            showColor
+                            placeholder="Chọn trạng thái"
+                            addNewLabel="Thêm trạng thái mới"
+                            onAddNew={async (data) => {
+                              try {
+                                const res = await lookupService.createSisterStatus(data);
+                                if (res.success) {
+                                  setSisterStatuses([...sisterStatuses, res.data]);
+                                  setFieldValue("status", res.data.code);
+                                }
+                                return res;
+                              } catch (error) {
+                                console.error("Error creating status:", error);
+                                return { success: false };
+                              }
+                            }}
+                          />
                         </Col>
 
                         <Col md={12}>
-                          <Select
+                          <SelectWithAdd
                             label="Cộng đoàn hiện tại"
                             name="current_community_id"
                             value={values.current_community_id}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                          >
-                            <option value="">Chọn cộng đoàn</option>
-                            {communities.map((community) => (
-                              <option key={community.id} value={community.id}>
-                                {community.name}
-                              </option>
-                            ))}
-                          </Select>
+                            options={communities}
+                            valueKey="id"
+                            labelKey="name"
+                            placeholder="Chọn cộng đoàn"
+                          />
                         </Col>
                       </Row>
+                    </Tab.Pane>
+
+                    {/* Documents Tab - Tài liệu */}
+                    <Tab.Pane eventKey="documents">
+                      <div className="mb-3">
+                        <h5 className="mb-3">
+                          <i className="fas fa-file-alt me-2"></i>
+                          Tài liệu đính kèm
+                        </h5>
+                        <p className="text-muted mb-4">
+                          Upload các tài liệu liên quan như: giấy khai sinh, chứng minh nhân dân, 
+                          bằng cấp, chứng chỉ, giấy giới thiệu, và các tài liệu khác.
+                        </p>
+                        <MultiFileUpload
+                          value={values.documents}
+                          onChange={(files) => setFieldValue("documents", files)}
+                          accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+                          maxSize={10 * 1024 * 1024}
+                          maxFiles={20}
+                        />
+                      </div>
+                    </Tab.Pane>
+
+                    {/* Notes Tab - Ghi chú */}
+                    <Tab.Pane eventKey="notes">
+                      <div className="mb-3">
+                        <h5 className="mb-3">
+                          <i className="fas fa-sticky-note me-2"></i>
+                          Ghi chú
+                        </h5>
+                        <p className="text-muted mb-4">
+                          Thêm các ghi chú, nhận xét hoặc thông tin bổ sung về nữ tu.
+                        </p>
+                        <TextArea
+                          name="notes"
+                          value={values.notes}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          rows={10}
+                          placeholder="Nhập ghi chú tại đây..."
+                        />
+                      </div>
                     </Tab.Pane>
                   </Tab.Content>
                 </Card.Body>

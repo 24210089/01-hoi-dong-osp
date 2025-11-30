@@ -36,6 +36,7 @@ class SisterModel extends BaseModel {
       "emergency_contact_phone",
       "photo_url",
       "documents_url",
+      "documents",
       "notes",
       "status",
       "current_stage",
@@ -44,10 +45,7 @@ class SisterModel extends BaseModel {
       "created_at",
       "updated_at",
     ];
-    this.requiredFields = [
-      "birth_name",
-      "date_of_birth",
-    ];
+    this.requiredFields = ["birth_name", "date_of_birth"];
   }
 
   validateData(data = {}, { partial = false } = {}) {

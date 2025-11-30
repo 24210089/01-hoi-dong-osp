@@ -12,6 +12,7 @@ const departureRecordRoutes = require("./departureRecordRoutes");
 const reportRoutes = require("./reportRoutes");
 const userRoutes = require("./userRoutes");
 const auditLogRoutes = require("./auditLogRoutes");
+const lookupRoutes = require("./lookupRoutes");
 
 module.exports = (app) => {
   app.use("/api/auth", authRoutes);
@@ -28,6 +29,7 @@ module.exports = (app) => {
   app.use("/api/reports", reportRoutes);
   app.use("/api/users", userRoutes);
   app.use("/api/audit-logs", auditLogRoutes);
+  app.use("/api/lookup", lookupRoutes);
 
   app.get("/api/health", (req, res) => {
     res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });

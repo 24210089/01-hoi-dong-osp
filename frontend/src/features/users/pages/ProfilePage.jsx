@@ -1,6 +1,7 @@
 // src/features/users/pages/ProfilePage.jsx
 
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
   Container,
   Row,
@@ -21,11 +22,24 @@ import Breadcrumb from "@components/common/Breadcrumb";
 import "./ProfilePage.css";
 
 const ProfilePage = () => {
+  const location = useLocation();
   const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  
+  // Determine active tab from URL hash
+  const getActiveTab = () => {
+    const hash = location.hash.replace('#', '');
+    return hash === 'password' ? 'password' : 'profile';
+  };
+  const [activeTab, setActiveTab] = useState(getActiveTab);
+  
+  // Update active tab when hash changes
+  useEffect(() => {
+    setActiveTab(getActiveTab());
+  }, [location.hash]);
 
   // Profile form
   const [profileData, setProfileData] = useState({
@@ -72,18 +86,20 @@ const ProfilePage = () => {
   const validateProfile = () => {
     const errors = {};
 
-    if (!profileData.full_name) {
+    if (!profileData.full_name || !profileData.full_name.trim()) {
       errors.full_name = "Họ tên là bắt buộc";
     }
 
     if (!profileData.email) {
       errors.email = "Email là bắt buộc";
     } else if (!isValidEmail(profileData.email)) {
-      errors.email = "Email không hợp lệ";
+      errors.email = "Email không đúng định dạng. Ví dụ: example@domain.com";
     }
 
-    if (profileData.phone && !isValidPhone(profileData.phone)) {
-      errors.phone = "Số điện thoại không hợp lệ";
+    if (profileData.phone && profileData.phone.trim() !== '') {
+      if (!isValidPhone(profileData.phone)) {
+        errors.phone = "Số điện thoại không đúng định dạng. Phải bắt đầu bằng 0 hoặc +84 và có 10-11 chữ số";
+      }
     }
 
     return errors;
@@ -256,7 +272,7 @@ const ProfilePage = () => {
 
         {/* Right Column - Forms */}
         <Col lg={8}>
-          <Tab.Container defaultActiveKey="profile">
+          <Tab.Container activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
             <Card>
               <Card.Header className="bg-white">
                 <Nav variant="tabs">

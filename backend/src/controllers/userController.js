@@ -2,6 +2,20 @@ const bcrypt = require("bcryptjs");
 const UserModel = require("../models/UserModel");
 const AuditLogModel = require("../models/AuditLogModel");
 
+// Validation helpers
+const isValidEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const isValidPhone = (phone) => {
+  // Vietnamese phone: starts with 0, 10-11 digits
+  // Also allow formats like: 0123-456-789, 0123 456 789, +84123456789
+  const phoneRegex = /^(\+84|0)[0-9]{9,10}$/;
+  const cleanPhone = phone.replace(/[\s\-\.]/g, '');
+  return phoneRegex.test(cleanPhone);
+};
+
 const sanitizeUser = (user) => {
   if (!user) {
     return null;
@@ -281,6 +295,127 @@ const toggleUserStatus = async (req, res) => {
   }
 };
 
+// Update current user's profile
+const updateProfile = async (req, res) => {
+  try {
+    if (!ensureAuthenticated(req, res)) {
+      return;
+    }
+
+    const userId = req.user.id;
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const { full_name, email, phone, avatar } = req.body;
+    
+    // Validate email format
+    if (email) {
+      if (!isValidEmail(email)) {
+        return res.status(400).json({ 
+          message: "Email không đúng định dạng. Ví dụ: example@domain.com" 
+        });
+      }
+      // Check if email already exists
+      if (email !== user.email) {
+        const existingEmail = await UserModel.executeQuery(
+          "SELECT id FROM users WHERE email = ? AND id != ?",
+          [email, userId]
+        );
+        if (existingEmail.length > 0) {
+          return res.status(409).json({ message: "Email đã được sử dụng bởi tài khoản khác" });
+        }
+      }
+    }
+
+    // Validate phone format
+    if (phone && phone.trim() !== '') {
+      if (!isValidPhone(phone)) {
+        return res.status(400).json({ 
+          message: "Số điện thoại không đúng định dạng. Số điện thoại phải bắt đầu bằng 0 hoặc +84 và có 10-11 chữ số" 
+        });
+      }
+    }
+
+    const payload = {};
+    if (full_name !== undefined) payload.full_name = full_name;
+    if (email !== undefined) payload.email = email;
+    if (phone !== undefined) payload.phone = phone;
+    if (avatar !== undefined) payload.avatar = avatar;
+
+    if (!Object.keys(payload).length) {
+      return res.status(400).json({ message: "Không có thông tin để cập nhật" });
+    }
+
+    const updated = await UserModel.update(userId, payload);
+    await logAudit(
+      req,
+      "UPDATE_PROFILE",
+      userId,
+      sanitizeUser(user),
+      sanitizeUser(updated)
+    );
+
+    return res.status(200).json({ 
+      success: true,
+      data: sanitizeUser(updated),
+      message: "Cập nhật thông tin thành công"
+    });
+  } catch (error) {
+    console.error("updateProfile error:", error.message);
+    return res.status(500).json({ message: "Lỗi khi cập nhật thông tin" });
+  }
+};
+
+// Change current user's password
+const changePassword = async (req, res) => {
+  try {
+    if (!ensureAuthenticated(req, res)) {
+      return;
+    }
+
+    const userId = req.user.id;
+    const { current_password, new_password } = req.body;
+
+    if (!current_password || !new_password) {
+      return res.status(400).json({ 
+        message: "Mật khẩu hiện tại và mật khẩu mới là bắt buộc" 
+      });
+    }
+
+    if (new_password.length < 6) {
+      return res.status(400).json({ 
+        message: "Mật khẩu mới phải có ít nhất 6 ký tự" 
+      });
+    }
+
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(current_password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Mật khẩu hiện tại không đúng" });
+    }
+
+    // Hash and update new password
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+    await UserModel.update(userId, { password: hashedPassword });
+    await logAudit(req, "CHANGE_PASSWORD", userId, null, { id: userId });
+
+    return res.status(200).json({ 
+      success: true,
+      message: "Đổi mật khẩu thành công" 
+    });
+  } catch (error) {
+    console.error("changePassword error:", error.message);
+    return res.status(500).json({ message: "Lỗi khi đổi mật khẩu" });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -289,4 +424,6 @@ module.exports = {
   deleteUser,
   resetPassword,
   toggleUserStatus,
+  updateProfile,
+  changePassword,
 };

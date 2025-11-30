@@ -13,6 +13,10 @@ const adminOnly = authorize("admin");
 
 router.use(authenticateToken);
 
+// Profile routes (must be before /:id routes)
+router.put("/profile", userController.updateProfile);
+router.post("/change-password", userController.changePassword);
+
 router.get("/", adminOnly, userController.getAllUsers);
 router.get("/:id", userController.getUserById);
 

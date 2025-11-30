@@ -5,9 +5,6 @@ const UserMenu = ({ user, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Debug: Log user prop
-  console.log("UserMenu received user:", user);
-
   // If user has password field, it's form data - clear localStorage and redirect
   if (user && user.password !== undefined) {
     console.error("❌ UserMenu received form data instead of user data!", user);
@@ -39,10 +36,11 @@ const UserMenu = ({ user, onLogout }) => {
     if (!role || typeof role !== "string") return "Người dùng";
     const roles = {
       admin: "Quản trị viên",
-      be_tren_tong: "Bề Trên Tổng",
-      thu_ky: "Thư ký",
-      be_tren_cong_doan: "Bề Trên Cộng Đoàn",
-      user: "Người dùng",
+      superior_general: "Bề Trên Tổng",
+      superior_provincial: "Bề Trên Tỉnh",
+      superior_community: "Bề Trên Cộng Đoàn",
+      secretary: "Thư ký",
+      viewer: "Người xem",
     };
     return roles[role] || "Người dùng";
   };
@@ -165,7 +163,7 @@ const UserMenu = ({ user, onLogout }) => {
         </Link>
 
         <Link
-          to="/settings/preferences"
+          to="/profile#password"
           className="dropdown-item"
           onClick={handleItemClick}
         >

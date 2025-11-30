@@ -9,28 +9,40 @@ const up = async () => {
     console.log("Adding profile fields to users table...");
 
     // Add full_name column
-    await connection.query(`
+    await connection
+      .query(
+        `
       ALTER TABLE users 
       ADD COLUMN IF NOT EXISTS full_name VARCHAR(150) NULL AFTER email
-    `).catch(() => {
-      // Column might already exist
-    });
+    `
+      )
+      .catch(() => {
+        // Column might already exist
+      });
 
     // Add phone column
-    await connection.query(`
+    await connection
+      .query(
+        `
       ALTER TABLE users 
       ADD COLUMN IF NOT EXISTS phone VARCHAR(30) NULL AFTER full_name
-    `).catch(() => {
-      // Column might already exist
-    });
+    `
+      )
+      .catch(() => {
+        // Column might already exist
+      });
 
     // Add avatar column
-    await connection.query(`
+    await connection
+      .query(
+        `
       ALTER TABLE users 
       ADD COLUMN IF NOT EXISTS avatar VARCHAR(500) NULL AFTER phone
-    `).catch(() => {
-      // Column might already exist
-    });
+    `
+      )
+      .catch(() => {
+        // Column might already exist
+      });
 
     console.log("Profile fields added successfully!");
   } catch (error) {
@@ -45,11 +57,11 @@ const down = async () => {
   const connection = await pool.getConnection();
   try {
     console.log("Removing profile fields from users table...");
-    
+
     await connection.query(`ALTER TABLE users DROP COLUMN IF EXISTS avatar`);
     await connection.query(`ALTER TABLE users DROP COLUMN IF EXISTS phone`);
     await connection.query(`ALTER TABLE users DROP COLUMN IF EXISTS full_name`);
-    
+
     console.log("Profile fields removed!");
   } catch (error) {
     console.error("Rollback failed:", error.message);

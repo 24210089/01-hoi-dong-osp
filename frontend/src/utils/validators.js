@@ -20,7 +20,7 @@ export const isValidPhone = (phone) => {
   if (!phone) return false;
   // Vietnamese phone: starts with 0 or +84, 10-11 digits total
   // Allows formats: 0123456789, 0123-456-789, 0123 456 789, +84123456789
-  const cleanPhone = phone.replace(/[\s\-\.]/g, '');
+  const cleanPhone = phone.replace(/[\s\-\.]/g, "");
   const phoneRegex = /^(\+84|0)[0-9]{9,10}$/;
   return phoneRegex.test(cleanPhone);
 };

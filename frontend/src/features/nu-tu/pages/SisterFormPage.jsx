@@ -48,12 +48,12 @@ const SisterFormPage = () => {
     setFieldValue,
     validateForm,
   } = useForm({
-    // Basic Info
-    full_name: "",
-    religious_name: "",
-    sister_code: "",
-    birth_date: "",
-    birth_place: "",
+    // Basic Info - mapped to database columns
+    birth_name: "", // Họ tên khai sinh
+    religious_name: "", // Tên thánh
+    code: "", // Mã số
+    date_of_birth: "",
+    place_of_birth: "",
     nationality: "Việt Nam",
     id_card: "",
     id_card_date: "",
@@ -70,14 +70,25 @@ const SisterFormPage = () => {
     mother_occupation: "",
     siblings_count: "",
     family_address: "",
+    family_religion: "", // Tôn giáo gia đình
+
+    // Sacraments - Bí tích
+    baptism_date: "",
+    baptism_place: "",
+    confirmation_date: "",
+    first_communion_date: "",
+
+    // Emergency Contact
+    emergency_contact_name: "",
+    emergency_contact_phone: "",
 
     // Status
     current_stage: JOURNEY_STAGES.ASPIRANT,
     status: SISTER_STATUS.ACTIVE,
-    community_id: "",
+    current_community_id: "",
 
     // Avatar
-    avatar_url: "",
+    photo_url: "",
   });
 
   useEffect(() => {
@@ -115,10 +126,9 @@ const SisterFormPage = () => {
   const validate = () => {
     const newErrors = {};
 
-    // Required fields
-    if (!values.full_name) newErrors.full_name = "Họ tên là bắt buộc";
-    if (!values.sister_code) newErrors.sister_code = "Mã số là bắt buộc";
-    if (!values.birth_date) newErrors.birth_date = "Ngày sinh là bắt buộc";
+    // Required fields - using database column names
+    if (!values.birth_name) newErrors.birth_name = "Họ tên khai sinh là bắt buộc";
+    if (!values.date_of_birth) newErrors.date_of_birth = "Ngày sinh là bắt buộc";
 
     // Email validation
     if (values.email && !isValidEmail(values.email)) {
@@ -212,8 +222,8 @@ const SisterFormPage = () => {
               <Card.Body>
                 <h5 className="mb-3">Ảnh đại diện</h5>
                 <FileUpload
-                  value={values.avatar_url}
-                  onChange={(url) => setFieldValue("avatar_url", url)}
+                  value={values.photo_url}
+                  onChange={(url) => setFieldValue("photo_url", url)}
                   accept="image/*"
                   maxSize={5 * 1024 * 1024}
                   preview
@@ -241,6 +251,12 @@ const SisterFormPage = () => {
                       </Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
+                      <Nav.Link eventKey="sacraments">
+                        <i className="fas fa-church me-2"></i>
+                        Bí tích
+                      </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item>
                       <Nav.Link eventKey="status">
                         <i className="fas fa-info-circle me-2"></i>
                         Trạng thái
@@ -256,13 +272,13 @@ const SisterFormPage = () => {
                       <Row className="g-3">
                         <Col md={6}>
                           <Input
-                            label="Họ và tên"
-                            name="full_name"
-                            value={values.full_name}
+                            label="Họ và tên khai sinh"
+                            name="birth_name"
+                            value={values.birth_name}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            error={errors.full_name}
-                            touched={touched.full_name}
+                            error={errors.birth_name}
+                            touched={touched.birth_name}
                             required
                           />
                         </Col>
@@ -280,27 +296,25 @@ const SisterFormPage = () => {
                         <Col md={6}>
                           <Input
                             label="Mã số"
-                            name="sister_code"
-                            value={values.sister_code}
+                            name="code"
+                            value={values.code}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            error={errors.sister_code}
-                            touched={touched.sister_code}
-                            required
+                            placeholder="Tự động tạo nếu để trống"
                           />
                         </Col>
 
                         <Col md={6}>
                           <DatePicker
                             label="Ngày sinh"
-                            name="birth_date"
-                            value={values.birth_date}
+                            name="date_of_birth"
+                            value={values.date_of_birth}
                             onChange={(date) =>
-                              setFieldValue("birth_date", date)
+                              setFieldValue("date_of_birth", date)
                             }
                             onBlur={handleBlur}
-                            error={errors.birth_date}
-                            touched={touched.birth_date}
+                            error={errors.date_of_birth}
+                            touched={touched.date_of_birth}
                             required
                           />
                         </Col>
@@ -308,8 +322,8 @@ const SisterFormPage = () => {
                         <Col md={6}>
                           <Input
                             label="Nơi sinh"
-                            name="birth_place"
-                            value={values.birth_place}
+                            name="place_of_birth"
+                            value={values.place_of_birth}
                             onChange={handleChange}
                             onBlur={handleBlur}
                           />
@@ -449,12 +463,22 @@ const SisterFormPage = () => {
                           />
                         </Col>
 
-                        <Col md={12}>
+                        <Col md={6}>
                           <Input
                             label="Số anh chị em"
                             name="siblings_count"
                             type="number"
                             value={values.siblings_count}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                          />
+                        </Col>
+
+                        <Col md={6}>
+                          <Input
+                            label="Tôn giáo gia đình"
+                            name="family_religion"
+                            value={values.family_religion}
                             onChange={handleChange}
                             onBlur={handleBlur}
                           />
@@ -468,6 +492,77 @@ const SisterFormPage = () => {
                             onChange={handleChange}
                             onBlur={handleBlur}
                             rows={3}
+                          />
+                        </Col>
+
+                        <Col md={6}>
+                          <Input
+                            label="Tên người liên hệ khẩn cấp"
+                            name="emergency_contact_name"
+                            value={values.emergency_contact_name}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                          />
+                        </Col>
+
+                        <Col md={6}>
+                          <Input
+                            label="SĐT liên hệ khẩn cấp"
+                            name="emergency_contact_phone"
+                            value={values.emergency_contact_phone}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                          />
+                        </Col>
+                      </Row>
+                    </Tab.Pane>
+
+                    {/* Sacraments Tab - Bí tích */}
+                    <Tab.Pane eventKey="sacraments">
+                      <Row className="g-3">
+                        <Col md={6}>
+                          <DatePicker
+                            label="Ngày rửa tội"
+                            name="baptism_date"
+                            value={values.baptism_date}
+                            onChange={(date) =>
+                              setFieldValue("baptism_date", date)
+                            }
+                            onBlur={handleBlur}
+                          />
+                        </Col>
+
+                        <Col md={6}>
+                          <Input
+                            label="Nơi rửa tội"
+                            name="baptism_place"
+                            value={values.baptism_place}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                          />
+                        </Col>
+
+                        <Col md={6}>
+                          <DatePicker
+                            label="Ngày thêm sức"
+                            name="confirmation_date"
+                            value={values.confirmation_date}
+                            onChange={(date) =>
+                              setFieldValue("confirmation_date", date)
+                            }
+                            onBlur={handleBlur}
+                          />
+                        </Col>
+
+                        <Col md={6}>
+                          <DatePicker
+                            label="Ngày rước lễ lần đầu"
+                            name="first_communion_date"
+                            value={values.first_communion_date}
+                            onChange={(date) =>
+                              setFieldValue("first_communion_date", date)
+                            }
+                            onBlur={handleBlur}
                           />
                         </Col>
                       </Row>
@@ -514,9 +609,9 @@ const SisterFormPage = () => {
 
                         <Col md={12}>
                           <Select
-                            label="Cộng đoàn"
-                            name="community_id"
-                            value={values.community_id}
+                            label="Cộng đoàn hiện tại"
+                            name="current_community_id"
+                            value={values.current_community_id}
                             onChange={handleChange}
                             onBlur={handleBlur}
                           >

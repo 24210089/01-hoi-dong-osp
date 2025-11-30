@@ -28,14 +28,14 @@ const ProfilePage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  
+
   // Determine active tab from URL hash
   const getActiveTab = () => {
-    const hash = location.hash.replace('#', '');
-    return hash === 'password' ? 'password' : 'profile';
+    const hash = location.hash.replace("#", "");
+    return hash === "password" ? "password" : "profile";
   };
   const [activeTab, setActiveTab] = useState(getActiveTab);
-  
+
   // Update active tab when hash changes
   useEffect(() => {
     setActiveTab(getActiveTab());
@@ -96,9 +96,10 @@ const ProfilePage = () => {
       errors.email = "Email không đúng định dạng. Ví dụ: example@domain.com";
     }
 
-    if (profileData.phone && profileData.phone.trim() !== '') {
+    if (profileData.phone && profileData.phone.trim() !== "") {
       if (!isValidPhone(profileData.phone)) {
-        errors.phone = "Số điện thoại không đúng định dạng. Phải bắt đầu bằng 0 hoặc +84 và có 10-11 chữ số";
+        errors.phone =
+          "Số điện thoại không đúng định dạng. Phải bắt đầu bằng 0 hoặc +84 và có 10-11 chữ số";
       }
     }
 
@@ -272,7 +273,10 @@ const ProfilePage = () => {
 
         {/* Right Column - Forms */}
         <Col lg={8}>
-          <Tab.Container activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
+          <Tab.Container
+            activeKey={activeTab}
+            onSelect={(k) => setActiveTab(k)}
+          >
             <Card>
               <Card.Header className="bg-white">
                 <Nav variant="tabs">

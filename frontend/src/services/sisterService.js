@@ -33,6 +33,23 @@ const sisterService = {
   },
 
   /**
+   * Get sister by ID (alias for getDetail with success format)
+   * @param {string} id
+   * @returns {Promise}
+   */
+  getById: async (id) => {
+    try {
+      const response = await api.get(API_ENDPOINTS.SISTER.DETAIL(id));
+      return {
+        success: true,
+        data: response.data || response,
+      };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
    * Create new sister
    * @param {Object} data
    * @returns {Promise}
@@ -40,7 +57,11 @@ const sisterService = {
   create: async (data) => {
     try {
       const response = await api.post(API_ENDPOINTS.SISTER.CREATE, data);
-      return response;
+      // API returns { sister: {...} }, transform to { success: true, data: {...} }
+      return {
+        success: true,
+        data: response.sister || response.data || response,
+      };
     } catch (error) {
       throw error;
     }
@@ -55,7 +76,11 @@ const sisterService = {
   update: async (id, data) => {
     try {
       const response = await api.put(API_ENDPOINTS.SISTER.UPDATE(id), data);
-      return response;
+      // API returns { sister: {...} }, transform to { success: true, data: {...} }
+      return {
+        success: true,
+        data: response.sister || response.data || response,
+      };
     } catch (error) {
       throw error;
     }

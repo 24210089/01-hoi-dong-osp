@@ -12,7 +12,7 @@ const isValidPhone = (phone) => {
   // Vietnamese phone: starts with 0, 10-11 digits
   // Also allow formats like: 0123-456-789, 0123 456 789, +84123456789
   const phoneRegex = /^(\+84|0)[0-9]{9,10}$/;
-  const cleanPhone = phone.replace(/[\s\-\.]/g, '');
+  const cleanPhone = phone.replace(/[\s\-\.]/g, "");
   return phoneRegex.test(cleanPhone);
 };
 
@@ -309,12 +309,12 @@ const updateProfile = async (req, res) => {
     }
 
     const { full_name, email, phone, avatar } = req.body;
-    
+
     // Validate email format
     if (email) {
       if (!isValidEmail(email)) {
-        return res.status(400).json({ 
-          message: "Email không đúng định dạng. Ví dụ: example@domain.com" 
+        return res.status(400).json({
+          message: "Email không đúng định dạng. Ví dụ: example@domain.com",
         });
       }
       // Check if email already exists
@@ -324,16 +324,19 @@ const updateProfile = async (req, res) => {
           [email, userId]
         );
         if (existingEmail.length > 0) {
-          return res.status(409).json({ message: "Email đã được sử dụng bởi tài khoản khác" });
+          return res
+            .status(409)
+            .json({ message: "Email đã được sử dụng bởi tài khoản khác" });
         }
       }
     }
 
     // Validate phone format
-    if (phone && phone.trim() !== '') {
+    if (phone && phone.trim() !== "") {
       if (!isValidPhone(phone)) {
-        return res.status(400).json({ 
-          message: "Số điện thoại không đúng định dạng. Số điện thoại phải bắt đầu bằng 0 hoặc +84 và có 10-11 chữ số" 
+        return res.status(400).json({
+          message:
+            "Số điện thoại không đúng định dạng. Số điện thoại phải bắt đầu bằng 0 hoặc +84 và có 10-11 chữ số",
         });
       }
     }
@@ -345,7 +348,9 @@ const updateProfile = async (req, res) => {
     if (avatar !== undefined) payload.avatar = avatar;
 
     if (!Object.keys(payload).length) {
-      return res.status(400).json({ message: "Không có thông tin để cập nhật" });
+      return res
+        .status(400)
+        .json({ message: "Không có thông tin để cập nhật" });
     }
 
     const updated = await UserModel.update(userId, payload);
@@ -357,10 +362,10 @@ const updateProfile = async (req, res) => {
       sanitizeUser(updated)
     );
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       success: true,
       data: sanitizeUser(updated),
-      message: "Cập nhật thông tin thành công"
+      message: "Cập nhật thông tin thành công",
     });
   } catch (error) {
     console.error("updateProfile error:", error.message);
@@ -379,14 +384,14 @@ const changePassword = async (req, res) => {
     const { current_password, new_password } = req.body;
 
     if (!current_password || !new_password) {
-      return res.status(400).json({ 
-        message: "Mật khẩu hiện tại và mật khẩu mới là bắt buộc" 
+      return res.status(400).json({
+        message: "Mật khẩu hiện tại và mật khẩu mới là bắt buộc",
       });
     }
 
     if (new_password.length < 6) {
-      return res.status(400).json({ 
-        message: "Mật khẩu mới phải có ít nhất 6 ký tự" 
+      return res.status(400).json({
+        message: "Mật khẩu mới phải có ít nhất 6 ký tự",
       });
     }
 
@@ -406,9 +411,9 @@ const changePassword = async (req, res) => {
     await UserModel.update(userId, { password: hashedPassword });
     await logAudit(req, "CHANGE_PASSWORD", userId, null, { id: userId });
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       success: true,
-      message: "Đổi mật khẩu thành công" 
+      message: "Đổi mật khẩu thành công",
     });
   } catch (error) {
     console.error("changePassword error:", error.message);

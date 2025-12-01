@@ -11,26 +11,29 @@ import {
   Form,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { journeyService } from "@services";
+import { journeyService, lookupService } from "@services";
 import { useTable, useDebounce } from "@hooks";
 import DataTable from "@components/tables/DataTable";
-import SearchBox from "@components/common/SearchBox";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
 import { formatDate } from "@utils";
-import { JOURNEY_STAGE_LABELS, JOURNEY_STAGE_COLORS } from "@utils/constants";
 
 const VocationJourneyListPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [journeys, setJourneys] = useState([]);
   const [stageFilter, setStageFilter] = useState("");
+  const [stages, setStages] = useState([]);
 
   const table = useTable({
     initialPageSize: 20,
   });
 
   const debouncedSearch = useDebounce(table.searchTerm, 500);
+
+  useEffect(() => {
+    fetchStages();
+  }, []);
 
   useEffect(() => {
     fetchJourneys();
@@ -42,6 +45,17 @@ const VocationJourneyListPage = () => {
     table.sortBy,
     table.sortOrder,
   ]);
+
+  const fetchStages = async () => {
+    try {
+      const response = await lookupService.getJourneyStages();
+      if (response && response.data) {
+        setStages(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching stages:", error);
+    }
+  };
 
   const fetchJourneys = async () => {
     try {
@@ -71,27 +85,10 @@ const VocationJourneyListPage = () => {
     }
   };
 
-  const handleView = (journey) => {
+
+
+  const handleRowClick = (journey) => {
     navigate(`/hanh-trinh/${journey.id}`);
-  };
-
-  const handleEdit = (journey) => {
-    navigate(`/hanh-trinh/${journey.id}/edit`);
-  };
-
-  const handleDelete = async (journey) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa hành trình này?")) {
-      try {
-        await journeyService.delete(journey.id);
-        fetchJourneys();
-      } catch (error) {
-        console.error("Error deleting journey:", error);
-      }
-    }
-  };
-
-  const handleViewSister = (journey) => {
-    navigate(`/nu-tu/${journey.sister_id}`);
   };
 
   const columns = [
@@ -101,12 +98,12 @@ const VocationJourneyListPage = () => {
       sortable: true,
       render: (row) => (
         <div>
-          {row.sister_religious_name && (
+          {row.saint_name && (
             <div className="text-primary fw-semibold">
-              {row.sister_religious_name}
+              {row.saint_name}
             </div>
           )}
-          <div>{row.sister_name}</div>
+          <div>{row.birth_name}</div>
           <small className="text-muted">{row.sister_code}</small>
         </div>
       ),
@@ -116,8 +113,13 @@ const VocationJourneyListPage = () => {
       label: "Giai đoạn",
       sortable: true,
       render: (row) => (
-        <Badge bg={JOURNEY_STAGE_COLORS[row.stage]}>
-          {JOURNEY_STAGE_LABELS[row.stage]}
+        <Badge 
+          style={{ 
+            backgroundColor: row.stage_color || '#6c757d',
+            color: '#fff'
+          }}
+        >
+          {row.stage_name || row.stage}
         </Badge>
       ),
     },
@@ -156,32 +158,7 @@ const VocationJourneyListPage = () => {
     },
   ];
 
-  const actions = [
-    {
-      label: "Xem nữ tu",
-      icon: "fas fa-user",
-      variant: "info",
-      onClick: handleViewSister,
-    },
-    {
-      label: "Xem",
-      icon: "fas fa-eye",
-      variant: "primary",
-      onClick: handleView,
-    },
-    {
-      label: "Sửa",
-      icon: "fas fa-edit",
-      variant: "success",
-      onClick: handleEdit,
-    },
-    {
-      label: "Xóa",
-      icon: "fas fa-trash",
-      variant: "danger",
-      onClick: handleDelete,
-    },
-  ];
+
 
   return (
     <Container fluid className="py-4">
@@ -261,7 +238,7 @@ const VocationJourneyListPage = () => {
                 <div>
                   <small className="text-muted">Giai đoạn</small>
                   <h4 className="mb-0">
-                    {Object.keys(JOURNEY_STAGE_LABELS).length}
+                    {stages.length}
                   </h4>
                 </div>
                 <div className="stat-icon bg-warning">
@@ -276,10 +253,11 @@ const VocationJourneyListPage = () => {
       {/* Search & Filter */}
       <Row className="g-3 mb-4">
         <Col md={6}>
-          <SearchBox
-            value={table.searchTerm}
-            onChange={table.handleSearch}
+          <Form.Control
+            type="text"
             placeholder="Tìm kiếm theo tên nữ tu, địa điểm..."
+            value={table.searchTerm}
+            onChange={(e) => table.handleSearch(e.target.value)}
           />
         </Col>
         <Col md={4}>
@@ -288,9 +266,9 @@ const VocationJourneyListPage = () => {
             onChange={(e) => setStageFilter(e.target.value)}
           >
             <option value="">Tất cả giai đoạn</option>
-            {Object.entries(JOURNEY_STAGE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
+            {stages.map((stage) => (
+              <option key={stage.code} value={stage.code}>
+                {stage.name}
               </option>
             ))}
           </Form.Select>
@@ -321,7 +299,7 @@ const VocationJourneyListPage = () => {
             <DataTable
               columns={columns}
               data={journeys}
-              actions={actions}
+              onRowClick={handleRowClick}
               pagination={{
                 currentPage: table.currentPage,
                 totalPages: table.totalPages,

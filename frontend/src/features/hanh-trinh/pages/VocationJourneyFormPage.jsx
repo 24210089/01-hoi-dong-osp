@@ -11,7 +11,12 @@ import {
   Alert,
 } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
-import { journeyService, sisterService, lookupService, communityService } from "@services";
+import {
+  journeyService,
+  sisterService,
+  lookupService,
+  communityService,
+} from "@services";
 import { useForm } from "@hooks";
 import Input from "@components/forms/Input";
 import Select from "@components/forms/Select";
@@ -36,7 +41,22 @@ const VocationJourneyFormPage = () => {
   const [showAddStageModal, setShowAddStageModal] = useState(false);
   const [newStageName, setNewStageName] = useState("");
   const [newStageCode, setNewStageCode] = useState("");
+  const [newStageColor, setNewStageColor] = useState("#17a2b8");
   const [addingStage, setAddingStage] = useState(false);
+
+  // Predefined colors for stages
+  const stageColors = [
+    { value: "#17a2b8", label: "Xanh dương" },
+    { value: "#28a745", label: "Xanh lá" },
+    { value: "#ffc107", label: "Vàng" },
+    { value: "#fd7e14", label: "Cam" },
+    { value: "#dc3545", label: "Đỏ" },
+    { value: "#6f42c1", label: "Tím" },
+    { value: "#e83e8c", label: "Hồng" },
+    { value: "#6c757d", label: "Xám" },
+    { value: "#007bff", label: "Xanh đậm" },
+    { value: "#20c997", label: "Ngọc" },
+  ];
 
   const {
     values,
@@ -44,7 +64,7 @@ const VocationJourneyFormPage = () => {
     touched,
     handleChange,
     handleBlur,
-    setValues,
+    updateValues,
     setFieldValue,
     validateForm,
   } = useForm({
@@ -84,7 +104,9 @@ const VocationJourneyFormPage = () => {
     try {
       const response = await communityService.getList({ limit: 1000 });
       if (response && response.success && response.data) {
-        const communitiesData = Array.isArray(response.data) ? response.data : [];
+        const communitiesData = Array.isArray(response.data)
+          ? response.data
+          : [];
         setCommunities(communitiesData);
       } else if (response && Array.isArray(response.data)) {
         setCommunities(response.data);
@@ -126,8 +148,16 @@ const VocationJourneyFormPage = () => {
     try {
       setLoading(true);
       const response = await journeyService.getById(id);
-      if (response.success) {
-        setValues(response.data);
+      console.log("Journey data response:", response);
+      if (response.success && response.data) {
+        // Format dates for DatePicker if needed
+        const journeyData = {
+          ...response.data,
+          start_date: response.data.start_date ? response.data.start_date.split('T')[0] : '',
+          end_date: response.data.end_date ? response.data.end_date.split('T')[0] : '',
+        };
+        console.log("Setting values:", journeyData);
+        updateValues(journeyData);
       }
     } catch (error) {
       console.error("Error fetching journey data:", error);
@@ -169,15 +199,36 @@ const VocationJourneyFormPage = () => {
       setSubmitting(true);
       setError("");
 
+      // Only send allowed fields to backend
+      const allowedFields = [
+        "sister_id",
+        "stage",
+        "start_date",
+        "end_date",
+        "location",
+        "superior",
+        "formation_director",
+        "community_id",
+        "supervisor_id",
+        "notes",
+      ];
+      
+      const payload = {};
+      allowedFields.forEach((field) => {
+        if (values[field] !== undefined) {
+          payload[field] = values[field];
+        }
+      });
+
       let response;
       if (isEditMode) {
-        response = await journeyService.update(id, values);
+        response = await journeyService.update(id, payload);
       } else {
-        response = await journeyService.create(values);
+        response = await journeyService.create(payload);
       }
 
       if (response.success) {
-        navigate(`/hanh-trinh/${response.data.id}`);
+        navigate(`/hanh-trinh/${response.data?.id || id}`);
       } else {
         setError(response.error);
       }
@@ -220,16 +271,17 @@ const VocationJourneyFormPage = () => {
     try {
       setAddingStage(true);
       const response = await lookupService.createJourneyStage({
-        code: newStageCode.trim().toLowerCase().replace(/\s+/g, '_'),
+        code: newStageCode.trim().toLowerCase().replace(/\s+/g, "_"),
         name: newStageName.trim(),
         display_order: stages.length + 1,
-        color: "#6c757d",
+        color: newStageColor,
       });
 
       if (response && response.data) {
         await fetchStages();
         setNewStageName("");
         setNewStageCode("");
+        setNewStageColor("#17a2b8");
         setShowAddStageModal(false);
       }
     } catch (error) {
@@ -241,10 +293,12 @@ const VocationJourneyFormPage = () => {
   };
 
   const handleDeleteStage = async (stageId) => {
-    const stage = stages.find(s => s.id === stageId);
+    const stage = stages.find((s) => s.id === stageId);
     if (!stage) return;
 
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa giai đoạn "${stage.name}"?`)) {
+    if (
+      !window.confirm(`Bạn có chắc chắn muốn xóa giai đoạn "${stage.name}"?`)
+    ) {
       return;
     }
 
@@ -333,7 +387,9 @@ const VocationJourneyFormPage = () => {
                       maxDisplayItems={5}
                       options={(sisters || []).map((sister) => ({
                         value: sister.id,
-                        label: `${sister.saint_name ? `${sister.saint_name} - ` : ''}${sister.birth_name} (${sister.code})`
+                        label: `${
+                          sister.saint_name ? `${sister.saint_name} - ` : ""
+                        }${sister.birth_name} (${sister.code})`,
                       }))}
                     />
                   </Col>
@@ -355,7 +411,7 @@ const VocationJourneyFormPage = () => {
                           placeholder="Chọn giai đoạn"
                           options={stages.map((stage) => ({
                             value: stage.code,
-                            label: stage.name
+                            label: stage.name,
                           }))}
                         />
                       </div>
@@ -364,7 +420,7 @@ const VocationJourneyFormPage = () => {
                         size="sm"
                         onClick={() => setShowAddStageModal(true)}
                         title="Thêm giai đoạn mới"
-                        style={{ height: '38px', minWidth: '38px' }}
+                        style={{ height: "38px", minWidth: "38px" }}
                       >
                         <i className="fas fa-plus"></i>
                       </Button>
@@ -373,20 +429,24 @@ const VocationJourneyFormPage = () => {
                           variant="outline-danger"
                           size="sm"
                           onClick={() => {
-                            const selectedStage = stages.find(s => s.code === values.stage);
+                            const selectedStage = stages.find(
+                              (s) => s.code === values.stage
+                            );
                             if (selectedStage) {
                               handleDeleteStage(selectedStage.id);
                             }
                           }}
                           title="Xóa giai đoạn đã chọn"
-                          style={{ height: '38px', minWidth: '38px' }}
+                          style={{ height: "38px", minWidth: "38px" }}
                         >
                           <i className="fas fa-minus"></i>
                         </Button>
                       )}
                     </div>
                     {touched.stage && errors.stage && (
-                      <div className="text-danger small mt-1">{errors.stage}</div>
+                      <div className="text-danger small mt-1">
+                        {errors.stage}
+                      </div>
                     )}
                   </Col>
 
@@ -429,7 +489,7 @@ const VocationJourneyFormPage = () => {
                       maxDisplayItems={5}
                       options={(communities || []).map((community) => ({
                         value: community.id,
-                        label: community.name
+                        label: community.name,
                       }))}
                     />
                   </Col>
@@ -463,8 +523,8 @@ const VocationJourneyFormPage = () => {
                           ? `${sister.saint_name} ${sister.birth_name}`
                           : sister.birth_name;
                         return {
-                          value: displayName,
-                          label: `${displayName} (${sister.code})`
+                          value: `${sister.id}_${displayName}`,
+                          label: `${displayName} (${sister.code})`,
                         };
                       })}
                     />
@@ -485,8 +545,8 @@ const VocationJourneyFormPage = () => {
                           ? `${sister.saint_name} ${sister.birth_name}`
                           : sister.birth_name;
                         return {
-                          value: displayName,
-                          label: `${displayName} (${sister.code})`
+                          value: `${sister.id}_${displayName}`,
+                          label: `${displayName} (${sister.code})`,
                         };
                       })}
                     />
@@ -591,7 +651,10 @@ const VocationJourneyFormPage = () => {
 
       {/* Add Stage Modal */}
       {showAddStageModal && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
@@ -607,7 +670,9 @@ const VocationJourneyFormPage = () => {
               </div>
               <div className="modal-body">
                 <Form.Group className="mb-3">
-                  <Form.Label>Mã giai đoạn <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Mã giai đoạn <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="text"
                     placeholder="Ví dụ: pre_aspirant"
@@ -615,17 +680,55 @@ const VocationJourneyFormPage = () => {
                     onChange={(e) => setNewStageCode(e.target.value)}
                   />
                   <Form.Text className="text-muted">
-                    Mã sẽ được tự động chuyển sang chữ thường và thay khoảng trắng bằng dấu gạch dưới
+                    Mã sẽ được tự động chuyển sang chữ thường và thay khoảng
+                    trắng bằng dấu gạch dưới
                   </Form.Text>
                 </Form.Group>
                 <Form.Group className="mb-3">
-                  <Form.Label>Tên giai đoạn <span className="text-danger">*</span></Form.Label>
+                  <Form.Label>
+                    Tên giai đoạn <span className="text-danger">*</span>
+                  </Form.Label>
                   <Form.Control
                     type="text"
                     placeholder="Ví dụ: Tiền ứng sinh"
                     value={newStageName}
                     onChange={(e) => setNewStageName(e.target.value)}
                   />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>
+                    Màu giai đoạn <span className="text-danger">*</span>
+                  </Form.Label>
+                  <div className="d-flex flex-wrap gap-2">
+                    {stageColors.map((color) => (
+                      <div
+                        key={color.value}
+                        onClick={() => setNewStageColor(color.value)}
+                        style={{
+                          width: "36px",
+                          height: "36px",
+                          backgroundColor: color.value,
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          border: newStageColor === color.value ? "3px solid #000" : "2px solid #dee2e6",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                        title={color.label}
+                      >
+                        {newStageColor === color.value && (
+                          <i className="fas fa-check text-white"></i>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-2">
+                    <small className="text-muted">Xem trước: </small>
+                    <Badge style={{ backgroundColor: newStageColor, color: "#fff" }}>
+                      {newStageName || "Tên giai đoạn"}
+                    </Badge>
+                  </div>
                 </Form.Group>
               </div>
               <div className="modal-footer">
@@ -639,7 +742,9 @@ const VocationJourneyFormPage = () => {
                 <Button
                   variant="primary"
                   onClick={handleAddStage}
-                  disabled={addingStage || !newStageName.trim() || !newStageCode.trim()}
+                  disabled={
+                    addingStage || !newStageName.trim() || !newStageCode.trim()
+                  }
                 >
                   {addingStage ? (
                     <>

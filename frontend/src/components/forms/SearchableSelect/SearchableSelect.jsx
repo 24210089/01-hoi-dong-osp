@@ -118,7 +118,11 @@ const SearchableSelect = ({
         </Form.Label>
       )}
 
-      <div className={`searchable-select-container ${isInvalid ? "is-invalid" : ""} ${disabled ? "disabled" : ""}`}>
+      <div
+        className={`searchable-select-container ${
+          isInvalid ? "is-invalid" : ""
+        } ${disabled ? "disabled" : ""}`}
+      >
         <div className="searchable-select-input-wrapper">
           <input
             ref={inputRef}
@@ -134,7 +138,7 @@ const SearchableSelect = ({
             name={name}
             autoComplete="off"
           />
-          
+
           {value && !disabled && (
             <button
               type="button"
@@ -145,14 +149,14 @@ const SearchableSelect = ({
               <i className="fas fa-times"></i>
             </button>
           )}
-          
+
           <span className="searchable-select-icon">
             <i className={`fas fa-chevron-${isOpen ? "up" : "down"}`}></i>
           </span>
         </div>
 
         {isOpen && !disabled && (
-          <div 
+          <div
             className="searchable-select-dropdown"
             style={{ maxHeight: `${maxHeight}px` }}
           >

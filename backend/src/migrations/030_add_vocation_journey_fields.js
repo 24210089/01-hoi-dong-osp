@@ -10,10 +10,12 @@ const up = async () => {
       ADD COLUMN IF NOT EXISTS superior VARCHAR(255) NULL AFTER location,
       ADD COLUMN IF NOT EXISTS formation_director VARCHAR(255) NULL AFTER superior
     `);
-    console.log("✅ Added location, superior, formation_director columns to vocation_journey table");
+    console.log(
+      "✅ Added location, superior, formation_director columns to vocation_journey table"
+    );
   } catch (error) {
     // Check if columns already exist
-    if (error.code === 'ER_DUP_FIELDNAME') {
+    if (error.code === "ER_DUP_FIELDNAME") {
       console.log("⚠️ Columns already exist in vocation_journey table");
     } else {
       throw error;
@@ -32,7 +34,9 @@ const down = async () => {
       DROP COLUMN IF EXISTS superior,
       DROP COLUMN IF EXISTS formation_director
     `);
-    console.log("✅ Dropped location, superior, formation_director columns from vocation_journey table");
+    console.log(
+      "✅ Dropped location, superior, formation_director columns from vocation_journey table"
+    );
   } finally {
     connection.release();
   }

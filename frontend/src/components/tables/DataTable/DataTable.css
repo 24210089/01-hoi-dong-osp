@@ -188,3 +188,40 @@
 .datatable-container::-webkit-scrollbar-thumb:hover {
   background: #a0aec0;
 }
+
+/* Clickable Row */
+.datatable-body tr.clickable {
+  cursor: pointer;
+}
+
+.datatable-body tr.clickable:hover {
+  background-color: rgba(102, 126, 234, 0.08);
+}
+
+/* Actions Column */
+.datatable-actions-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.datatable-actions-cell {
+  white-space: nowrap;
+}
+
+.datatable-actions-toggle {
+  border: none;
+  background: transparent;
+  padding: 0.25rem 0.5rem;
+}
+
+.datatable-actions-toggle::after {
+  display: none;
+}
+
+.datatable-actions-toggle:hover,
+.datatable-actions-toggle:focus {
+  background-color: rgba(102, 126, 234, 0.1);
+}
+
+.datatable-actions-toggle:active {
+  background-color: rgba(102, 126, 234, 0.2) !important;
+}

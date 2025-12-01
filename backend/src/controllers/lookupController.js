@@ -100,9 +100,9 @@ const deleteJourneyStage = async (req, res) => {
     );
 
     if (usageCount[0].count > 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: `Không thể xóa giai đoạn này vì đang được sử dụng bởi ${usageCount[0].count} hành trình ơn gọi`,
-        usageCount: usageCount[0].count
+        usageCount: usageCount[0].count,
       });
     }
 

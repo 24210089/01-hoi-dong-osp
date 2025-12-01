@@ -13,7 +13,6 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { journeyService } from "@services";
 import { formatDate, calculateDuration } from "@utils";
-import { JOURNEY_STAGE_LABELS, JOURNEY_STAGE_COLORS } from "@utils/constants";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
 import "./VocationJourneyDetailPage.css";
@@ -138,11 +137,11 @@ const VocationJourneyDetailPage = () => {
                 <Col xs={12}>
                   <div className="stage-badge-large">
                     <Badge
-                      bg={JOURNEY_STAGE_COLORS[journey.stage]}
-                      className="p-3"
+                      style={{ backgroundColor: journey.stage_color || '#6c757d' }}
+                      className="p-3 fs-6"
                     >
                       <i className="fas fa-route me-2"></i>
-                      {JOURNEY_STAGE_LABELS[journey.stage]}
+                      {journey.stage_name || journey.stage}
                     </Badge>
                   </div>
                 </Col>
@@ -201,13 +200,13 @@ const VocationJourneyDetailPage = () => {
                   </Col>
                 )}
 
-                {/* Formation Director */}
+                {/* Formation Director - Chị giáo */}
                 {journey.formation_director && (
                   <Col md={6}>
                     <InfoItem
                       icon="fas fa-chalkboard-teacher"
                       iconColor="secondary"
-                      label="Giám đốc đào tạo"
+                      label="Chị giáo"
                       value={journey.formation_director}
                     />
                   </Col>
@@ -318,14 +317,14 @@ const VocationJourneyDetailPage = () => {
                   <i className="fas fa-birthday-cake text-primary"></i>
                   <div>
                     <small className="text-muted">Ngày sinh</small>
-                    <div>{formatDate(journey.sister_birth_date)}</div>
+                    <div>{journey.sister_birth_date ? formatDate(journey.sister_birth_date) : "-"}</div>
                   </div>
                 </div>
 
                 <div className="info-row">
                   <i className="fas fa-home text-success"></i>
                   <div>
-                    <small className="text-muted">Cộng đoàn</small>
+                    <small className="text-muted">Cộng đoàn hiện tại</small>
                     <div>{journey.sister_community || "-"}</div>
                   </div>
                 </div>

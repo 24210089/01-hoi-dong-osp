@@ -77,23 +77,67 @@ const getAllJourneys = async (req, res) => {
       params.push(req.query.stage);
     }
 
-    // Get total count
-    const countSql = `SELECT COUNT(*) as total FROM vocation_journey vj WHERE ${whereClause}`;
-    const countResult = await VocationJourneyModel.executeQuery(countSql, params);
-    const total = countResult[0].total;
+    // Search by sister name, location, etc.
+    if (req.query.search) {
+      const searchTerm = `%${req.query.search}%`;
+      whereClause += " AND (s.birth_name LIKE ? OR s.saint_name LIKE ? OR s.code LIKE ? OR vj.location LIKE ?)";
+      params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+    }
 
-    // Get data with sister info
-    const sql = `
-      SELECT vj.*, 
-             s.birth_name, 
-             s.saint_name, 
-             s.code as sister_code
-      FROM vocation_journey vj
+    // Check if journey_stages table exists first (for count query)
+    let hasJourneyStagesTable = false;
+    try {
+      await VocationJourneyModel.executeQuery("SELECT 1 FROM journey_stages LIMIT 1");
+      hasJourneyStagesTable = true;
+    } catch (e) {
+      // Table doesn't exist
+    }
+
+    // Get total count - need to join sisters for search to work
+    const countSql = `
+      SELECT COUNT(*) as total 
+      FROM vocation_journey vj 
       LEFT JOIN sisters s ON vj.sister_id = s.id
       WHERE ${whereClause}
-      ORDER BY vj.start_date DESC
-      LIMIT ? OFFSET ?
     `;
+    const countResult = await VocationJourneyModel.executeQuery(
+      countSql,
+      [...params]
+    );
+    const total = countResult[0].total;
+
+    // Get data with sister info and stage info
+    let sql;
+    if (hasJourneyStagesTable) {
+      sql = `
+        SELECT vj.*, 
+               s.birth_name, 
+               s.saint_name, 
+               s.code as sister_code,
+               js.name as stage_name,
+               js.color as stage_color
+        FROM vocation_journey vj
+        LEFT JOIN sisters s ON vj.sister_id = s.id
+        LEFT JOIN journey_stages js ON vj.stage COLLATE utf8mb4_unicode_ci = js.code COLLATE utf8mb4_unicode_ci
+        WHERE ${whereClause}
+        ORDER BY vj.start_date DESC
+        LIMIT ? OFFSET ?
+      `;
+    } else {
+      sql = `
+        SELECT vj.*, 
+               s.birth_name, 
+               s.saint_name, 
+               s.code as sister_code,
+               vj.stage as stage_name,
+               '#6c757d' as stage_color
+        FROM vocation_journey vj
+        LEFT JOIN sisters s ON vj.sister_id = s.id
+        WHERE ${whereClause}
+        ORDER BY vj.start_date DESC
+        LIMIT ? OFFSET ?
+      `;
+    }
     params.push(limit, offset);
     const data = await VocationJourneyModel.executeQuery(sql, params);
 
@@ -122,22 +166,64 @@ const getJourneyById = async (req, res) => {
       return res.status(400).json({ message: "Invalid journey id" });
     }
 
-    const sql = `
-      SELECT vj.*, 
-             s.birth_name, 
-             s.saint_name, 
-             s.code as sister_code
-      FROM vocation_journey vj
-      LEFT JOIN sisters s ON vj.sister_id = s.id
-      WHERE vj.id = ?
-    `;
-    const rows = await VocationJourneyModel.executeQuery(sql, [id]);
+    // Check if journey_stages table exists
+    let hasJourneyStagesTable = false;
+    try {
+      await VocationJourneyModel.executeQuery("SELECT 1 FROM journey_stages LIMIT 1");
+      hasJourneyStagesTable = true;
+    } catch (e) {
+      // Table doesn't exist
+    }
+
+    let sql;
+    if (hasJourneyStagesTable) {
+      sql = `
+        SELECT vj.*, 
+               s.id as sister_id,
+               s.birth_name as sister_name, 
+               s.saint_name as sister_religious_name,
+               s.code as sister_code,
+               s.date_of_birth as sister_birth_date,
+               s.phone as sister_phone,
+               s.email as sister_email,
+               s.photo_url as sister_avatar,
+               c.name as sister_community,
+               js.name as stage_name,
+               js.color as stage_color
+        FROM vocation_journey vj
+        LEFT JOIN sisters s ON vj.sister_id = s.id
+        LEFT JOIN communities c ON s.current_community_id = c.id
+        LEFT JOIN journey_stages js ON vj.stage COLLATE utf8mb4_unicode_ci = js.code COLLATE utf8mb4_unicode_ci
+        WHERE vj.id = ?
+      `;
+    } else {
+      sql = `
+        SELECT vj.*, 
+               s.id as sister_id,
+               s.birth_name as sister_name, 
+               s.saint_name as sister_religious_name,
+               s.code as sister_code,
+               s.date_of_birth as sister_birth_date,
+               s.phone as sister_phone,
+               s.email as sister_email,
+               s.photo_url as sister_avatar,
+               c.name as sister_community,
+               vj.stage as stage_name,
+               '#6c757d' as stage_color
+        FROM vocation_journey vj
+        LEFT JOIN sisters s ON vj.sister_id = s.id
+        LEFT JOIN communities c ON s.current_community_id = c.id
+        WHERE vj.id = ?
+      `;
+    }
     
+    const rows = await VocationJourneyModel.executeQuery(sql, [id]);
+
     if (!rows || rows.length === 0) {
       return res.status(404).json({ message: "Journey not found" });
     }
 
-    return res.status(200).json({ data: rows[0] });
+    return res.status(200).json({ success: true, data: rows[0] });
   } catch (error) {
     console.error("getJourneyById error:", error.message);
     return res.status(500).json({ message: "Failed to fetch journey" });
@@ -181,17 +267,23 @@ const createJourney = async (req, res) => {
 
     const startDateObj = parseDateOnly(startDate);
     if (!startDateObj) {
-      return res.status(400).json({ message: "start_date must be a valid date" });
+      return res
+        .status(400)
+        .json({ message: "start_date must be a valid date" });
     }
 
     let endDateFormatted = null;
     if (endDate) {
       const endDateObj = parseDateOnly(endDate);
       if (!endDateObj) {
-        return res.status(400).json({ message: "end_date must be a valid date" });
+        return res
+          .status(400)
+          .json({ message: "end_date must be a valid date" });
       }
       if (endDateObj < startDateObj) {
-        return res.status(400).json({ message: "end_date must be after start_date" });
+        return res
+          .status(400)
+          .json({ message: "end_date must be after start_date" });
       }
       endDateFormatted = formatDateOnly(endDateObj);
     }
@@ -222,11 +314,13 @@ const createJourney = async (req, res) => {
       LEFT JOIN sisters s ON vj.sister_id = s.id
       WHERE vj.id = ?
     `;
-    const rows = await VocationJourneyModel.executeQuery(sql, [createdJourney.id]);
+    const rows = await VocationJourneyModel.executeQuery(sql, [
+      createdJourney.id,
+    ]);
 
-    return res.status(201).json({ 
+    return res.status(201).json({
       success: true,
-      data: rows[0] || createdJourney 
+      data: rows[0] || createdJourney,
     });
   } catch (error) {
     console.error("createJourney error:", error.message);

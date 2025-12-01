@@ -1,0 +1,83 @@
+/* Timeline Page Styles */
+
+.timeline {
+  position: relative;
+  padding-left: 30px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, #0d6efd 0%, #6c757d 100%);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 0;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -30px;
+  top: 15px;
+  z-index: 1;
+}
+
+.timeline-marker .badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-content {
+  padding-left: 15px;
+}
+
+.timeline-content .card {
+  border-left: 3px solid #0d6efd;
+  transition: all 0.2s ease;
+}
+
+.timeline-content .card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateX(5px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .timeline {
+    padding-left: 20px;
+  }
+
+  .timeline::before {
+    left: 10px;
+  }
+
+  .timeline-marker {
+    left: -20px;
+  }
+
+  .timeline-marker .badge {
+    width: 24px;
+    height: 24px;
+    font-size: 0.65rem;
+  }
+
+  .timeline-content {
+    padding-left: 10px;
+  }
+}

@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Button, Badge } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
-import { missionService, sisterService } from "@services";
-import { formatDate } from "@utils";
+import { journeyService, sisterService } from "@services";
+import { formatDate, calculateDuration } from "@utils";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
+import "./TimelinePage.css";
 
 const TimelinePage = () => {
   const { sisterId } = useParams();
@@ -25,44 +26,26 @@ const TimelinePage = () => {
 
       // Fetch sister info
       const sisterRes = await sisterService.getDetail(sisterId);
-      if (sisterRes) {
+      if (sisterRes && sisterRes.success) {
+        setSister(sisterRes.data);
+      } else if (sisterRes && !sisterRes.success) {
         setSister(sisterRes);
       }
 
-      // Fetch journey timeline
-      const journeyRes = await missionService.journey.getTimeline(sisterId);
-      if (journeyRes) {
-        setJourneys(journeyRes);
+      // Fetch journey timeline for this sister
+      const journeyRes = await journeyService.getList({ sister_id: sisterId, limit: 100 });
+      if (journeyRes && journeyRes.success) {
+        // Sort by start_date ascending for timeline
+        const sortedJourneys = (journeyRes.data || []).sort(
+          (a, b) => new Date(a.start_date) - new Date(b.start_date)
+        );
+        setJourneys(sortedJourneys);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const getStageLabel = (stage) => {
-    const stages = {
-      inquiry: "Tim hieu",
-      postulant: "Thỉnh sinh",
-      novice_1: "Tan tap I",
-      novice_2: "Tan tap II",
-      temporary_vows: "Khan tam",
-      perpetual_vows: "Khan tron",
-    };
-    return stages[stage] || stage;
-  };
-
-  const getStageBadgeColor = (stage) => {
-    const colors = {
-      inquiry: "secondary",
-      postulant: "info",
-      novice_1: "primary",
-      novice_2: "primary",
-      temporary_vows: "warning",
-      perpetual_vows: "success",
-    };
-    return colors[stage] || "secondary";
   };
 
   if (loading) {
@@ -80,28 +63,28 @@ const TimelinePage = () => {
     <Container fluid className="py-4">
       <Breadcrumb
         items={[
-          { label: "Trang chu", link: "/dashboard" },
-          { label: "Quan ly Nu Tu", link: "/nu-tu" },
-          { label: sister?.full_name, link: `/nu-tu/${sisterId}` },
-          { label: "Hanh trinh on goi" },
+          { label: "Trang chủ", link: "/dashboard" },
+          { label: "Quản lý Nữ tu", link: "/nu-tu" },
+          { label: sister?.birth_name || sister?.full_name, link: `/nu-tu/${sisterId}` },
+          { label: "Hành trình ơn gọi" },
         ]}
       />
 
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2 className="mb-1">Hanh trinh On goi</h2>
+          <h2 className="mb-1">Hành trình Ơn gọi</h2>
           <p className="text-muted mb-0">
-            {sister?.religious_name && (
-              <span className="text-primary me-2">{sister.religious_name}</span>
+            {sister?.saint_name && (
+              <span className="text-primary me-2">{sister.saint_name}</span>
             )}
-            {sister?.full_name}
+            {sister?.birth_name || sister?.full_name}
           </p>
         </div>
         <Button
           variant="secondary"
           onClick={() => navigate(`/nu-tu/${sisterId}`)}
         >
-          Quay lai
+          Quay lại
         </Button>
       </div>
 
@@ -109,7 +92,7 @@ const TimelinePage = () => {
         <Col lg={8}>
           <Card>
             <Card.Header className="bg-white">
-              <h5 className="mb-0">Cac giai doan</h5>
+              <h5 className="mb-0">Các giai đoạn</h5>
             </Card.Header>
             <Card.Body>
               {journeys.length > 0 ? (
@@ -117,9 +100,15 @@ const TimelinePage = () => {
                   {journeys.map((journey, index) => (
                     <div key={journey.id} className="timeline-item">
                       <div className="timeline-marker">
-                        <Badge bg={getStageBadgeColor(journey.stage)}>
+                        <span
+                          className="badge"
+                          style={{
+                            backgroundColor: journey.stage_color || '#6c757d',
+                            color: '#fff'
+                          }}
+                        >
                           {index + 1}
-                        </Badge>
+                        </span>
                       </div>
                       <div className="timeline-content">
                         <Card className="mb-3">
@@ -127,7 +116,7 @@ const TimelinePage = () => {
                             <div className="d-flex justify-content-between align-items-start">
                               <div>
                                 <h6 className="mb-1">
-                                  {getStageLabel(journey.stage)}
+                                  {journey.stage_name || journey.stage}
                                 </h6>
                                 <small className="text-muted">
                                   {formatDate(journey.start_date)}
@@ -135,11 +124,17 @@ const TimelinePage = () => {
                                     ` - ${formatDate(journey.end_date)}`}
                                 </small>
                               </div>
-                              <Badge bg={getStageBadgeColor(journey.stage)}>
-                                {journey.status === "completed"
-                                  ? "Hoan thanh"
-                                  : "Dang thuc hien"}
-                              </Badge>
+                              <span
+                                className="badge"
+                                style={{
+                                  backgroundColor: journey.stage_color || '#6c757d',
+                                  color: '#fff'
+                                }}
+                              >
+                                {journey.end_date
+                                  ? "Hoàn thành"
+                                  : "Đang thực hiện"}
+                              </span>
                             </div>
                             {journey.notes && (
                               <p className="text-muted mt-2 mb-0 small">
@@ -154,7 +149,7 @@ const TimelinePage = () => {
                 </div>
               ) : (
                 <div className="text-center py-5">
-                  <p className="text-muted">Chua co thong tin hanh trinh</p>
+                  <p className="text-muted">Chưa có thông tin hành trình</p>
                 </div>
               )}
             </Card.Body>
@@ -164,34 +159,41 @@ const TimelinePage = () => {
         <Col lg={4}>
           <Card>
             <Card.Header className="bg-white">
-              <h5 className="mb-0">Thong tin hien tai</h5>
+              <h5 className="mb-0">Thông tin hiện tại</h5>
             </Card.Header>
             <Card.Body>
               {sister && (
                 <>
                   <div className="mb-3">
                     <small className="text-muted d-block">
-                      Giai doan hien tai
+                      Giai đoạn hiện tại
                     </small>
-                    <Badge
-                      bg={getStageBadgeColor(sister.current_stage)}
-                      className="mt-1"
-                    >
-                      {getStageLabel(sister.current_stage)}
-                    </Badge>
+                    {journeys.length > 0 && journeys[journeys.length - 1] ? (
+                      <span
+                        className="badge mt-1"
+                        style={{
+                          backgroundColor: journeys[journeys.length - 1].stage_color || '#6c757d',
+                          color: '#fff'
+                        }}
+                      >
+                        {journeys[journeys.length - 1].stage_name || journeys[journeys.length - 1].stage}
+                      </span>
+                    ) : (
+                      <span className="badge bg-secondary mt-1">Chưa xác định</span>
+                    )}
                   </div>
                   <div className="mb-3">
-                    <small className="text-muted d-block">Ma so</small>
-                    <div className="fw-semibold">{sister.sister_code}</div>
+                    <small className="text-muted d-block">Mã số</small>
+                    <div className="fw-semibold">{sister.code || sister.sister_code}</div>
                   </div>
                   <div className="mb-3">
-                    <small className="text-muted d-block">Ngay sinh</small>
+                    <small className="text-muted d-block">Ngày sinh</small>
                     <div className="fw-semibold">
-                      {formatDate(sister.birth_date)}
+                      {formatDate(sister.date_of_birth || sister.birth_date)}
                     </div>
                   </div>
                   <div className="mb-3">
-                    <small className="text-muted d-block">Ngay gia nhap</small>
+                    <small className="text-muted d-block">Ngày gia nhập</small>
                     <div className="fw-semibold">
                       {formatDate(sister.join_date)}
                     </div>

@@ -1,7 +1,7 @@
 // src/components/tables/DataTable/DataTable.jsx
 
 import React, { useState } from "react";
-import { Table, Form } from "react-bootstrap";
+import { Table, Form, Button, Dropdown } from "react-bootstrap";
 import Pagination from "@components/common/Pagination";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import EmptyState from "@components/common/EmptyState";
@@ -30,6 +30,8 @@ const DataTable = ({
   emptyText = "Không có dữ liệu",
   emptyIcon = "fas fa-inbox",
   className = "",
+  actions = [],
+  onRowClick,
 }) => {
   const [hoveredRow, setHoveredRow] = useState(null);
 
@@ -149,6 +151,12 @@ const DataTable = ({
                   </div>
                 </th>
               ))}
+
+              {actions.length > 0 && (
+                <th className="datatable-actions-header text-center" style={{ width: '120px' }}>
+                  Thao tác
+                </th>
+              )}
             </tr>
           </thead>
 
@@ -160,12 +168,15 @@ const DataTable = ({
                   datatable-row
                   ${isRowSelected(row, rowIndex) ? "selected" : ""}
                   ${hoveredRow === rowIndex ? "hovered" : ""}
+                  ${onRowClick ? "clickable" : ""}
                 `}
                 onMouseEnter={() => setHoveredRow(rowIndex)}
                 onMouseLeave={() => setHoveredRow(null)}
+                onClick={() => onRowClick && onRowClick(row, rowIndex)}
+                style={onRowClick ? { cursor: 'pointer' } : {}}
               >
                 {selectable && (
-                  <td className="datatable-checkbox-cell">
+                  <td className="datatable-checkbox-cell" onClick={(e) => e.stopPropagation()}>
                     <Form.Check
                       type="checkbox"
                       checked={isRowSelected(row, rowIndex)}
@@ -186,6 +197,32 @@ const DataTable = ({
                     {renderCellContent(column, row, rowIndex)}
                   </td>
                 ))}
+
+                {actions.length > 0 && (
+                  <td className="datatable-actions-cell text-center" onClick={(e) => e.stopPropagation()}>
+                    <Dropdown>
+                      <Dropdown.Toggle
+                        variant="light"
+                        size="sm"
+                        className="datatable-actions-toggle"
+                      >
+                        <i className="fas fa-ellipsis-v"></i>
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu align="end">
+                        {actions.map((action, actionIndex) => (
+                          <Dropdown.Item
+                            key={actionIndex}
+                            onClick={() => action.onClick(row, rowIndex)}
+                            className={`text-${action.variant || 'dark'}`}
+                          >
+                            {action.icon && <i className={`${action.icon} me-2`}></i>}
+                            {action.label}
+                          </Dropdown.Item>
+                        ))}
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

@@ -145,20 +145,39 @@ const getAllSisters = async (req, res) => {
       maxAge,
       excludeLeft: !showAll && !req.query.status, // exclude 'left' by default
     });
-    const whereClause = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+    
+    // Prefix clauses with 's.' for sisters table
+    const prefixedClauses = clauses.map(clause => {
+      // Replace field names with s. prefix
+      return clause
+        .replace(/\bstatus\b/g, 's.status')
+        .replace(/\bbirth_name\b/g, 's.birth_name')
+        .replace(/\breligious_name\b/g, 's.religious_name')
+        .replace(/\bcode\b/g, 's.code')
+        .replace(/\bdate_of_birth\b/g, 's.date_of_birth');
+    });
+    
+    const whereClause = prefixedClauses.length ? `WHERE ${prefixedClauses.join(" AND ")}` : "";
 
     const totalRows = await SisterModel.executeQuery(
-      `SELECT COUNT(*) AS total FROM sisters ${whereClause}`,
+      `SELECT COUNT(*) AS total FROM sisters s ${whereClause}`,
       params
     );
     const total = totalRows[0] ? totalRows[0].total : 0;
 
+    // JOIN with communities table to get current_community_name
     const rows = await SisterModel.executeQuery(
-      `SELECT * FROM sisters ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      `SELECT s.*, c.name AS current_community_name 
+       FROM sisters s 
+       LEFT JOIN communities c ON s.current_community_id = c.id 
+       ${whereClause} 
+       ORDER BY s.created_at DESC 
+       LIMIT ? OFFSET ?`,
       [...params, limit, offset]
     );
 
     return res.status(200).json({
+      success: true,
       data: rows,
       meta: {
         total,
@@ -169,7 +188,7 @@ const getAllSisters = async (req, res) => {
     });
   } catch (error) {
     console.error("getAllSisters error:", error.message);
-    return res.status(500).json({ message: "Failed to fetch sisters" });
+    return res.status(500).json({ success: false, message: "Failed to fetch sisters" });
   }
 };
 
@@ -200,11 +219,13 @@ const getSisterById = async (req, res) => {
         ...profile,
         currentCommunity,
         currentMission,
-      }
+      },
     });
   } catch (error) {
     console.error("getSisterById error:", error.message);
-    return res.status(500).json({ success: false, message: "Failed to fetch sister detail" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch sister detail" });
   }
 };
 
@@ -236,7 +257,13 @@ const createSister = async (req, res) => {
     console.error("createSister error:", error.message);
     console.error("Full error:", error);
     console.error("Request body:", req.body);
-    return res.status(500).json({ success: false, message: "Failed to create sister", error: error.message });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to create sister",
+        error: error.message,
+      });
   }
 };
 
@@ -253,7 +280,7 @@ const updateSister = async (req, res) => {
     }
 
     const updateData = { ...req.body };
-    
+
     // Convert documents array to JSON string if needed
     if (Array.isArray(updateData.documents)) {
       updateData.documents = JSON.stringify(updateData.documents);
@@ -265,7 +292,9 @@ const updateSister = async (req, res) => {
     return res.status(200).json({ success: true, data: updated });
   } catch (error) {
     console.error("updateSister error:", error.message);
-    return res.status(500).json({ success: false, message: "Failed to update sister" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to update sister" });
   }
 };
 

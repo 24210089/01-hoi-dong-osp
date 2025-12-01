@@ -55,6 +55,53 @@ const getPagination = (req) => {
   return { page, limit, offset };
 };
 
+// Generate unique community code like CD001, CD002, ...
+const generateCommunityCode = async () => {
+  try {
+    // Find the highest existing CD number
+    const rows = await CommunityModel.executeQuery(
+      "SELECT code FROM communities WHERE code REGEXP '^CD[0-9]+$' ORDER BY CAST(SUBSTRING(code, 3) AS UNSIGNED) DESC LIMIT 1"
+    );
+
+    let nextNum = 1;
+    if (rows.length > 0 && rows[0].code) {
+      const lastCode = rows[0].code;
+      const numPart = lastCode.replace(/^CD/, '');
+      if (!isNaN(numPart)) {
+        nextNum = parseInt(numPart, 10) + 1;
+      }
+    }
+
+    // Keep incrementing until we find an unused code
+    let newCode = `CD${String(nextNum).padStart(3, '0')}`;
+    let attempts = 0;
+    while (await isCodeExists(newCode) && attempts < 100) {
+      nextNum++;
+      newCode = `CD${String(nextNum).padStart(3, '0')}`;
+      attempts++;
+    }
+
+    return newCode;
+  } catch (error) {
+    console.error("Error generating community code:", error);
+    return `CD${Date.now()}`;
+  }
+};
+
+// Check if community code already exists
+const isCodeExists = async (code, excludeId = null) => {
+  let query = "SELECT id FROM communities WHERE code = ?";
+  const params = [code];
+  
+  if (excludeId) {
+    query += " AND id != ?";
+    params.push(excludeId);
+  }
+  
+  const rows = await CommunityModel.executeQuery(query, params);
+  return rows.length > 0;
+};
+
 const getAllCommunities = async (req, res) => {
   try {
     if (!ensurePermission(req, res, viewerRoles)) {
@@ -130,7 +177,21 @@ const createCommunity = async (req, res) => {
       return;
     }
 
-    const payload = req.body;
+    const payload = { ...req.body };
+    
+    // Auto-generate code if not provided
+    if (!payload.code || payload.code.trim() === '') {
+      payload.code = await generateCommunityCode();
+    } else {
+      // Check if code already exists
+      const codeExists = await isCodeExists(payload.code);
+      if (codeExists) {
+        return res.status(400).json({ 
+          message: `Mã cộng đoàn "${payload.code}" đã tồn tại. Vui lòng nhập mã khác hoặc để trống để hệ thống tự động tạo.` 
+        });
+      }
+    }
+    
     const created = await CommunityModel.create(payload);
     await logAudit(req, "CREATE", created.id, null, created);
 
@@ -153,7 +214,19 @@ const updateCommunity = async (req, res) => {
       return res.status(404).json({ message: "Community not found" });
     }
 
-    const updated = await CommunityModel.update(id, req.body);
+    const payload = { ...req.body };
+    
+    // Check if code is being changed and if it already exists
+    if (payload.code && payload.code !== existing.code) {
+      const codeExists = await isCodeExists(payload.code, id);
+      if (codeExists) {
+        return res.status(400).json({ 
+          message: `Mã cộng đoàn "${payload.code}" đã tồn tại. Vui lòng nhập mã khác.` 
+        });
+      }
+    }
+
+    const updated = await CommunityModel.update(id, payload);
     await logAudit(req, "UPDATE", id, existing, updated);
 
     return res.status(200).json({ community: updated });

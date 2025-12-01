@@ -63,11 +63,28 @@ const VocationJourneyFormPage = () => {
   const fetchSisters = async () => {
     try {
       const response = await sisterService.getList({ page_size: 1000 });
-      if (response.success) {
-        setSisters(response.data.items);
+      // Handle different response formats
+      if (response.success && response.data) {
+        // If response.data is an array
+        if (Array.isArray(response.data)) {
+          setSisters(response.data);
+        } 
+        // If response.data has items property
+        else if (response.data.items) {
+          setSisters(response.data.items);
+        }
+        // Default to empty array
+        else {
+          setSisters([]);
+        }
+      } else if (Array.isArray(response.data)) {
+        setSisters(response.data);
+      } else {
+        setSisters([]);
       }
     } catch (error) {
       console.error("Error fetching sisters:", error);
+      setSisters([]);
     }
   };
 
@@ -229,12 +246,12 @@ const VocationJourneyFormPage = () => {
                       required
                     >
                       <option value="">Chọn nữ tu</option>
-                      {sisters.map((sister) => (
+                      {(sisters || []).map((sister) => (
                         <option key={sister.id} value={sister.id}>
-                          {sister.religious_name
-                            ? `${sister.religious_name} - ${sister.full_name}`
-                            : sister.full_name}{" "}
-                          ({sister.sister_code})
+                          {sister.religious_name || sister.saint_name
+                            ? `${sister.religious_name || sister.saint_name} - ${sister.birth_name}`
+                            : sister.birth_name}{" "}
+                          ({sister.code})
                         </option>
                       ))}
                     </Select>

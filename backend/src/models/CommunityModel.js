@@ -7,11 +7,15 @@ class CommunityModel extends BaseModel {
       "code",
       "name",
       "address",
-      "type",
+      "phone",
+      "email",
+      "established_date",
+      "status",
+      "description",
       "created_at",
       "updated_at",
     ];
-    this.requiredFields = ["code", "name", "type"];
+    this.requiredFields = ["name"];
   }
 
   validateData(data = {}, { partial = false } = {}) {
@@ -43,13 +47,6 @@ class CommunityModel extends BaseModel {
   async update(id, data = {}) {
     const sanitized = this.validateData(data, { partial: true });
     return super.update(id, sanitized);
-  }
-
-  async findByType(type) {
-    if (!type) {
-      throw new Error("findByType requires a type value.");
-    }
-    return this.findAll({ type }, 1000, 0);
   }
 
   async getMembersList(communityId) {

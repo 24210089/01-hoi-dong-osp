@@ -444,7 +444,10 @@ const SisterDetailPage = () => {
                           let docs = [];
                           if (Array.isArray(sister.documents)) {
                             docs = sister.documents;
-                          } else if (typeof sister.documents === 'string' && sister.documents) {
+                          } else if (
+                            typeof sister.documents === "string" &&
+                            sister.documents
+                          ) {
                             try {
                               docs = JSON.parse(sister.documents);
                             } catch (e) {
@@ -457,7 +460,7 @@ const SisterDetailPage = () => {
                               docs = [];
                             }
                           }
-                          
+
                           if (docs && docs.length > 0) {
                             return (
                               <div className="document-list">
@@ -485,7 +488,11 @@ const SisterDetailPage = () => {
                               </div>
                             );
                           }
-                          return <p className="text-muted">Chưa có tài liệu đính kèm</p>;
+                          return (
+                            <p className="text-muted">
+                              Chưa có tài liệu đính kèm
+                            </p>
+                          );
                         })()}
                       </Col>
                     </Row>

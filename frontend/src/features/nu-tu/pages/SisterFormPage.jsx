@@ -10,6 +10,8 @@ import {
   Form,
   Nav,
   Tab,
+  Toast,
+  ToastContainer,
 } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { sisterService, communityService, lookupService } from "@services";
@@ -35,6 +37,22 @@ const SisterFormPage = () => {
   const [communities, setCommunities] = useState([]);
   const [journeyStages, setJourneyStages] = useState([]);
   const [sisterStatuses, setSisterStatuses] = useState([]);
+  
+  // Toast notification state
+  const [toast, setToast] = useState({
+    show: false,
+    variant: "success",
+    title: "",
+    message: "",
+  });
+
+  const showToast = (variant, title, message) => {
+    setToast({ show: true, variant, title, message });
+  };
+
+  const hideToast = () => {
+    setToast((prev) => ({ ...prev, show: false }));
+  };
 
   const {
     values,
@@ -183,9 +201,7 @@ const SisterFormPage = () => {
         // For optional fields, only include if they have value
         if (value !== "" && value !== null && value !== undefined) {
           submitData[key] = value;
-        } else if (
-          ["birth_name", "date_of_birth"].includes(key)
-        ) {
+        } else if (["birth_name", "date_of_birth"].includes(key)) {
           // Always include required fields
           submitData[key] = value;
         }
@@ -209,10 +225,50 @@ const SisterFormPage = () => {
       }
 
       if (response.success) {
-        navigate(`/nu-tu/${response.data.id}`);
+        showToast(
+          "success",
+          isEditMode ? "Cập nhật thành công!" : "Tạo mới thành công!",
+          isEditMode
+            ? `Đã cập nhật thông tin nữ tu "${submitData.birth_name}".`
+            : `Đã thêm nữ tu "${submitData.birth_name}" vào hệ thống.`
+        );
+        // Delay navigation to show toast
+        setTimeout(() => {
+          navigate(`/nu-tu/${response.data.id}`);
+        }, 1500);
+      } else {
+        // API returned success: false
+        showToast(
+          "danger",
+          isEditMode ? "Cập nhật thất bại!" : "Tạo mới thất bại!",
+          response.message || "Đã xảy ra lỗi. Vui lòng thử lại."
+        );
       }
     } catch (error) {
       console.error("Error saving sister:", error);
+      
+      // Extract error message from response
+      let errorMessage = "Đã xảy ra lỗi không xác định. Vui lòng thử lại.";
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.errors) {
+        // Validation errors from backend
+        const errors = error.response.data.errors;
+        if (Array.isArray(errors)) {
+          errorMessage = errors.map((e) => e.msg || e.message).join(", ");
+        } else if (typeof errors === "object") {
+          errorMessage = Object.values(errors).join(", ");
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      showToast(
+        "danger",
+        isEditMode ? "Cập nhật thất bại!" : "Tạo mới thất bại!",
+        errorMessage
+      );
     } finally {
       setSubmitting(false);
     }
@@ -241,6 +297,31 @@ const SisterFormPage = () => {
 
   return (
     <Container fluid className="py-4">
+      {/* Toast Notification */}
+      <ToastContainer position="top-end" className="p-3" style={{ zIndex: 9999 }}>
+        <Toast
+          show={toast.show}
+          onClose={hideToast}
+          delay={5000}
+          autohide
+          bg={toast.variant}
+        >
+          <Toast.Header closeButton>
+            <i
+              className={`me-2 ${
+                toast.variant === "success"
+                  ? "fas fa-check-circle text-success"
+                  : "fas fa-exclamation-circle text-danger"
+              }`}
+            ></i>
+            <strong className="me-auto">{toast.title}</strong>
+          </Toast.Header>
+          <Toast.Body className={toast.variant === "danger" ? "text-white" : ""}>
+            {toast.message}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
+
       {/* Breadcrumb */}
       <Breadcrumb
         items={[

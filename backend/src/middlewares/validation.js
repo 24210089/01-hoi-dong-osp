@@ -99,13 +99,8 @@ const validateLogin = [
 ];
 
 const validateCommunityCreate = [
-  body("code").notEmpty().withMessage("code is required"),
+  body("code").optional({ nullable: true, checkFalsy: true }),
   body("name").notEmpty().withMessage("name is required"),
-  body("type")
-    .notEmpty()
-    .withMessage("type is required")
-    .isIn(["motherhouse", "education", "healthcare", "media", "social"])
-    .withMessage("invalid community type"),
 ];
 
 const validateCommunityAssignmentCreate = [

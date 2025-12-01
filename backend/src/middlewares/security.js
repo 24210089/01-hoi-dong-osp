@@ -72,7 +72,7 @@ const buildHelmetConfig = () => {
 
 const generalRateLimiter = rateLimit({
   windowMs: FIFTEEN_MINUTES_MS,
-  max: 100,
+  max: process.env.NODE_ENV === 'production' ? 100 : 1000, // Higher limit for development
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -83,7 +83,7 @@ const generalRateLimiter = rateLimit({
 
 const loginRateLimiter = rateLimit({
   windowMs: FIFTEEN_MINUTES_MS,
-  max: 5,
+  max: process.env.NODE_ENV === 'production' ? 5 : 50, // Higher limit for development
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -101,8 +101,12 @@ const applySecurityMiddlewares = (app) => {
   // app.use(hpp());
   // app.use(mongoSanitize());
   // app.use(xssClean());
-  app.use(generalRateLimiter);
-  app.use("/api/auth/login", loginRateLimiter);
+  
+  // Only apply rate limiting in production
+  if (process.env.NODE_ENV === 'production') {
+    app.use(generalRateLimiter);
+    app.use("/api/auth/login", loginRateLimiter);
+  }
 };
 
 module.exports = {

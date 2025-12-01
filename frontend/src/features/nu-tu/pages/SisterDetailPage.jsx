@@ -47,7 +47,8 @@ const SisterDetailPage = () => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa ${sister.full_name}?`)) {
+    const name = sister.religious_name || sister.birth_name;
+    if (window.confirm(`Bạn có chắc chắn muốn xóa ${name}?`)) {
       try {
         await sisterService.delete(id);
         navigate("/nu-tu");
@@ -88,7 +89,7 @@ const SisterDetailPage = () => {
         items={[
           { label: "Trang chủ", link: "/dashboard" },
           { label: "Quản lý Nữ Tu", link: "/nu-tu" },
-          { label: sister.full_name },
+          { label: sister.religious_name || sister.birth_name },
         ]}
       />
 
@@ -122,7 +123,10 @@ const SisterDetailPage = () => {
               {/* Avatar */}
               <div className="sister-avatar-large mb-3">
                 {sister.avatar_url ? (
-                  <img src={sister.avatar_url} alt={sister.full_name} />
+                  <img
+                    src={sister.avatar_url}
+                    alt={sister.religious_name || sister.birth_name}
+                  />
                 ) : (
                   <div className="avatar-placeholder-large">
                     <i className="fas fa-user"></i>
@@ -135,13 +139,13 @@ const SisterDetailPage = () => {
                 {sister.religious_name && (
                   <div className="text-primary">{sister.religious_name}</div>
                 )}
-                {sister.full_name}
+                {sister.birth_name}
               </h3>
 
               {/* Code */}
               <p className="text-muted mb-3">
                 <i className="fas fa-id-card me-2"></i>
-                {sister.sister_code}
+                {sister.code}
               </p>
 
               {/* Badges */}
@@ -161,10 +165,10 @@ const SisterDetailPage = () => {
                   <div>
                     <small className="text-muted">Ngày sinh</small>
                     <div className="fw-semibold">
-                      {formatDate(sister.birth_date)}
+                      {formatDate(sister.date_of_birth)}
                     </div>
                     <small className="text-muted">
-                      ({calculateAge(sister.birth_date)} tuổi)
+                      ({calculateAge(sister.date_of_birth)} tuổi)
                     </small>
                   </div>
                 </div>
@@ -242,28 +246,49 @@ const SisterDetailPage = () => {
                 <Tab.Content>
                   {/* Basic Info Tab */}
                   <Tab.Pane eventKey="basic">
-                    <h5 className="mb-3">Thông tin cơ bản</h5>
+                    <h5 className="mb-3">Thông tin cá nhân</h5>
                     <Row className="g-3">
                       <Col md={6}>
-                        <InfoItem label="Họ và tên" value={sister.full_name} />
+                        <InfoItem
+                          label="Họ và tên khai sinh"
+                          value={sister.birth_name}
+                        />
+                      </Col>
+                      <Col md={6}>
+                        <InfoItem label="Tên thánh" value={sister.saint_name} />
                       </Col>
                       <Col md={6}>
                         <InfoItem
-                          label="Tên thánh"
+                          label="Tên dòng"
                           value={sister.religious_name}
                         />
                       </Col>
                       <Col md={6}>
-                        <InfoItem label="Mã số" value={sister.sister_code} />
+                        <InfoItem
+                          label="Cộng đoàn hiện tại"
+                          value={
+                            sister.currentCommunity?.community_name ||
+                            sister.current_community_name
+                          }
+                        />
+                      </Col>
+                      <Col md={6}>
+                        <InfoItem label="Mã số" value={sister.code} />
                       </Col>
                       <Col md={6}>
                         <InfoItem
                           label="Ngày sinh"
-                          value={formatDate(sister.birth_date)}
+                          value={formatDate(sister.date_of_birth)}
                         />
                       </Col>
                       <Col md={6}>
-                        <InfoItem label="Nơi sinh" value={sister.birth_place} />
+                        <InfoItem
+                          label="Nơi sinh"
+                          value={sister.place_of_birth}
+                        />
+                      </Col>
+                      <Col md={6}>
+                        <InfoItem label="Quê quán" value={sister.hometown} />
                       </Col>
                       <Col md={6}>
                         <InfoItem
@@ -271,16 +296,16 @@ const SisterDetailPage = () => {
                           value={sister.nationality}
                         />
                       </Col>
-                      <Col md={6}>
+                      <Col md={4}>
                         <InfoItem label="CMND/CCCD" value={sister.id_card} />
                       </Col>
-                      <Col md={6}>
+                      <Col md={4}>
                         <InfoItem
                           label="Ngày cấp"
                           value={formatDate(sister.id_card_date)}
                         />
                       </Col>
-                      <Col md={12}>
+                      <Col md={4}>
                         <InfoItem
                           label="Nơi cấp"
                           value={sister.id_card_place}
@@ -326,10 +351,16 @@ const SisterDetailPage = () => {
                           value={sister.mother_occupation}
                         />
                       </Col>
-                      <Col md={12}>
+                      <Col md={6}>
                         <InfoItem
                           label="Số anh chị em"
                           value={sister.siblings_count}
+                        />
+                      </Col>
+                      <Col md={6}>
+                        <InfoItem
+                          label="Tôn giáo gia đình"
+                          value={sister.family_religion}
                         />
                       </Col>
                       <Col md={12}>
@@ -337,6 +368,145 @@ const SisterDetailPage = () => {
                           label="Địa chỉ gia đình"
                           value={sister.family_address}
                         />
+                      </Col>
+                      <Col md={6}>
+                        <InfoItem
+                          label="Người liên hệ khẩn cấp"
+                          value={sister.emergency_contact_name}
+                        />
+                      </Col>
+                      <Col md={6}>
+                        <InfoItem
+                          label="SĐT liên hệ khẩn cấp"
+                          value={sister.emergency_contact_phone}
+                        />
+                      </Col>
+                    </Row>
+
+                    <h5 className="mt-4 mb-3">Bí tích</h5>
+                    <Row className="g-3">
+                      <Col md={6}>
+                        <InfoItem
+                          label="Ngày rửa tội"
+                          value={formatDate(sister.baptism_date)}
+                        />
+                      </Col>
+                      <Col md={6}>
+                        <InfoItem
+                          label="Nơi rửa tội"
+                          value={sister.baptism_place}
+                        />
+                      </Col>
+                      <Col md={6}>
+                        <InfoItem
+                          label="Ngày thêm sức"
+                          value={formatDate(sister.confirmation_date)}
+                        />
+                      </Col>
+                      <Col md={6}>
+                        <InfoItem
+                          label="Ngày rước lễ lần đầu"
+                          value={formatDate(sister.first_communion_date)}
+                        />
+                      </Col>
+                    </Row>
+
+                    <h5 className="mt-4 mb-3">Trạng thái hiện tại</h5>
+                    <Row className="g-3">
+                      <Col md={6}>
+                        <InfoItem
+                          label="Giai đoạn"
+                          value={
+                            JOURNEY_STAGE_LABELS[sister.current_stage] ||
+                            sister.current_stage
+                          }
+                        />
+                      </Col>
+                      <Col md={6}>
+                        <InfoItem
+                          label="Trạng thái"
+                          value={
+                            SISTER_STATUS_LABELS[sister.status] || sister.status
+                          }
+                        />
+                      </Col>
+                    </Row>
+
+                    {/* Tài liệu đính kèm */}
+                    <h5 className="mt-4 mb-3">
+                      <i className="fas fa-file-alt me-2"></i>
+                      Tài liệu đính kèm
+                    </h5>
+                    <Row className="g-3">
+                      <Col md={12}>
+                        {(() => {
+                          // Parse documents - could be array, JSON string, or null
+                          let docs = [];
+                          if (Array.isArray(sister.documents)) {
+                            docs = sister.documents;
+                          } else if (typeof sister.documents === 'string' && sister.documents) {
+                            try {
+                              docs = JSON.parse(sister.documents);
+                            } catch (e) {
+                              docs = [];
+                            }
+                          } else if (sister.documents_url) {
+                            try {
+                              docs = JSON.parse(sister.documents_url);
+                            } catch (e) {
+                              docs = [];
+                            }
+                          }
+                          
+                          if (docs && docs.length > 0) {
+                            return (
+                              <div className="document-list">
+                                {docs.map((doc, index) => (
+                                  <div
+                                    key={index}
+                                    className="document-item d-flex align-items-center p-2 border rounded mb-2"
+                                  >
+                                    <i className="fas fa-file me-2 text-primary"></i>
+                                    <a
+                                      href={doc.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-decoration-none"
+                                    >
+                                      {doc.name || `Tài liệu ${index + 1}`}
+                                    </a>
+                                    {doc.uploadedAt && (
+                                      <small className="text-muted ms-auto">
+                                        {formatDate(doc.uploadedAt)}
+                                      </small>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          }
+                          return <p className="text-muted">Chưa có tài liệu đính kèm</p>;
+                        })()}
+                      </Col>
+                    </Row>
+
+                    {/* Ghi chú */}
+                    <h5 className="mt-4 mb-3">
+                      <i className="fas fa-sticky-note me-2"></i>
+                      Ghi chú
+                    </h5>
+                    <Row className="g-3">
+                      <Col md={12}>
+                        {sister.notes ? (
+                          <div
+                            className="p-3 bg-light rounded"
+                            style={{ whiteSpace: "pre-wrap" }}
+                          >
+                            {sister.notes}
+                          </div>
+                        ) : (
+                          <p className="text-muted">Chưa có ghi chú</p>
+                        )}
                       </Col>
                     </Row>
                   </Tab.Pane>

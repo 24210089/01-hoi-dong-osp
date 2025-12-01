@@ -195,13 +195,16 @@ const getSisterById = async (req, res) => {
     ]);
 
     return res.status(200).json({
-      ...profile,
-      currentCommunity,
-      currentMission,
+      success: true,
+      data: {
+        ...profile,
+        currentCommunity,
+        currentMission,
+      }
     });
   } catch (error) {
     console.error("getSisterById error:", error.message);
-    return res.status(500).json({ message: "Failed to fetch sister detail" });
+    return res.status(500).json({ success: false, message: "Failed to fetch sister detail" });
   }
 };
 
@@ -220,13 +223,20 @@ const createSister = async (req, res) => {
       created_by: req.user ? req.user.id : null,
     };
 
+    // Convert documents array to JSON string if needed
+    if (Array.isArray(payload.documents)) {
+      payload.documents = JSON.stringify(payload.documents);
+    }
+
     const newSister = await SisterModel.create(payload);
     await logAudit(req, "CREATE", newSister.id, null, newSister);
 
-    return res.status(201).json({ sister: newSister });
+    return res.status(201).json({ success: true, data: newSister });
   } catch (error) {
     console.error("createSister error:", error.message);
-    return res.status(500).json({ message: "Failed to create sister" });
+    console.error("Full error:", error);
+    console.error("Request body:", req.body);
+    return res.status(500).json({ success: false, message: "Failed to create sister", error: error.message });
   }
 };
 
@@ -242,13 +252,20 @@ const updateSister = async (req, res) => {
       return res.status(404).json({ message: "Sister not found" });
     }
 
-    const updated = await SisterModel.update(id, req.body);
+    const updateData = { ...req.body };
+    
+    // Convert documents array to JSON string if needed
+    if (Array.isArray(updateData.documents)) {
+      updateData.documents = JSON.stringify(updateData.documents);
+    }
+
+    const updated = await SisterModel.update(id, updateData);
     await logAudit(req, "UPDATE", id, existing, updated);
 
-    return res.status(200).json({ sister: updated });
+    return res.status(200).json({ success: true, data: updated });
   } catch (error) {
     console.error("updateSister error:", error.message);
-    return res.status(500).json({ message: "Failed to update sister" });
+    return res.status(500).json({ success: false, message: "Failed to update sister" });
   }
 };
 

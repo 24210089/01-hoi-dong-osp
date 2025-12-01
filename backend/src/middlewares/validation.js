@@ -37,7 +37,10 @@ const validateSisterCreate = [
     .withMessage("Ngày sinh là bắt buộc")
     .isISO8601()
     .withMessage("Ngày sinh phải là ngày hợp lệ"),
-  body("place_of_birth").notEmpty().withMessage("Nơi sinh là bắt buộc"),
+  body("place_of_birth")
+    .optional({ checkFalsy: true })
+    .notEmpty()
+    .withMessage("Nơi sinh không được để trống"),
   optionalEmail("email"),
   optionalPhone("phone"),
   optionalPhone("emergency_contact_phone"),

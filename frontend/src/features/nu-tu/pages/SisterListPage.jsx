@@ -1,6 +1,6 @@
 // src/features/nu-tu/pages/SisterListPage.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Container,
   Row,
@@ -12,64 +12,23 @@ import {
   Badge,
   Form,
   InputGroup,
+  Pagination,
+  Alert,
+  Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import sisterService from "@services/sisterService";
 
-// Mock data
-const mockSisters = [
-  {
-    id: 1,
-    religious_name: "Maria",
-    full_name: "Nguyễn Thị An",
-    birth_date: "1985-03-15",
-    current_stage: "vinh_khan",
-    community: "Cộng đoàn Mẹ Vô Nhiễm",
-    status: "active",
-  },
-  {
-    id: 2,
-    religious_name: "Teresa",
-    full_name: "Trần Thị Bình",
-    birth_date: "1990-07-22",
-    current_stage: "tam_khan",
-    community: "Cộng đoàn Thánh Tâm",
-    status: "active",
-  },
-  {
-    id: 3,
-    religious_name: "Anna",
-    full_name: "Lê Thị Cúc",
-    birth_date: "1988-11-10",
-    current_stage: "vinh_khan",
-    community: "Cộng đoàn Fatima",
-    status: "active",
-  },
-  {
-    id: 4,
-    religious_name: "Rosa",
-    full_name: "Phạm Thị Dung",
-    birth_date: "1992-05-08",
-    current_stage: "tien_tap",
-    community: "Cộng đoàn Mẹ Vô Nhiễm",
-    status: "active",
-  },
-  {
-    id: 5,
-    religious_name: "Lucia",
-    full_name: "Hoàng Thị Em",
-    birth_date: "1995-01-20",
-    current_stage: "thỉnh_sinh",
-    community: "Nhà Mẹ",
-    status: "active",
-  },
-];
-
+// Stage labels mapping (từ database ENUM)
 const stageLabels = {
-  thinh_sinh: { label: "Thỉnh sinh", color: "secondary" },
-  tien_tap: { label: "Tiền tập", color: "info" },
-  tap_vien: { label: "Tập viện", color: "primary" },
-  tam_khan: { label: "Tạm khấn", color: "warning" },
-  vinh_khan: { label: "Vĩnh khấn", color: "success" },
+  inquiry: { label: "Tìm hiểu", color: "secondary" },
+  postulant: { label: "Thỉnh sinh", color: "info" },
+  aspirant: { label: "Tiền tập", color: "primary" },
+  novice: { label: "Tập viện", color: "warning" },
+  temporary_vows: { label: "Tạm khấn", color: "orange" },
+  perpetual_vows: { label: "Vĩnh khấn", color: "success" },
+  left: { label: "Đã rời", color: "danger" },
 };
 
 const SisterListPage = () => {
@@ -78,31 +37,98 @@ const SisterListPage = () => {
   const [sisters, setSisters] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState("table");
+  const [error, setError] = useState(null);
 
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 1,
+  });
+
+  // Fetch sisters from API
+  const fetchSisters = useCallback(
+    async (page = 1, search = "") => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const params = {
+          page,
+          limit: pagination.limit,
+        };
+
+        if (search.trim()) {
+          params.search = search.trim();
+        }
+
+        const response = await sisterService.getList(params);
+
+        if (response && response.data) {
+          setSisters(response.data);
+          if (response.meta) {
+            setPagination({
+              page: response.meta.page || 1,
+              limit: response.meta.limit || 20,
+              total: response.meta.total || 0,
+              totalPages: response.meta.totalPages || 1,
+            });
+          }
+        } else {
+          setSisters([]);
+        }
+      } catch (err) {
+        console.error("Error fetching sisters:", err);
+        setError("Không thể tải danh sách nữ tu. Vui lòng thử lại.");
+        setSisters([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [pagination.limit]
+  );
+
+  // Initial load
   useEffect(() => {
-    // Simulate loading
-    setTimeout(() => {
-      setSisters(mockSisters);
-      setLoading(false);
-    }, 500);
+    fetchSisters(1, "");
   }, []);
 
-  const filteredSisters = sisters.filter(
-    (s) =>
-      s.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.religious_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchSisters(1, searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Handle page change
+  const handlePageChange = (newPage) => {
+    fetchSisters(newPage, searchTerm);
+  };
 
   const handleCreate = () => navigate("/nu-tu/create");
   const handleView = (sister) => navigate(`/nu-tu/${sister.id}`);
   const handleEdit = (sister) => navigate(`/nu-tu/${sister.id}/edit`);
-  const handleDelete = (sister) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa ${sister.full_name}?`)) {
-      setSisters(sisters.filter((s) => s.id !== sister.id));
+
+  const handleDelete = async (sister) => {
+    const name = sister.religious_name || sister.birth_name;
+    if (window.confirm(`Bạn có chắc chắn muốn xóa ${name}?`)) {
+      try {
+        await sisterService.delete(sister.id);
+        toast.success(`Đã xóa nữ tu ${name} thành công`);
+        // Refresh list
+        fetchSisters(pagination.page, searchTerm);
+      } catch (err) {
+        console.error("Error deleting sister:", err);
+        toast.error("Không thể xóa nữ tu. Vui lòng thử lại.");
+      }
     }
   };
 
   const calculateAge = (birthDate) => {
+    if (!birthDate) return "N/A";
     const birth = new Date(birthDate);
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
@@ -112,7 +138,84 @@ const SisterListPage = () => {
   };
 
   const getStageInfo = (stage) =>
-    stageLabels[stage] || { label: stage, color: "secondary" };
+    stageLabels[stage] || {
+      label: stage || "Chưa xác định",
+      color: "secondary",
+    };
+
+  // Get photo URL with fallback
+  const getPhotoUrl = (sister) => {
+    if (sister.photo_url) {
+      // If it's a relative URL, prepend the API base
+      if (sister.photo_url.startsWith("/")) {
+        return `http://localhost:5000${sister.photo_url}`;
+      }
+      return sister.photo_url;
+    }
+    return null;
+  };
+
+  // Render pagination
+  const renderPagination = () => {
+    if (pagination.totalPages <= 1) return null;
+
+    const items = [];
+    const maxVisible = 5;
+    let startPage = Math.max(1, pagination.page - Math.floor(maxVisible / 2));
+    let endPage = Math.min(pagination.totalPages, startPage + maxVisible - 1);
+
+    if (endPage - startPage + 1 < maxVisible) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    items.push(
+      <Pagination.First
+        key="first"
+        disabled={pagination.page === 1}
+        onClick={() => handlePageChange(1)}
+      />,
+      <Pagination.Prev
+        key="prev"
+        disabled={pagination.page === 1}
+        onClick={() => handlePageChange(pagination.page - 1)}
+      />
+    );
+
+    if (startPage > 1) {
+      items.push(<Pagination.Ellipsis key="ellipsis-start" disabled />);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <Pagination.Item
+          key={i}
+          active={i === pagination.page}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </Pagination.Item>
+      );
+    }
+
+    if (endPage < pagination.totalPages) {
+      items.push(<Pagination.Ellipsis key="ellipsis-end" disabled />);
+    }
+
+    items.push(
+      <Pagination.Next
+        key="next"
+        disabled={pagination.page === pagination.totalPages}
+        onClick={() => handlePageChange(pagination.page + 1)}
+      />,
+      <Pagination.Last
+        key="last"
+        disabled={pagination.page === pagination.totalPages}
+        onClick={() => handlePageChange(pagination.totalPages)}
+      />
+    );
+
+    return <Pagination className="mb-0">{items}</Pagination>;
+  };
 
   return (
     <Container fluid className="py-4">
@@ -166,10 +269,36 @@ const SisterListPage = () => {
       {/* Content */}
       {loading ? (
         <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
+          <Spinner animation="border" variant="primary" role="status">
+            <span className="visually-hidden">Đang tải...</span>
+          </Spinner>
+          <p className="mt-2 text-muted">Đang tải dữ liệu...</p>
         </div>
+      ) : error ? (
+        <Alert variant="danger">
+          <Alert.Heading>Lỗi</Alert.Heading>
+          <p>{error}</p>
+          <Button
+            variant="outline-danger"
+            onClick={() => fetchSisters(1, searchTerm)}
+          >
+            <i className="fas fa-redo me-2"></i>Thử lại
+          </Button>
+        </Alert>
+      ) : sisters.length === 0 ? (
+        <Alert variant="info">
+          <Alert.Heading>Không có dữ liệu</Alert.Heading>
+          <p>
+            {searchTerm
+              ? `Không tìm thấy nữ tu nào với từ khóa "${searchTerm}"`
+              : "Chưa có nữ tu nào trong hệ thống."}
+          </p>
+          {!searchTerm && (
+            <Button variant="primary" onClick={handleCreate}>
+              <i className="fas fa-plus me-2"></i>Thêm nữ tu đầu tiên
+            </Button>
+          )}
+        </Alert>
       ) : viewMode === "table" ? (
         <Card>
           <Card.Body className="p-0">
@@ -186,20 +315,22 @@ const SisterListPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredSisters.map((sister, index) => (
+                {sisters.map((sister, index) => (
                   <tr key={sister.id}>
-                    <td>{index + 1}</td>
                     <td>
-                      <strong>{sister.religious_name}</strong>
+                      {(pagination.page - 1) * pagination.limit + index + 1}
                     </td>
-                    <td>{sister.full_name}</td>
-                    <td>{calculateAge(sister.birth_date)}</td>
+                    <td>
+                      <strong>{sister.saint_name || "—"}</strong>
+                    </td>
+                    <td>{sister.birth_name}</td>
+                    <td>{calculateAge(sister.date_of_birth)}</td>
                     <td>
                       <Badge bg={getStageInfo(sister.current_stage).color}>
                         {getStageInfo(sister.current_stage).label}
                       </Badge>
                     </td>
-                    <td>{sister.community}</td>
+                    <td>{sister.current_community_name || "Chưa phân công"}</td>
                     <td className="text-center">
                       <Button
                         variant="outline-info"
@@ -236,33 +367,59 @@ const SisterListPage = () => {
         </Card>
       ) : (
         <Row className="g-4">
-          {filteredSisters.map((sister) => (
+          {sisters.map((sister) => (
             <Col key={sister.id} xs={12} sm={6} lg={4} xl={3}>
               <Card className="h-100 shadow-sm">
                 <Card.Body className="text-center">
+                  {getPhotoUrl(sister) ? (
+                    <img
+                      src={getPhotoUrl(sister)}
+                      alt={sister.religious_name || sister.birth_name}
+                      className="rounded-circle mx-auto mb-3"
+                      style={{
+                        width: 80,
+                        height: 80,
+                        objectFit: "cover",
+                      }}
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                        e.target.nextSibling.style.display = "flex";
+                      }}
+                    />
+                  ) : null}
                   <div
                     className="avatar-circle bg-primary text-white mx-auto mb-3"
                     style={{
                       width: 80,
                       height: 80,
                       borderRadius: "50%",
-                      display: "flex",
+                      display: getPhotoUrl(sister) ? "none" : "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: "2rem",
                     }}
                   >
-                    {sister.religious_name.charAt(0)}
+                    {(sister.religious_name || sister.birth_name || "?")
+                      .charAt(0)
+                      .toUpperCase()}
                   </div>
-                  <h5 className="mb-1">{sister.religious_name}</h5>
-                  <p className="text-muted mb-2">{sister.full_name}</p>
+                  <h5 className="mb-1">{sister.religious_name || "—"}</h5>
+                  <p className="text-muted mb-2">{sister.birth_name}</p>
                   <Badge
                     bg={getStageInfo(sister.current_stage).color}
-                    className="mb-3"
+                    className="mb-2"
                   >
                     {getStageInfo(sister.current_stage).label}
                   </Badge>
-                  <p className="small text-muted mb-0">{sister.community}</p>
+                  <br />
+                  <Badge
+                    bg={sister.status === "active" ? "success" : "secondary"}
+                  >
+                    {sister.status === "active" ? "Đang hoạt động" : "Đã rời"}
+                  </Badge>
+                  <p className="small text-muted mt-2 mb-0">
+                    Mã: {sister.code || "N/A"}
+                  </p>
                 </Card.Body>
                 <Card.Footer className="bg-white text-center">
                   <Button
@@ -295,10 +452,17 @@ const SisterListPage = () => {
         </Row>
       )}
 
-      {/* Summary */}
-      <div className="mt-4 text-muted">
-        Hiển thị {filteredSisters.length} / {sisters.length} nữ tu
-      </div>
+      {/* Pagination & Summary */}
+      {!loading && !error && sisters.length > 0 && (
+        <div className="d-flex justify-content-between align-items-center mt-4">
+          <div className="text-muted">
+            Hiển thị {(pagination.page - 1) * pagination.limit + 1} -{" "}
+            {Math.min(pagination.page * pagination.limit, pagination.total)} /{" "}
+            {pagination.total} nữ tu
+          </div>
+          {renderPagination()}
+        </div>
+      )}
     </Container>
   );
 };

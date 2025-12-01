@@ -42,13 +42,14 @@ const SisterFormPage = () => {
     touched,
     handleChange,
     handleBlur,
-    setValues,
+    updateValues,
     setFieldValue,
+    setFieldError,
     validateForm,
   } = useForm({
     // Basic Info - mapped to database columns
     birth_name: "", // Họ tên khai sinh
-    religious_name: "", // Tên thánh
+    saint_name: "", // Tên thánh
     code: "", // Mã số
     date_of_birth: "",
     place_of_birth: "",
@@ -129,7 +130,7 @@ const SisterFormPage = () => {
       setLoading(true);
       const response = await sisterService.getById(id);
       if (response.success) {
-        setValues(response.data);
+        updateValues(response.data);
       }
     } catch (error) {
       console.error("Error fetching sister data:", error);
@@ -165,18 +166,46 @@ const SisterFormPage = () => {
 
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
-      validateForm(validationErrors);
+      // Set each error using setFieldError
+      Object.entries(validationErrors).forEach(([field, error]) => {
+        setFieldError(field, error);
+      });
       return;
     }
 
     try {
       setSubmitting(true);
 
+      // Prepare data - remove empty strings and null values for optional fields
+      const submitData = {};
+      Object.entries(values).forEach(([key, value]) => {
+        // Keep required fields even if empty (validation will catch them)
+        // For optional fields, only include if they have value
+        if (value !== "" && value !== null && value !== undefined) {
+          submitData[key] = value;
+        } else if (
+          ["birth_name", "date_of_birth"].includes(key)
+        ) {
+          // Always include required fields
+          submitData[key] = value;
+        }
+      });
+
+      // Remove documents if empty array
+      if (
+        Array.isArray(submitData.documents) &&
+        submitData.documents.length === 0
+      ) {
+        delete submitData.documents;
+      }
+
+      console.log("Submitting data:", submitData);
+
       let response;
       if (isEditMode) {
-        response = await sisterService.update(id, values);
+        response = await sisterService.update(id, submitData);
       } else {
-        response = await sisterService.create(values);
+        response = await sisterService.create(submitData);
       }
 
       if (response.success) {
@@ -315,8 +344,8 @@ const SisterFormPage = () => {
                         <Col md={6}>
                           <Input
                             label="Tên thánh"
-                            name="religious_name"
-                            value={values.religious_name}
+                            name="saint_name"
+                            value={values.saint_name}
                             onChange={handleChange}
                             onBlur={handleBlur}
                           />
@@ -616,9 +645,13 @@ const SisterFormPage = () => {
                             addNewLabel="Thêm giai đoạn mới"
                             onAddNew={async (data) => {
                               try {
-                                const res = await lookupService.createJourneyStage(data);
+                                const res =
+                                  await lookupService.createJourneyStage(data);
                                 if (res.success) {
-                                  setJourneyStages([...journeyStages, res.data]);
+                                  setJourneyStages([
+                                    ...journeyStages,
+                                    res.data,
+                                  ]);
                                   setFieldValue("current_stage", res.data.code);
                                 }
                                 return res;
@@ -646,9 +679,13 @@ const SisterFormPage = () => {
                             addNewLabel="Thêm trạng thái mới"
                             onAddNew={async (data) => {
                               try {
-                                const res = await lookupService.createSisterStatus(data);
+                                const res =
+                                  await lookupService.createSisterStatus(data);
                                 if (res.success) {
-                                  setSisterStatuses([...sisterStatuses, res.data]);
+                                  setSisterStatuses([
+                                    ...sisterStatuses,
+                                    res.data,
+                                  ]);
                                   setFieldValue("status", res.data.code);
                                 }
                                 return res;
@@ -684,12 +721,15 @@ const SisterFormPage = () => {
                           Tài liệu đính kèm
                         </h5>
                         <p className="text-muted mb-4">
-                          Upload các tài liệu liên quan như: giấy khai sinh, chứng minh nhân dân, 
-                          bằng cấp, chứng chỉ, giấy giới thiệu, và các tài liệu khác.
+                          Upload các tài liệu liên quan như: giấy khai sinh,
+                          chứng minh nhân dân, bằng cấp, chứng chỉ, giấy giới
+                          thiệu, và các tài liệu khác.
                         </p>
                         <MultiFileUpload
                           value={values.documents}
-                          onChange={(files) => setFieldValue("documents", files)}
+                          onChange={(files) =>
+                            setFieldValue("documents", files)
+                          }
                           accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
                           maxSize={10 * 1024 * 1024}
                           maxFiles={20}
@@ -705,7 +745,8 @@ const SisterFormPage = () => {
                           Ghi chú
                         </h5>
                         <p className="text-muted mb-4">
-                          Thêm các ghi chú, nhận xét hoặc thông tin bổ sung về nữ tu.
+                          Thêm các ghi chú, nhận xét hoặc thông tin bổ sung về
+                          nữ tu.
                         </p>
                         <TextArea
                           name="notes"

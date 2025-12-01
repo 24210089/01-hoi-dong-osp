@@ -6,19 +6,15 @@ class SisterModel extends BaseModel {
     this.allowedFields = [
       "code",
       "birth_name",
-      "religious_name",
       "saint_name",
-      "prefer_name",
       "date_of_birth",
       "place_of_birth",
-      "hometown",
       "permanent_address",
       "current_address",
       "nationality",
       "id_card",
       "id_card_date",
       "id_card_place",
-      "id_number",
       "father_name",
       "father_occupation",
       "mother_name",
@@ -35,7 +31,6 @@ class SisterModel extends BaseModel {
       "emergency_contact_name",
       "emergency_contact_phone",
       "photo_url",
-      "documents_url",
       "documents",
       "notes",
       "status",
@@ -98,7 +93,7 @@ class SisterModel extends BaseModel {
     const like = `%${trimmed}%`;
     const sql = `
       SELECT * FROM ${this.tableName}
-      WHERE (birth_name LIKE ? OR religious_name LIKE ?)
+      WHERE (birth_name LIKE ? OR saint_name LIKE ?)
     `;
     return this.executeQuery(sql, [like, like]);
   }

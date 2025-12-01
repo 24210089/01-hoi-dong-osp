@@ -1,6 +1,7 @@
 const CommunityModel = require("../models/CommunityModel");
 const CommunityAssignmentModel = require("../models/CommunityAssignmentModel");
 const AuditLogModel = require("../models/AuditLogModel");
+const { clearCacheForResource } = require("../middlewares/cache");
 
 const viewerRoles = [
   "admin",
@@ -109,24 +110,32 @@ const getAllCommunities = async (req, res) => {
     }
 
     const { page, limit, offset } = getPagination(req);
-    const { type } = req.query;
+    const { status } = req.query;
 
     let whereClause = "";
     const params = [];
 
-    if (type) {
-      whereClause = "WHERE type = ?";
-      params.push(type);
+    if (status && status !== "all") {
+      whereClause = "WHERE c.status = ?";
+      params.push(status);
     }
 
     const totalRows = await CommunityModel.executeQuery(
-      `SELECT COUNT(*) AS total FROM communities ${whereClause}`,
+      `SELECT COUNT(*) AS total FROM communities c ${whereClause}`,
       params
     );
     const total = totalRows[0] ? totalRows[0].total : 0;
 
+    // Get communities with member count
     const data = await CommunityModel.executeQuery(
-      `SELECT * FROM communities ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      `SELECT c.*, 
+        (SELECT COUNT(*) FROM community_assignments ca 
+         WHERE ca.community_id = c.id 
+         AND (ca.end_date IS NULL OR ca.end_date >= CURDATE())) as member_count
+       FROM communities c 
+       ${whereClause} 
+       ORDER BY c.created_at DESC 
+       LIMIT ? OFFSET ?`,
       [...params, limit, offset]
     );
 
@@ -195,6 +204,9 @@ const createCommunity = async (req, res) => {
     const created = await CommunityModel.create(payload);
     await logAudit(req, "CREATE", created.id, null, created);
 
+    // Xóa cache để danh sách được cập nhật
+    clearCacheForResource("communities");
+
     return res.status(201).json({ community: created });
   } catch (error) {
     console.error("createCommunity error:", error.message);
@@ -228,6 +240,9 @@ const updateCommunity = async (req, res) => {
 
     const updated = await CommunityModel.update(id, payload);
     await logAudit(req, "UPDATE", id, existing, updated);
+
+    // Xóa cache để danh sách được cập nhật
+    clearCacheForResource("communities");
 
     return res.status(200).json({ community: updated });
   } catch (error) {
@@ -265,6 +280,10 @@ const deleteCommunity = async (req, res) => {
     }
 
     await logAudit(req, "DELETE", id, existing, null);
+
+    // Xóa cache để danh sách được cập nhật
+    clearCacheForResource("communities");
+
     return res.status(200).json({ message: "Community deleted successfully" });
   } catch (error) {
     console.error("deleteCommunity error:", error.message);

@@ -21,13 +21,13 @@ import "./CommunityDetailPage.css";
 
 const getRoleLabel = (role) => {
   const roles = {
-    superior: "Be tren",
-    assistant: "Pho be tren",
-    treasurer: "Thu quy",
-    secretary: "Thu ky",
-    member: "Thanh vien",
+    superior: "Bề trên",
+    assistant: "Phó bề trên",
+    treasurer: "Thủ quỹ",
+    secretary: "Thư ký",
+    member: "Thành viên",
   };
-  return roles[role] || "Thanh vien";
+  return roles[role] || "Thành viên";
 };
 
 const InfoItem = ({ label, value }) => (
@@ -53,8 +53,12 @@ const CommunityDetailPage = () => {
     try {
       setLoading(true);
       const response = await communityService.getDetail(id);
-      if (response) {
-        setCommunity(response);
+      if (response && response.community) {
+        setCommunity(response.community);
+        // Nếu API trả về members cùng lúc
+        if (response.members) {
+          setMembers(response.members);
+        }
       }
     } catch (error) {
       console.error("Error fetching community detail:", error);
@@ -66,8 +70,8 @@ const CommunityDetailPage = () => {
   const fetchMembers = async () => {
     try {
       const response = await communityService.getMembers(id);
-      if (response) {
-        setMembers(response);
+      if (response && response.members) {
+        setMembers(response.members);
       }
     } catch (error) {
       console.error("Error fetching members:", error);
@@ -79,7 +83,7 @@ const CommunityDetailPage = () => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Ban co chac chan muon xoa cong doan nay?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa cộng đoàn này?")) {
       try {
         await communityService.delete(id);
         navigate("/cong-doan");
@@ -112,9 +116,9 @@ const CommunityDetailPage = () => {
     return (
       <Container className="py-4">
         <div className="text-center">
-          <h3>Khong tim thay thong tin cong doan</h3>
+          <h3>Không tìm thấy thông tin cộng đoàn</h3>
           <Button variant="primary" onClick={() => navigate("/cong-doan")}>
-            Quay lai danh sach
+            Quay lại danh sách
           </Button>
         </div>
       </Container>
@@ -125,26 +129,26 @@ const CommunityDetailPage = () => {
     <Container fluid className="py-4">
       <Breadcrumb
         items={[
-          { label: "Trang chu", link: "/dashboard" },
-          { label: "Quan ly Cong Doan", link: "/cong-doan" },
+          { label: "Trang chủ", link: "/dashboard" },
+          { label: "Quản lý Cộng Đoàn", link: "/cong-doan" },
           { label: community.name },
         ]}
       />
 
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2 className="mb-1">Thong tin Cong Doan</h2>
-          <p className="text-muted mb-0">Chi tiet thong tin cong doan</p>
+          <h2 className="mb-1">Thông tin Cộng Đoàn</h2>
+          <p className="text-muted mb-0">Chi tiết thông tin cộng đoàn</p>
         </div>
         <div className="d-flex gap-2">
           <Button variant="success" onClick={handleEdit}>
-            Chinh sua
+            <i className="fas fa-edit me-2"></i>Chỉnh sửa
           </Button>
           <Button variant="danger" onClick={handleDelete}>
-            Xoa
+            <i className="fas fa-trash me-2"></i>Xóa
           </Button>
           <Button variant="secondary" onClick={() => navigate("/cong-doan")}>
-            Quay lai
+            <i className="fas fa-arrow-left me-2"></i>Quay lại
           </Button>
         </div>
       </div>
@@ -163,18 +167,18 @@ const CommunityDetailPage = () => {
                 className="mb-3"
               >
                 {community.status === "active"
-                  ? "Dang hoat dong"
-                  : "Khong hoat dong"}
+                  ? "Đang hoạt động"
+                  : "Không hoạt động"}
               </Badge>
 
               <div className="quick-stats mt-3">
                 <div className="d-flex justify-content-around">
                   <div>
-                    <small className="text-muted">Thanh vien</small>
+                    <small className="text-muted">Thành viên</small>
                     <h4 className="mb-0">{members.length}</h4>
                   </div>
                   <div>
-                    <small className="text-muted">Thanh lap</small>
+                    <small className="text-muted">Thành lập</small>
                     <div className="fw-semibold">
                       {formatDate(community.established_date)}
                     </div>
@@ -187,7 +191,7 @@ const CommunityDetailPage = () => {
                 className="w-100 mt-3"
                 onClick={handleAssignMembers}
               >
-                Phan cong thanh vien
+                <i className="fas fa-user-plus me-2"></i>Phân công thành viên
               </Button>
             </Card.Body>
           </Card>
@@ -199,11 +203,13 @@ const CommunityDetailPage = () => {
               <Card.Header className="bg-white">
                 <Nav variant="tabs">
                   <Nav.Item>
-                    <Nav.Link eventKey="info">Thong tin</Nav.Link>
+                    <Nav.Link eventKey="info">
+                      <i className="fas fa-info-circle me-2"></i>Thông tin
+                    </Nav.Link>
                   </Nav.Item>
                   <Nav.Item>
                     <Nav.Link eventKey="members">
-                      Thanh vien ({members.length})
+                      <i className="fas fa-users me-2"></i>Thành viên ({members.length})
                     </Nav.Link>
                   </Nav.Item>
                 </Nav>
@@ -212,54 +218,57 @@ const CommunityDetailPage = () => {
               <Card.Body>
                 <Tab.Content>
                   <Tab.Pane eventKey="info">
-                    <h5 className="mb-3">Thong tin co ban</h5>
+                    <h5 className="mb-3">Thông tin cơ bản</h5>
                     <Row className="g-3">
                       <Col md={6}>
                         <InfoItem
-                          label="Ten cong doan"
+                          label="Tên cộng đoàn"
                           value={community.name}
                         />
                       </Col>
                       <Col md={6}>
-                        <InfoItem label="Ma so" value={community.code} />
+                        <InfoItem label="Mã số" value={community.code} />
                       </Col>
                       <Col md={6}>
                         <InfoItem
-                          label="Ngay thanh lap"
+                          label="Ngày thành lập"
                           value={formatDate(community.established_date)}
                         />
                       </Col>
                       <Col md={6}>
                         <InfoItem
-                          label="Trang thai"
+                          label="Trạng thái"
                           value={
                             community.status === "active"
-                              ? "Dang hoat dong"
-                              : "Khong hoat dong"
+                              ? "Đang hoạt động"
+                              : "Không hoạt động"
                           }
                         />
                       </Col>
                       <Col md={12}>
-                        <InfoItem label="Dia chi" value={community.address} />
+                        <InfoItem label="Địa chỉ" value={community.address} />
                       </Col>
                       <Col md={6}>
-                        <InfoItem label="Dien thoai" value={community.phone} />
+                        <InfoItem label="Điện thoại" value={community.phone} />
                       </Col>
                       <Col md={6}>
                         <InfoItem label="Email" value={community.email} />
+                      </Col>
+                      <Col md={12}>
+                        <InfoItem label="Mô tả" value={community.description} />
                       </Col>
                     </Row>
                   </Tab.Pane>
 
                   <Tab.Pane eventKey="members">
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                      <h5 className="mb-0">Danh sach thanh vien</h5>
+                      <h5 className="mb-0">Danh sách thành viên</h5>
                       <Button
                         variant="primary"
                         size="sm"
                         onClick={handleAssignMembers}
                       >
-                        Them thanh vien
+                        <i className="fas fa-plus me-2"></i>Thêm thành viên
                       </Button>
                     </div>
 
@@ -268,12 +277,12 @@ const CommunityDetailPage = () => {
                         <thead>
                           <tr>
                             <th>STT</th>
-                            <th>Ma so</th>
-                            <th>Ho ten</th>
-                            <th>Ten thanh</th>
-                            <th>Vai tro</th>
-                            <th>Ngay tham gia</th>
-                            <th>Thao tac</th>
+                            <th>Mã số</th>
+                            <th>Họ tên</th>
+                            <th>Tên thánh</th>
+                            <th>Vai trò</th>
+                            <th>Ngày tham gia</th>
+                            <th>Thao tác</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -281,8 +290,8 @@ const CommunityDetailPage = () => {
                             <tr key={member.id}>
                               <td>{index + 1}</td>
                               <td>{member.sister_code}</td>
-                              <td>{member.full_name}</td>
-                              <td>{member.religious_name || "-"}</td>
+                              <td>{member.birth_name}</td>
+                              <td>{member.saint_name || "-"}</td>
                               <td>
                                 <Badge
                                   bg={
@@ -296,14 +305,14 @@ const CommunityDetailPage = () => {
                                   {getRoleLabel(member.role)}
                                 </Badge>
                               </td>
-                              <td>{formatDate(member.joined_date)}</td>
+                              <td>{formatDate(member.start_date)}</td>
                               <td>
                                 <Button
                                   variant="outline-primary"
                                   size="sm"
-                                  onClick={() => handleViewMember(member.id)}
+                                  onClick={() => handleViewMember(member.sister_id)}
                                 >
-                                  Xem
+                                  <i className="fas fa-eye"></i>
                                 </Button>
                               </td>
                             </tr>
@@ -312,9 +321,9 @@ const CommunityDetailPage = () => {
                       </Table>
                     ) : (
                       <div className="text-center py-5">
-                        <p className="text-muted">Chua co thanh vien nao</p>
+                        <p className="text-muted">Chưa có thành viên nào</p>
                         <Button variant="primary" onClick={handleAssignMembers}>
-                          Them thanh vien dau tien
+                          <i className="fas fa-user-plus me-2"></i>Thêm thành viên đầu tiên
                         </Button>
                       </div>
                     )}

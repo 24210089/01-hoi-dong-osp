@@ -55,7 +55,7 @@ class CommunityModel extends BaseModel {
     }
 
     const sql = `
-      SELECT ca.*, s.birth_name, s.religious_name, s.code AS sister_code
+      SELECT ca.*, s.birth_name, s.saint_name, s.code AS sister_code
       FROM community_assignments ca
       INNER JOIN sisters s ON s.id = ca.sister_id
       WHERE ca.community_id = ?

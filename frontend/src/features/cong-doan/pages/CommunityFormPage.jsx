@@ -62,18 +62,19 @@ const CommunityFormPage = () => {
     try {
       setLoading(true);
       const response = await communityService.getDetail(id);
-      if (response) {
+      if (response && response.community) {
+        const community = response.community;
         setFormData({
-          name: response.name || "",
-          code: response.code || "",
-          address: response.address || "",
-          phone: response.phone || "",
-          email: response.email || "",
-          established_date: response.established_date
-            ? response.established_date.split("T")[0]
+          name: community.name || "",
+          code: community.code || "",
+          address: community.address || "",
+          phone: community.phone || "",
+          email: community.email || "",
+          established_date: community.established_date
+            ? community.established_date.split("T")[0]
             : "",
-          status: response.status || "active",
-          description: response.description || "",
+          status: community.status || "active",
+          description: community.description || "",
         });
       }
     } catch (err) {

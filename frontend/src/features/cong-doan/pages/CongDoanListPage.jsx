@@ -10,6 +10,8 @@ import {
   Table,
   Badge,
   Form,
+  Toast,
+  ToastContainer,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { communityService } from "@services";
@@ -27,6 +29,22 @@ const CongDoanListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // Toast notification state
+  const [toast, setToast] = useState({
+    show: false,
+    variant: "success",
+    title: "",
+    message: "",
+  });
+
+  const showToast = (variant, title, message) => {
+    setToast({ show: true, variant, title, message });
+  };
+
+  const hideToast = () => {
+    setToast((prev) => ({ ...prev, show: false }));
+  };
 
   useEffect(() => {
     fetchCommunities();
@@ -80,12 +98,23 @@ const CongDoanListPage = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa cộng đoàn ${name}?`)) {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa cộng đoàn "${name}"?`)) {
       try {
         await communityService.delete(id);
-        fetchCommunities();
+        showToast(
+          "success",
+          "Xóa thành công!",
+          `Đã xóa cộng đoàn "${name}" khỏi hệ thống.`
+        );
+        // Fetch lại danh sách từ server sau khi xóa
+        await fetchCommunities();
       } catch (error) {
         console.error("Error deleting community:", error);
+        let errorMessage = "Không thể xóa cộng đoàn. Vui lòng thử lại.";
+        if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+        showToast("danger", "Xóa thất bại!", errorMessage);
       }
     }
   };
@@ -102,6 +131,37 @@ const CongDoanListPage = () => {
 
   return (
     <Container fluid className="py-4">
+      {/* Toast Notification */}
+      <ToastContainer
+        position="top-end"
+        className="p-3"
+        style={{ zIndex: 9999 }}
+      >
+        <Toast
+          show={toast.show}
+          onClose={hideToast}
+          delay={5000}
+          autohide
+          bg={toast.variant}
+        >
+          <Toast.Header closeButton>
+            <i
+              className={`me-2 ${
+                toast.variant === "success"
+                  ? "fas fa-check-circle text-success"
+                  : "fas fa-exclamation-circle text-danger"
+              }`}
+            ></i>
+            <strong className="me-auto">{toast.title}</strong>
+          </Toast.Header>
+          <Toast.Body
+            className={toast.variant === "danger" ? "text-white" : ""}
+          >
+            {toast.message}
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
+
       <Breadcrumb
         items={[
           { label: "Trang chủ", link: "/dashboard" },
@@ -193,38 +253,43 @@ const CongDoanListPage = () => {
                       </Badge>
                     </td>
                     <td>
-                      <div className="d-flex gap-1">
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => handleViewDetail(community.id)}
-                        >
-                          Xem
-                        </Button>
-                        <Button
-                          variant="outline-success"
-                          size="sm"
-                          onClick={() => handleAssign(community.id)}
-                        >
-                          Phân công
-                        </Button>
-                        <Button
-                          variant="outline-warning"
-                          size="sm"
-                          onClick={() => handleEdit(community.id)}
-                        >
-                          Sửa
-                        </Button>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() =>
-                            handleDelete(community.id, community.name)
-                          }
-                        >
-                          Xóa
-                        </Button>
-                      </div>
+                      <Button
+                        variant="outline-info"
+                        size="sm"
+                        className="me-1"
+                        onClick={() => handleViewDetail(community.id)}
+                        title="Xem chi tiết"
+                      >
+                        <i className="fas fa-eye"></i>
+                      </Button>
+                      <Button
+                        variant="outline-success"
+                        size="sm"
+                        className="me-1"
+                        onClick={() => handleAssign(community.id)}
+                        title="Phân công"
+                      >
+                        <i className="fas fa-user-plus"></i>
+                      </Button>
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="me-1"
+                        onClick={() => handleEdit(community.id)}
+                        title="Chỉnh sửa"
+                      >
+                        <i className="fas fa-edit"></i>
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() =>
+                          handleDelete(community.id, community.name)
+                        }
+                        title="Xóa"
+                      >
+                        <i className="fas fa-trash"></i>
+                      </Button>
                     </td>
                   </tr>
                 ))}

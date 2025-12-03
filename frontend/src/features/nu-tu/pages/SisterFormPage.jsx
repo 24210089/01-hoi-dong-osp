@@ -131,7 +131,28 @@ const SisterFormPage = () => {
       setLoading(true);
       const response = await sisterService.getById(id);
       if (response.success) {
-        updateValues(response.data);
+        // Convert null values to empty strings for form inputs
+        const data = response.data;
+        const sanitizedData = {};
+        Object.keys(data).forEach(key => {
+          if (key === 'documents') {
+            // Parse documents - could be array, JSON string, or null
+            if (Array.isArray(data[key])) {
+              sanitizedData[key] = data[key];
+            } else if (typeof data[key] === 'string' && data[key]) {
+              try {
+                sanitizedData[key] = JSON.parse(data[key]);
+              } catch (e) {
+                sanitizedData[key] = [];
+              }
+            } else {
+              sanitizedData[key] = [];
+            }
+          } else {
+            sanitizedData[key] = data[key] === null ? "" : data[key];
+          }
+        });
+        updateValues(sanitizedData);
       }
     } catch (error) {
       console.error("Error fetching sister data:", error);

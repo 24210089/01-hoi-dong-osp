@@ -311,6 +311,26 @@ const updateSister = async (req, res) => {
     }
 
     const updateData = { ...req.body };
+    
+    // Remove fields that shouldn't be updated (system fields and relations)
+    delete updateData.id;
+    delete updateData.created_at;
+    delete updateData.created_by;
+    delete updateData.updated_at;
+    
+    // Remove relation fields (these come from getFullProfile)
+    delete updateData.vocationJourney;
+    delete updateData.communityAssignments;
+    delete updateData.missions;
+    delete updateData.education;
+    delete updateData.educations;
+    delete updateData.trainingCourses;
+    delete updateData.healthRecords;
+    delete updateData.health_records;
+    delete updateData.evaluations;
+    delete updateData.departureRecords;
+    delete updateData.current_community_name;
+    delete updateData.currentCommunity;
 
     // Convert documents array to JSON string if needed
     if (Array.isArray(updateData.documents)) {
@@ -322,10 +342,10 @@ const updateSister = async (req, res) => {
 
     return res.status(200).json({ success: true, data: updated });
   } catch (error) {
-    console.error("updateSister error:", error.message);
+    console.error("updateSister error:", error.message, error.stack);
     return res
       .status(500)
-      .json({ success: false, message: "Failed to update sister" });
+      .json({ success: false, message: "Failed to update sister", error: error.message });
   }
 };
 

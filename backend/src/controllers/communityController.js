@@ -321,7 +321,15 @@ const addMember = async (req, res) => {
     }
 
     const { id } = req.params;
-    const { sister_id, role, start_date, end_date, decision_number, notes, is_primary } = req.body;
+    const {
+      sister_id,
+      role,
+      start_date,
+      end_date,
+      decision_number,
+      notes,
+      is_primary,
+    } = req.body;
 
     // Check if community exists
     const community = await CommunityModel.findById(id);
@@ -357,7 +365,9 @@ const addMember = async (req, res) => {
     });
   } catch (error) {
     console.error("addMember error:", error.message);
-    return res.status(500).json({ message: "Failed to add member", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Failed to add member", error: error.message });
   }
 };
 
@@ -425,10 +435,14 @@ const updateMemberRole = async (req, res) => {
     if (role !== undefined) updateData.role = role;
     if (start_date !== undefined) updateData.start_date = start_date;
     if (end_date !== undefined) updateData.end_date = end_date;
-    if (decision_number !== undefined) updateData.decision_number = decision_number;
+    if (decision_number !== undefined)
+      updateData.decision_number = decision_number;
     if (notes !== undefined) updateData.notes = notes;
 
-    const updatedAssignment = await CommunityAssignmentModel.update(memberId, updateData);
+    const updatedAssignment = await CommunityAssignmentModel.update(
+      memberId,
+      updateData
+    );
 
     await logAudit(req, "UPDATE_MEMBER", id, assignment, updatedAssignment);
     clearCacheForResource("communities");

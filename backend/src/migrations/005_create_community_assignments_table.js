@@ -5,7 +5,7 @@ const upQuery = `
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     sister_id INT UNSIGNED NOT NULL,
     community_id INT UNSIGNED NOT NULL,
-    role ENUM('superior','deputy','treasurer','member') NOT NULL,
+    role ENUM('superior','assistant','vice_superior','deputy','secretary','treasurer','member') NOT NULL DEFAULT 'member',
     start_date DATE NOT NULL,
     end_date DATE NULL,
     decision_number VARCHAR(50) NULL,

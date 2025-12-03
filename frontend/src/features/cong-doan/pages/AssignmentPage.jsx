@@ -16,19 +16,28 @@ import { communityService, sisterService } from "@services";
 import { formatDate } from "@utils";
 import Breadcrumb from "@components/common/Breadcrumb";
 import DataTable from "@components/tables/DataTable";
-import DatePicker from "@components/forms/DatePicker";
 import "./AssignmentPage.css";
 
 // Role labels and styles
 const roleConfig = {
+  superior: { label: "Bề trên", icon: "fa-crown", className: "role-leader" },
   leader: { label: "Bề trên", icon: "fa-crown", className: "role-leader" },
+  assistant: {
+    label: "Phó bề trên",
+    icon: "fa-user-tie",
+    className: "role-vice-leader",
+  },
+  vice_superior: {
+    label: "Phó bề trên",
+    icon: "fa-user-tie",
+    className: "role-vice-leader",
+  },
   vice_leader: {
     label: "Phó bề trên",
     icon: "fa-user-tie",
     className: "role-vice-leader",
   },
-  superior: { label: "Bề trên", icon: "fa-crown", className: "role-leader" },
-  assistant: {
+  deputy: {
     label: "Phó bề trên",
     icon: "fa-user-tie",
     className: "role-vice-leader",
@@ -89,6 +98,7 @@ const AssignmentPage = () => {
   const [communities, setCommunities] = useState([]);
   const [sisters, setSisters] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [allAssignmentsData, setAllAssignmentsData] = useState([]); // Store unfiltered data
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filters
@@ -123,16 +133,45 @@ const AssignmentPage = () => {
     completed: 0,
   });
 
-  // Fetch data
+  // Fetch initial data
   useEffect(() => {
     fetchInitialData();
   }, []);
 
+  // Apply filters when filters or allAssignmentsData change (client-side filtering)
   useEffect(() => {
-    if (communities.length > 0) {
-      fetchAssignments();
+    if (allAssignmentsData.length === 0) {
+      setAssignments([]);
+      return;
     }
-  }, [filters, communities]);
+    
+    let filtered = allAssignmentsData;
+
+    if (filters.community_id) {
+      const communityId = parseInt(filters.community_id);
+      filtered = filtered.filter((a) => a.community_id === communityId);
+    }
+
+    if (filters.role) {
+      filtered = filtered.filter((a) => a.role === filters.role);
+    }
+
+    if (filters.status) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (filters.status === "active") {
+        filtered = filtered.filter(
+          (a) => !a.end_date || new Date(a.end_date) >= today
+        );
+      } else if (filters.status === "completed") {
+        filtered = filtered.filter(
+          (a) => a.end_date && new Date(a.end_date) < today
+        );
+      }
+    }
+
+    setAssignments(filtered);
+  }, [filters.community_id, filters.role, filters.status, allAssignmentsData]);
 
   const fetchInitialData = async () => {
     try {
@@ -142,19 +181,25 @@ const AssignmentPage = () => {
         sisterService.getList({ limit: 1000 }),
       ]);
 
+      let loadedCommunities = [];
+      let loadedSisters = [];
+
       if (communitiesRes?.data) {
-        // Remove duplicates by id
-        const uniqueCommunities = communitiesRes.data.filter(
+        loadedCommunities = communitiesRes.data.filter(
           (c, index, self) => index === self.findIndex((t) => t.id === c.id)
         );
-        setCommunities(uniqueCommunities);
+        setCommunities(loadedCommunities);
       }
       if (sistersRes?.data) {
-        // Remove duplicates by id
-        const uniqueSisters = sistersRes.data.filter(
+        loadedSisters = sistersRes.data.filter(
           (s, index, self) => index === self.findIndex((t) => t.id === s.id)
         );
-        setSisters(uniqueSisters);
+        setSisters(loadedSisters);
+      }
+
+      // Fetch assignments after loading communities
+      if (loadedCommunities.length > 0) {
+        await fetchAssignmentsFromAPI(loadedCommunities);
       }
     } catch (err) {
       console.error("Error fetching initial data:", err);
@@ -164,17 +209,26 @@ const AssignmentPage = () => {
     }
   };
 
-  const fetchAssignments = async () => {
+  // Fetch assignments from API (no filtering here)
+  const fetchAssignmentsFromAPI = async (communitiesToUse) => {
+    const comms = communitiesToUse || communities;
+    
+    if (!comms || comms.length === 0) {
+      console.log("Communities not loaded yet");
+      return;
+    }
+    
     try {
       setLoading(true);
 
-      // Get assignments from all communities
       const allAssignments = [];
-      for (const community of communities) {
+      for (const community of comms) {
         try {
           const response = await communityService.getMembers(community.id);
-          // API returns { members: [...] } or could be array directly
-          const members = response?.members || response?.data?.members || (Array.isArray(response) ? response : []);
+          const members =
+            response?.members ||
+            response?.data?.members ||
+            (Array.isArray(response) ? response : []);
           if (members && Array.isArray(members)) {
             members.forEach((m) => {
               allAssignments.push({
@@ -185,55 +239,16 @@ const AssignmentPage = () => {
             });
           }
         } catch (err) {
-          console.error(
-            `Error fetching members for community ${community.id}:`,
-            err
-          );
+          console.error(`Error fetching members for community ${community.id}:`, err);
         }
       }
+      
+      console.log("All assignments fetched:", allAssignments.length);
+      
+      // Store all data (unfiltered)
+      setAllAssignmentsData(allAssignments);
 
-      // Apply filters
-      let filteredAssignments = allAssignments;
-
-      if (filters.community_id) {
-        filteredAssignments = filteredAssignments.filter(
-          (a) => a.community_id === parseInt(filters.community_id)
-        );
-      }
-
-      if (filters.role) {
-        filteredAssignments = filteredAssignments.filter(
-          (a) => a.role === filters.role
-        );
-      }
-
-      if (filters.status) {
-        const today = new Date();
-        if (filters.status === "active") {
-          filteredAssignments = filteredAssignments.filter(
-            (a) => !a.end_date || new Date(a.end_date) > today
-          );
-        } else if (filters.status === "completed") {
-          filteredAssignments = filteredAssignments.filter(
-            (a) => a.end_date && new Date(a.end_date) <= today
-          );
-        }
-      }
-
-      if (filters.search) {
-        const searchLower = filters.search.toLowerCase();
-        filteredAssignments = filteredAssignments.filter((a) => {
-          const sister = sisters.find((s) => s.id === a.sister_id) || a;
-          const name = sister.saint_name
-            ? `${sister.saint_name} ${sister.birth_name}`
-            : sister.birth_name || sister.full_name || "";
-          return name.toLowerCase().includes(searchLower);
-        });
-      }
-
-      setAssignments(filteredAssignments);
-
-      // Calculate stats
+      // Calculate stats from all data
       const today = new Date();
       const activeCount = allAssignments.filter(
         (a) => !a.end_date || new Date(a.end_date) > today
@@ -304,7 +319,8 @@ const AssignmentPage = () => {
   };
 
   const handleFormChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    const newFormData = { ...formData, [field]: value };
+    setFormData(newFormData);
   };
 
   const handleSubmit = async () => {
@@ -313,25 +329,38 @@ const AssignmentPage = () => {
       return;
     }
 
+    // Validate end_date > start_date
+    if (formData.end_date && formData.start_date) {
+      const startDate = new Date(formData.start_date);
+      const endDate = new Date(formData.end_date);
+      if (endDate <= startDate) {
+        toast.error("Ngày kết thúc phải lớn hơn ngày bắt đầu");
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
 
       if (isEditing && selectedAssignment) {
+        const communityId = parseInt(formData.community_id) || selectedAssignment.community_id;
+        const assignmentId = selectedAssignment.id;
+        
         console.log("Updating assignment:", {
-          community_id: formData.community_id,
-          assignment_id: selectedAssignment.id,
+          community_id: communityId,
+          assignment_id: assignmentId,
           data: {
             role: formData.role,
             start_date: formData.start_date || null,
             end_date: formData.end_date || null,
             decision_number: formData.decision_number || null,
             notes: formData.notes || null,
-          }
+          },
         });
-        
+
         const result = await communityService.updateMemberRole(
-          formData.community_id,
-          selectedAssignment.id,
+          communityId,
+          assignmentId,
           {
             role: formData.role,
             start_date: formData.start_date || null,
@@ -356,7 +385,11 @@ const AssignmentPage = () => {
       }
 
       setShowAddModal(false);
-      fetchAssignments();
+      
+      // Small delay to ensure backend has processed the update
+      setTimeout(() => {
+        fetchAssignmentsFromAPI();
+      }, 300);
     } catch (err) {
       console.error("Error saving assignment:", err);
       toast.error("Có lỗi xảy ra khi lưu bổ nhiệm");
@@ -376,7 +409,7 @@ const AssignmentPage = () => {
         assignment.id
       );
       toast.success("Đã xóa bổ nhiệm thành công");
-      fetchAssignments();
+      fetchAssignmentsFromAPI();
     } catch (err) {
       console.error("Error deleting assignment:", err);
       toast.error("Không thể xóa bổ nhiệm");
@@ -412,9 +445,13 @@ const AssignmentPage = () => {
       const name = sister.saint_name
         ? `${sister.saint_name} ${sister.birth_name}`
         : sister.birth_name || sister.full_name || "";
-      const community = getCommunityById(a.community_id) || { name: a.community_name };
-      return name.toLowerCase().includes(searchLower) || 
-             (community?.name || "").toLowerCase().includes(searchLower);
+      const community = getCommunityById(a.community_id) || {
+        name: a.community_name,
+      };
+      return (
+        name.toLowerCase().includes(searchLower) ||
+        (community?.name || "").toLowerCase().includes(searchLower)
+      );
     });
   };
 
@@ -424,6 +461,8 @@ const AssignmentPage = () => {
       leader: "#d63031",
       superior: "#d63031",
       vice_leader: "#2d3436",
+      vice_superior: "#2d3436",
+      deputy: "#2d3436",
       assistant: "#2d3436",
       secretary: "#6c5ce7",
       treasurer: "#e84393",
@@ -443,12 +482,19 @@ const AssignmentPage = () => {
         return (
           <div>
             {sister.saint_name && (
-              <div className="text-primary fw-semibold" style={{ fontSize: "0.85rem" }}>
+              <div
+                className="text-primary fw-semibold"
+                style={{ fontSize: "0.85rem" }}
+              >
                 {sister.saint_name}
               </div>
             )}
-            <div style={{ fontSize: "0.85rem" }}>{sister.birth_name || row.birth_name}</div>
-            <small className="text-muted">{stageLabels[sister.current_stage] || ""}</small>
+            <div style={{ fontSize: "0.85rem" }}>
+              {sister.birth_name || row.birth_name}
+            </div>
+            <small className="text-muted">
+              {stageLabels[sister.current_stage] || ""}
+            </small>
           </div>
         );
       },
@@ -458,7 +504,9 @@ const AssignmentPage = () => {
       label: "Cộng Đoàn",
       sortable: true,
       render: (row) => {
-        const community = getCommunityById(row.community_id) || { name: row.community_name };
+        const community = getCommunityById(row.community_id) || {
+          name: row.community_name,
+        };
         return community?.name || "N/A";
       },
     },
@@ -500,7 +548,11 @@ const AssignmentPage = () => {
       render: (row) => {
         const statusInfo = getAssignmentStatus(row);
         return (
-          <Badge bg={statusInfo.className === "status-active" ? "success" : "secondary"}>
+          <Badge
+            bg={
+              statusInfo.className === "status-active" ? "success" : "secondary"
+            }
+          >
             {statusInfo.label}
           </Badge>
         );
@@ -555,7 +607,10 @@ const AssignmentPage = () => {
 
   if (loading && assignments.length === 0 && communities.length === 0) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "60vh" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "60vh" }}
+      >
         <Spinner animation="border" variant="primary" />
       </div>
     );
@@ -639,7 +694,7 @@ const AssignmentPage = () => {
       </Row>
 
       {/* Search & Filter */}
-      <Row className="g-3 mb-4">
+      <Row className="g-3 mb-4 filter-row">
         <Col md={4}>
           <Form.Control
             type="text"
@@ -685,7 +740,11 @@ const AssignmentPage = () => {
           </Form.Select>
         </Col>
         <Col md={2} className="d-flex gap-2">
-          <Button variant="outline-secondary" className="flex-grow-1" onClick={resetFilters}>
+          <Button
+            variant="outline-secondary"
+            className="flex-grow-1"
+            onClick={resetFilters}
+          >
             <i className="fas fa-redo me-1"></i>
             Đặt lại
           </Button>
@@ -809,33 +868,31 @@ const AssignmentPage = () => {
               </Col>
 
               <Col md={6} className="mb-3">
-                <DatePicker
-                  label={
-                    <>
-                      <i className="fas fa-calendar-alt text-primary me-1"></i>
-                      Ngày Bắt Đầu
-                    </>
-                  }
+                <Form.Label>
+                  <i className="fas fa-calendar-alt text-primary me-1"></i>
+                  Ngày Bắt Đầu <span className="text-danger">*</span>
+                </Form.Label>
+                <Form.Control
+                  type="date"
                   name="start_date"
                   value={formData.start_date}
-                  onChange={(value) => handleFormChange("start_date", value)}
+                  onChange={(e) => handleFormChange("start_date", e.target.value)}
                   required
                 />
               </Col>
 
               <Col md={6} className="mb-3">
-                <DatePicker
-                  label={
-                    <>
-                      <i className="fas fa-calendar-check text-primary me-1"></i>
-                      Ngày Kết Thúc
-                    </>
-                  }
+                <Form.Label>
+                  <i className="fas fa-calendar-check text-primary me-1"></i>
+                  Ngày Kết Thúc
+                </Form.Label>
+                <Form.Control
+                  type="date"
                   name="end_date"
                   value={formData.end_date}
-                  onChange={(value) => handleFormChange("end_date", value)}
-                  helpText="Để trống nếu không xác định"
+                  onChange={(e) => handleFormChange("end_date", e.target.value)}
                 />
+                <Form.Text className="text-muted">Để trống nếu không xác định</Form.Text>
               </Col>
 
               <Col md={12} className="mb-3">
@@ -895,7 +952,11 @@ const AssignmentPage = () => {
       </Modal>
 
       {/* View Modal */}
-      <Modal show={showViewModal} onHide={() => setShowViewModal(false)} size="lg">
+      <Modal
+        show={showViewModal}
+        onHide={() => setShowViewModal(false)}
+        size="lg"
+      >
         <Modal.Header closeButton className="modal-header-custom">
           <Modal.Title>
             <i className="fas fa-info-circle me-2"></i>
@@ -903,87 +964,130 @@ const AssignmentPage = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {selectedAssignment && (() => {
-            const sister = getSisterById(selectedAssignment.sister_id) || selectedAssignment;
-            const community = getCommunityById(selectedAssignment.community_id) || { name: selectedAssignment.community_name };
-            const roleInfo = getRoleConfig(selectedAssignment.role);
-            const statusInfo = getAssignmentStatus(selectedAssignment);
+          {selectedAssignment &&
+            (() => {
+              const sister =
+                getSisterById(selectedAssignment.sister_id) ||
+                selectedAssignment;
+              const community = getCommunityById(
+                selectedAssignment.community_id
+              ) || { name: selectedAssignment.community_name };
+              const roleInfo = getRoleConfig(selectedAssignment.role);
+              const statusInfo = getAssignmentStatus(selectedAssignment);
 
-            return (
-              <Row>
-                <Col md={6} className="mb-3">
-                  <div className="info-card">
-                    <h6><i className="fas fa-user me-2"></i>Thông Tin Nữ Tu</h6>
-                    <div className="info-content">
-                      <div className="info-item">
-                        <span className="info-label">Tên thánh:</span>
-                        <span className="info-value">{sister.saint_name || "—"}</span>
-                      </div>
-                      <div className="info-item">
-                        <span className="info-label">Họ tên:</span>
-                        <span className="info-value">{sister.birth_name || "—"}</span>
-                      </div>
-                      <div className="info-item">
-                        <span className="info-label">Giai đoạn:</span>
-                        <span className="info-value">{stageLabels[sister.current_stage] || "Chưa xác định"}</span>
-                      </div>
-                      {sister.phone && (
-                        <div className="info-item">
-                          <span className="info-label">Điện thoại:</span>
-                          <span className="info-value">{sister.phone}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Col>
-                <Col md={6} className="mb-3">
-                  <div className="info-card">
-                    <h6><i className="fas fa-briefcase me-2"></i>Thông Tin Bổ Nhiệm</h6>
-                    <div className="info-content">
-                      <div className="info-item">
-                        <span className="info-label">Cộng đoàn:</span>
-                        <span className="info-value">{community?.name || "—"}</span>
-                      </div>
-                      <div className="info-item">
-                        <span className="info-label">Chức vụ:</span>
-                        <span className="info-value">
-                          <Badge style={{ backgroundColor: getRoleBadgeColor(selectedAssignment.role), color: "#fff" }}>
-                            {roleInfo.label}
-                          </Badge>
-                        </span>
-                      </div>
-                      <div className="info-item">
-                        <span className="info-label">Ngày bắt đầu:</span>
-                        <span className="info-value">{formatDate(selectedAssignment.start_date || selectedAssignment.joined_date)}</span>
-                      </div>
-                      <div className="info-item">
-                        <span className="info-label">Ngày kết thúc:</span>
-                        <span className="info-value">{selectedAssignment.end_date ? formatDate(selectedAssignment.end_date) : "Chưa xác định"}</span>
-                      </div>
-                      <div className="info-item">
-                        <span className="info-label">Trạng thái:</span>
-                        <span className="info-value">
-                          <Badge bg={statusInfo.className === "status-active" ? "success" : "secondary"}>
-                            {statusInfo.label}
-                          </Badge>
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Col>
-                {selectedAssignment.notes && (
-                  <Col md={12}>
+              return (
+                <Row>
+                  <Col md={6} className="mb-3">
                     <div className="info-card">
-                      <h6><i className="fas fa-sticky-note me-2"></i>Ghi Chú</h6>
+                      <h6>
+                        <i className="fas fa-user me-2"></i>Thông Tin Nữ Tu
+                      </h6>
                       <div className="info-content">
-                        <p className="mb-0">{selectedAssignment.notes}</p>
+                        <div className="info-item">
+                          <span className="info-label">Tên thánh:</span>
+                          <span className="info-value">
+                            {sister.saint_name || "—"}
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Họ tên:</span>
+                          <span className="info-value">
+                            {sister.birth_name || "—"}
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Giai đoạn:</span>
+                          <span className="info-value">
+                            {stageLabels[sister.current_stage] ||
+                              "Chưa xác định"}
+                          </span>
+                        </div>
+                        {sister.phone && (
+                          <div className="info-item">
+                            <span className="info-label">Điện thoại:</span>
+                            <span className="info-value">{sister.phone}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </Col>
-                )}
-              </Row>
-            );
-          })()}
+                  <Col md={6} className="mb-3">
+                    <div className="info-card">
+                      <h6>
+                        <i className="fas fa-briefcase me-2"></i>Thông Tin Bổ
+                        Nhiệm
+                      </h6>
+                      <div className="info-content">
+                        <div className="info-item">
+                          <span className="info-label">Cộng đoàn:</span>
+                          <span className="info-value">
+                            {community?.name || "—"}
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Chức vụ:</span>
+                          <span className="info-value">
+                            <Badge
+                              style={{
+                                backgroundColor: getRoleBadgeColor(
+                                  selectedAssignment.role
+                                ),
+                                color: "#fff",
+                              }}
+                            >
+                              {roleInfo.label}
+                            </Badge>
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Ngày bắt đầu:</span>
+                          <span className="info-value">
+                            {formatDate(
+                              selectedAssignment.start_date ||
+                                selectedAssignment.joined_date
+                            )}
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Ngày kết thúc:</span>
+                          <span className="info-value">
+                            {selectedAssignment.end_date
+                              ? formatDate(selectedAssignment.end_date)
+                              : "Chưa xác định"}
+                          </span>
+                        </div>
+                        <div className="info-item">
+                          <span className="info-label">Trạng thái:</span>
+                          <span className="info-value">
+                            <Badge
+                              bg={
+                                statusInfo.className === "status-active"
+                                  ? "success"
+                                  : "secondary"
+                              }
+                            >
+                              {statusInfo.label}
+                            </Badge>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Col>
+                  {selectedAssignment.notes && (
+                    <Col md={12}>
+                      <div className="info-card">
+                        <h6>
+                          <i className="fas fa-sticky-note me-2"></i>Ghi Chú
+                        </h6>
+                        <div className="info-content">
+                          <p className="mb-0">{selectedAssignment.notes}</p>
+                        </div>
+                      </div>
+                    </Col>
+                  )}
+                </Row>
+              );
+            })()}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowViewModal(false)}>

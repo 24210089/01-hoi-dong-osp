@@ -21,7 +21,10 @@ const MissionForm = ({ show, onHide, mission, onSubmit, sisterId }) => {
 
   const fetchSisters = async () => {
     try {
-      const response = await sisterService.getList({ limit: 1000, status: "all" });
+      const response = await sisterService.getList({
+        limit: 1000,
+        status: "all",
+      });
       if (response.success) {
         const items = response.data?.items || response.data || [];
         setSisters(items);
@@ -53,7 +56,8 @@ const MissionForm = ({ show, onHide, mission, onSubmit, sisterId }) => {
   const validate = () => {
     const newErrors = {};
 
-    if (!values.sister_id && !sisterId) newErrors.sister_id = "Nữ tu là bắt buộc";
+    if (!values.sister_id && !sisterId)
+      newErrors.sister_id = "Nữ tu là bắt buộc";
     if (!values.field) newErrors.field = "Lĩnh vực sứ vụ là bắt buộc";
     if (!values.start_date) newErrors.start_date = "Ngày bắt đầu là bắt buộc";
 
@@ -99,7 +103,9 @@ const MissionForm = ({ show, onHide, mission, onSubmit, sisterId }) => {
                   <option value="">-- Chọn nữ tu --</option>
                   {sisters.map((sister) => (
                     <option key={sister.id} value={sister.id}>
-                      {sister.saint_name || sister.religious_name || sister.birth_name}
+                      {sister.saint_name ||
+                        sister.religious_name ||
+                        sister.birth_name}
                       {sister.code ? ` (${sister.code})` : ""}
                     </option>
                   ))}

@@ -8,7 +8,7 @@ import "./LoginForm.css";
 
 const LoginForm = ({ onSubmit, loading, error, onClearError }) => {
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const { values, errors, touched, handleChange, handleBlur, handleSubmit } =
     useForm({
       username: "",
@@ -84,12 +84,14 @@ const LoginForm = ({ onSubmit, loading, error, onClearError }) => {
               disabled={loading}
               isInvalid={touched.password && errors.password}
             />
-            <InputGroup.Text 
+            <InputGroup.Text
               className="password-toggle"
               onClick={togglePasswordVisibility}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
             >
-              <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+              <i
+                className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
+              ></i>
             </InputGroup.Text>
           </InputGroup>
           {touched.password && errors.password && (

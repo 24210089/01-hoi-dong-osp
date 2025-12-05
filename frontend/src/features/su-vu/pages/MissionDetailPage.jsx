@@ -214,9 +214,7 @@ const MissionDetailPage = () => {
                         <i className="fas fa-align-left text-primary me-2"></i>
                         Ghi chú
                       </h6>
-                      <div className="description-content">
-                        {mission.notes}
-                      </div>
+                      <div className="description-content">{mission.notes}</div>
                     </div>
                   </Col>
                 )}

@@ -22,7 +22,11 @@ router.get("/:id", missionController.getMissionById);
 router.post("/", authorize(...editorRoles), missionController.createMission);
 
 router.put("/:id", authorize(...editorRoles), missionController.updateMission);
-router.delete("/:id", authorize(...editorRoles), missionController.deleteMission);
+router.delete(
+  "/:id",
+  authorize(...editorRoles),
+  missionController.deleteMission
+);
 
 router.post(
   "/:id/end",

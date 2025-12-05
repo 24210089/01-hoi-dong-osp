@@ -24,26 +24,33 @@ const LoginPage = () => {
       } else {
         // Kiểm tra nếu là lỗi xác thực sai
         const errorMsg = result.error || "";
-        if (errorMsg.toLowerCase().includes("invalid") || 
-            errorMsg.toLowerCase().includes("credentials") ||
-            errorMsg.toLowerCase().includes("incorrect") ||
-            errorMsg.toLowerCase().includes("wrong")) {
+        if (
+          errorMsg.toLowerCase().includes("invalid") ||
+          errorMsg.toLowerCase().includes("credentials") ||
+          errorMsg.toLowerCase().includes("incorrect") ||
+          errorMsg.toLowerCase().includes("wrong")
+        ) {
           setError("Sai tên đăng nhập hoặc mật khẩu, vui lòng đăng nhập lại");
         } else {
-          setError(errorMsg || "Sai tên đăng nhập hoặc mật khẩu, vui lòng đăng nhập lại");
+          setError(
+            errorMsg ||
+              "Sai tên đăng nhập hoặc mật khẩu, vui lòng đăng nhập lại"
+          );
         }
       }
     } catch (err) {
       console.error("Login error:", err);
       // Lấy message lỗi từ backend
       const errorMessage = err.response?.data?.message || err.message || "";
-      
+
       // Kiểm tra nếu là lỗi xác thực sai
-      if (errorMessage.toLowerCase().includes("invalid") || 
-          errorMessage.toLowerCase().includes("credentials") ||
-          errorMessage.toLowerCase().includes("incorrect") ||
-          errorMessage.toLowerCase().includes("wrong") ||
-          err.response?.status === 401) {
+      if (
+        errorMessage.toLowerCase().includes("invalid") ||
+        errorMessage.toLowerCase().includes("credentials") ||
+        errorMessage.toLowerCase().includes("incorrect") ||
+        errorMessage.toLowerCase().includes("wrong") ||
+        err.response?.status === 401
+      ) {
         setError("Sai tên đăng nhập hoặc mật khẩu, vui lòng đăng nhập lại");
       } else {
         setError(errorMessage || "Có lỗi xảy ra. Vui lòng thử lại.");

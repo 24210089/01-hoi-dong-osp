@@ -35,7 +35,7 @@ const MissionListPage = () => {
     try {
       setLoading(true);
       const params = table.getTableParams();
-      
+
       let response;
       if (sisterId) {
         // Fetch missions for specific sister
@@ -91,7 +91,7 @@ const MissionListPage = () => {
     try {
       // Add sisterId if provided via URL
       const payload = sisterId ? { ...values, sister_id: sisterId } : values;
-      
+
       if (selectedMission) {
         const result = await missionService.update(selectedMission.id, payload);
         if (result.success) {

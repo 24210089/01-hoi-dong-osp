@@ -48,7 +48,10 @@ const MissionFormPage = () => {
 
   const fetchSisters = async () => {
     try {
-      const response = await sisterService.getList({ limit: 1000, status: "all" });
+      const response = await sisterService.getList({
+        limit: 1000,
+        status: "all",
+      });
       if (response.success) {
         const items = response.data?.items || response.data || [];
         setSisters(items);
@@ -68,7 +71,9 @@ const MissionFormPage = () => {
           sister_id: mission.sister_id || "",
           field: mission.field || "",
           specific_role: mission.specific_role || "",
-          start_date: mission.start_date ? mission.start_date.split("T")[0] : "",
+          start_date: mission.start_date
+            ? mission.start_date.split("T")[0]
+            : "",
           end_date: mission.end_date ? mission.end_date.split("T")[0] : "",
           notes: mission.notes || "",
         });
@@ -87,7 +92,8 @@ const MissionFormPage = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!values.sister_id && !sisterId) newErrors.sister_id = "Nữ tu là bắt buộc";
+    if (!values.sister_id && !sisterId)
+      newErrors.sister_id = "Nữ tu là bắt buộc";
     if (!values.field) newErrors.field = "Lĩnh vực sứ vụ là bắt buộc";
     if (!values.start_date) newErrors.start_date = "Ngày bắt đầu là bắt buộc";
     return newErrors;
@@ -117,7 +123,9 @@ const MissionFormPage = () => {
       }
 
       if (result.success) {
-        toast.success(isEditMode ? "Cập nhật sứ vụ thành công!" : "Thêm sứ vụ thành công!");
+        toast.success(
+          isEditMode ? "Cập nhật sứ vụ thành công!" : "Thêm sứ vụ thành công!"
+        );
         if (sisterId) {
           navigate(`/nu-tu/${sisterId}/su-vu`);
         } else {
@@ -144,7 +152,10 @@ const MissionFormPage = () => {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: "60vh" }}>
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: "60vh" }}
+      >
         <LoadingSpinner size="large" />
       </div>
     );
@@ -188,7 +199,9 @@ const MissionFormPage = () => {
                         <option value="">-- Chọn nữ tu --</option>
                         {sisters.map((sister) => (
                           <option key={sister.id} value={sister.id}>
-                            {sister.saint_name || sister.religious_name || sister.birth_name}
+                            {sister.saint_name ||
+                              sister.religious_name ||
+                              sister.birth_name}
                             {sister.code ? ` (${sister.code})` : ""}
                           </option>
                         ))}
@@ -266,7 +279,11 @@ const MissionFormPage = () => {
                 </Row>
 
                 <div className="d-flex justify-content-end gap-2 mt-4">
-                  <Button variant="secondary" onClick={handleCancel} disabled={submitting}>
+                  <Button
+                    variant="secondary"
+                    onClick={handleCancel}
+                    disabled={submitting}
+                  >
                     <i className="fas fa-times me-2"></i>
                     Hủy
                   </Button>

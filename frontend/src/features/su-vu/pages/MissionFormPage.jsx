@@ -10,6 +10,7 @@ import Input from "@components/forms/Input";
 import Select from "@components/forms/Select";
 import DatePicker from "@components/forms/DatePicker";
 import TextArea from "@components/forms/TextArea";
+import SearchableSelect from "@components/forms/SearchableSelect";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
 
@@ -186,7 +187,7 @@ const MissionFormPage = () => {
                   {/* Sister selector - only show if sisterId not provided */}
                   {!sisterId && (
                     <Col md={12}>
-                      <Select
+                      <SearchableSelect
                         label="Nữ tu"
                         name="sister_id"
                         value={values.sister_id}
@@ -195,17 +196,29 @@ const MissionFormPage = () => {
                         error={errors.sister_id}
                         touched={touched.sister_id}
                         required
-                      >
-                        <option value="">-- Chọn nữ tu --</option>
-                        {sisters.map((sister) => (
-                          <option key={sister.id} value={sister.id}>
-                            {sister.saint_name ||
-                              sister.religious_name ||
-                              sister.birth_name}
-                            {sister.code ? ` (${sister.code})` : ""}
-                          </option>
-                        ))}
-                      </Select>
+                        placeholder="Nhập tên để tìm nữ tu..."
+                        maxDisplayItems={5}
+                        options={(sisters || []).map((sister) => {
+                          const saintName = sister.saint_name || "";
+                          const religiousName = sister.religious_name || "";
+                          const birthName = sister.birth_name || "";
+                          const code = sister.code || "";
+
+                          let label =
+                            saintName ||
+                            religiousName ||
+                            birthName ||
+                            `Nữ tu #${sister.id}`;
+                          if (code) {
+                            label += ` (${code})`;
+                          }
+
+                          return {
+                            value: sister.id,
+                            label: label,
+                          };
+                        })}
+                      />
                     </Col>
                   )}
 

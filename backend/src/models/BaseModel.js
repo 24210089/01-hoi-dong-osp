@@ -128,6 +128,8 @@ class BaseModel {
       return rows;
     } catch (error) {
       console.error(`[${this.tableName}] Query failed: ${error.message}`);
+      console.error(`[${this.tableName}] SQL: ${sql}`);
+      console.error(`[${this.tableName}] Params: ${JSON.stringify(params)}`);
       throw error;
     } finally {
       connection.release();

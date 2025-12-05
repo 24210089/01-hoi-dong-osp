@@ -150,7 +150,7 @@ export const API_ENDPOINTS = {
   UPLOAD: {
     IMAGE: "/upload/image",
     FILE: "/upload/file",
-    MULTIPLE: "/upload/multiple",
+    MULTIPLE: "/upload/documents",
   },
 
   // ============================================

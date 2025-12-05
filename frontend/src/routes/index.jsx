@@ -37,6 +37,7 @@ import AssignmentPage from "@features/cong-doan/pages/AssignmentPage";
 import {
   HealthRecordListPage,
   HealthRecordFormPage,
+  HealthRecordDetailPage,
   DepartureListPage,
   DepartureFormPage,
 } from "@features/suc-khoe";
@@ -160,6 +161,7 @@ const AppRoutes = () => {
           {/* Suc Khoe */}
           <Route path="/suc-khoe" element={<HealthRecordListPage />} />
           <Route path="/suc-khoe/create" element={<HealthRecordFormPage />} />
+          <Route path="/suc-khoe/:id" element={<HealthRecordDetailPage />} />
           <Route path="/suc-khoe/:id/edit" element={<HealthRecordFormPage />} />
           <Route
             path="/nu-tu/:sisterId/suc-khoe"

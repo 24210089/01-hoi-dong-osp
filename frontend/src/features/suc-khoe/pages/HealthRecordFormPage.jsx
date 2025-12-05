@@ -9,9 +9,13 @@ import {
   Alert,
 } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { healthService, sisterService } from "@services";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
+import SearchableSelect from "@components/forms/SearchableSelect";
+import DatePicker from "@components/forms/DatePicker";
+import MultiFileUpload from "@components/forms/MultiFileUpload";
 
 const HealthRecordFormPage = () => {
   const { id, sisterId } = useParams();
@@ -22,21 +26,24 @@ const HealthRecordFormPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [sisters, setSisters] = useState([]);
+  const [documents, setDocuments] = useState([]);
 
   const [formData, setFormData] = useState({
     sister_id: sisterId || "",
-    check_date: "",
-    facility: "",
+    general_health: "",
+    chronic_diseases: "",
+    work_limitations: "",
+    checkup_date: "",
+    checkup_place: "",
     doctor: "",
-    health_status: "",
-    diagnosis: "",
-    treatment: "",
     blood_pressure: "",
     heart_rate: "",
     weight: "",
     height: "",
-    notes: "",
+    diagnosis: "",
+    treatment: "",
     next_check_date: "",
+    notes: "",
   });
 
   useEffect(() => {
@@ -48,9 +55,26 @@ const HealthRecordFormPage = () => {
 
   const fetchSisters = async () => {
     try {
-      const response = await sisterService.getList({ page_size: 1000 });
-      if (response.success) {
-        setSisters(response.data.items || []);
+      const response = await sisterService.getList({ limit: 1000 });
+      console.log("Sisters API response:", response);
+      if (response && response.success && response.data) {
+        let sistersData = Array.isArray(response.data)
+          ? response.data
+          : response.data.items || [];
+        // Remove duplicates by id
+        const uniqueSisters = sistersData.filter(
+          (sister, index, self) =>
+            index === self.findIndex((s) => s.id === sister.id)
+        );
+        console.log("Sisters data (unique):", uniqueSisters.length);
+        setSisters(uniqueSisters);
+      } else if (response && Array.isArray(response.data)) {
+        setSisters(response.data);
+      } else if (Array.isArray(response)) {
+        setSisters(response);
+      } else {
+        console.log("No sisters data found");
+        setSisters([]);
       }
     } catch (error) {
       console.error("Error fetching sisters:", error);
@@ -62,7 +86,29 @@ const HealthRecordFormPage = () => {
       setLoading(true);
       const response = await healthService.getById(id);
       if (response.success) {
-        setFormData(response.data);
+        const data = response.data;
+        // Format dates
+        setFormData({
+          ...data,
+          checkup_date: data.checkup_date
+            ? data.checkup_date.split("T")[0]
+            : "",
+          next_check_date: data.next_check_date
+            ? data.next_check_date.split("T")[0]
+            : "",
+        });
+        // Load documents if available
+        if (data.documents) {
+          try {
+            const docs =
+              typeof data.documents === "string"
+                ? JSON.parse(data.documents)
+                : data.documents;
+            setDocuments(Array.isArray(docs) ? docs : []);
+          } catch {
+            setDocuments([]);
+          }
+        }
       }
     } catch (error) {
       console.error("Error fetching health record:", error);
@@ -73,7 +119,18 @@ const HealthRecordFormPage = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    // Handle both event object and direct value
+    if (e && e.target) {
+      const { name, value } = e.target;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  // Separate handler for DatePicker (receives value directly)
+  const handleDateChange = (name) => (value) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -89,29 +146,46 @@ const HealthRecordFormPage = () => {
       return;
     }
 
-    if (!formData.check_date) {
-      setError("Vui lòng nhập ngày khám");
+    if (!formData.general_health) {
+      setError("Vui lòng chọn tình trạng sức khỏe chung");
       return;
     }
 
     try {
       setSubmitting(true);
 
+      // Prepare payload with documents
+      const payload = {
+        ...formData,
+        documents: documents.length > 0 ? JSON.stringify(documents) : null,
+      };
+
       let response;
       if (isEditMode) {
-        response = await healthService.update(id, formData);
+        response = await healthService.update(id, payload);
       } else {
-        response = await healthService.create(formData);
+        response = await healthService.create(payload);
       }
 
       if (response.success) {
-        navigate(sisterId ? `/nu-tu/${sisterId}/suc-khoe` : "/suc-khoe");
+        const successMsg = isEditMode
+          ? "Đã cập nhật hồ sơ sức khỏe thành công!"
+          : "Đã thêm hồ sơ sức khỏe thành công!";
+        toast.success(successMsg);
+        setTimeout(() => {
+          navigate(sisterId ? `/nu-tu/${sisterId}/suc-khoe` : "/suc-khoe");
+        }, 1500);
       } else {
-        setError(response.error || "Có lỗi xảy ra");
+        const errorMsg = response.error || "Không thể lưu hồ sơ sức khỏe";
+        toast.error(errorMsg);
+        setError(errorMsg);
       }
     } catch (error) {
       console.error("Error saving health record:", error);
-      setError("Có lỗi xảy ra khi lưu hồ sơ");
+      const errorMsg =
+        error?.response?.data?.message || "Lỗi khi lưu hồ sơ sức khỏe";
+      toast.error(errorMsg);
+      setError(errorMsg);
     } finally {
       setSubmitting(false);
     }
@@ -169,77 +243,55 @@ const HealthRecordFormPage = () => {
               <Card.Body>
                 <Row className="g-3">
                   <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>
-                        Nữ tu <span className="text-danger">*</span>
-                      </Form.Label>
-                      <Form.Select
-                        name="sister_id"
-                        value={formData.sister_id}
-                        onChange={handleChange}
-                        disabled={!!sisterId}
-                        required
-                      >
-                        <option value="">Chọn nữ tu</option>
-                        {sisters.map((sister) => (
-                          <option key={sister.id} value={sister.id}>
-                            {sister.religious_name
-                              ? `${sister.religious_name} - ${sister.full_name}`
-                              : sister.full_name}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
+                    <SearchableSelect
+                      label="Nữ Tu"
+                      name="sister_id"
+                      value={formData.sister_id}
+                      onChange={handleChange}
+                      disabled={!!sisterId}
+                      required
+                      placeholder="Nhập tên để tìm..."
+                      maxDisplayItems={5}
+                      options={(sisters || []).map((sister) => {
+                        // Build label from available name fields
+                        const saintName = sister.saint_name || "";
+                        const birthName = sister.birth_name || "";
+                        const code = sister.code || "";
+
+                        let label = "";
+                        if (saintName && birthName) {
+                          label = `${saintName} - ${birthName}`;
+                        } else if (birthName) {
+                          label = birthName;
+                        } else if (saintName) {
+                          label = saintName;
+                        } else {
+                          label = `Nữ tu #${sister.id}`;
+                        }
+
+                        if (code) {
+                          label += ` (${code})`;
+                        }
+
+                        return {
+                          value: sister.id,
+                          label: label,
+                        };
+                      })}
+                    />
                   </Col>
 
                   <Col md={6}>
                     <Form.Group>
                       <Form.Label>
-                        Ngày khám <span className="text-danger">*</span>
+                        Tình trạng sức khỏe chung{" "}
+                        <span className="text-danger">*</span>
                       </Form.Label>
-                      <Form.Control
-                        type="date"
-                        name="check_date"
-                        value={formData.check_date}
+                      <Form.Select
+                        name="general_health"
+                        value={formData.general_health}
                         onChange={handleChange}
                         required
-                      />
-                    </Form.Group>
-                  </Col>
-
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Cơ sở y tế</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="facility"
-                        value={formData.facility}
-                        onChange={handleChange}
-                        placeholder="Nhập tên bệnh viện, phòng khám..."
-                      />
-                    </Form.Group>
-                  </Col>
-
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Bác sĩ</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="doctor"
-                        value={formData.doctor}
-                        onChange={handleChange}
-                        placeholder="Tên bác sĩ khám"
-                      />
-                    </Form.Group>
-                  </Col>
-
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>Tình trạng sức khỏe</Form.Label>
-                      <Form.Select
-                        name="health_status"
-                        value={formData.health_status}
-                        onChange={handleChange}
                       >
                         <option value="">Chọn tình trạng</option>
                         <option value="excellent">Tốt</option>
@@ -251,13 +303,65 @@ const HealthRecordFormPage = () => {
                   </Col>
 
                   <Col md={6}>
+                    <DatePicker
+                      label="Ngày khám"
+                      name="checkup_date"
+                      value={formData.checkup_date}
+                      onChange={handleDateChange("checkup_date")}
+                      placeholder="dd/mm/yyyy"
+                    />
+                  </Col>
+
+                  <Col md={6}>
                     <Form.Group>
-                      <Form.Label>Ngày khám tiếp theo</Form.Label>
+                      <Form.Label>Nơi khám</Form.Label>
                       <Form.Control
-                        type="date"
-                        name="next_check_date"
-                        value={formData.next_check_date}
+                        type="text"
+                        name="checkup_place"
+                        value={formData.checkup_place}
                         onChange={handleChange}
+                        placeholder="Nhập tên bệnh viện, phòng khám..."
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>Bác sĩ khám</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="doctor"
+                        value={formData.doctor}
+                        onChange={handleChange}
+                        placeholder="Tên bác sĩ..."
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={12}>
+                    <Form.Group>
+                      <Form.Label>Bệnh mãn tính</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        name="chronic_diseases"
+                        value={formData.chronic_diseases}
+                        onChange={handleChange}
+                        placeholder="Liệt kê các bệnh mãn tính (nếu có)..."
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={12}>
+                    <Form.Group>
+                      <Form.Label>Hạn chế công việc</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        name="work_limitations"
+                        value={formData.work_limitations}
+                        onChange={handleChange}
+                        placeholder="Các hạn chế về công việc do sức khỏe..."
                       />
                     </Form.Group>
                   </Col>
@@ -289,17 +393,52 @@ const HealthRecordFormPage = () => {
                       />
                     </Form.Group>
                   </Col>
+
+                  <Col md={6}>
+                    <DatePicker
+                      label="Ngày tái khám"
+                      name="next_check_date"
+                      value={formData.next_check_date}
+                      onChange={handleDateChange("next_check_date")}
+                      placeholder="dd/mm/yyyy"
+                    />
+                  </Col>
+
+                  <Col md={12}>
+                    <Form.Group>
+                      <Form.Label>Ghi chú</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        name="notes"
+                        value={formData.notes}
+                        onChange={handleChange}
+                        placeholder="Ghi chú thêm..."
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={12}>
+                    <MultiFileUpload
+                      label="Tài liệu đính kèm"
+                      files={documents}
+                      onChange={setDocuments}
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                      maxFiles={10}
+                      hint="Hỗ trợ PDF, Word, ảnh (tối đa 10 file)"
+                    />
+                  </Col>
                 </Row>
               </Card.Body>
             </Card>
           </Col>
 
           <Col lg={4}>
-            <Card className="mb-4">
+            <Card>
               <Card.Header className="bg-white border-bottom">
                 <h5 className="mb-0">
-                  <i className="fas fa-chart-line me-2 text-primary"></i>
-                  Chỉ số sức khỏe
+                  <i className="fas fa-chart-line me-2 text-info"></i>
+                  Chỉ số Sức khỏe
                 </h5>
               </Card.Header>
               <Card.Body>
@@ -312,7 +451,7 @@ const HealthRecordFormPage = () => {
                         name="blood_pressure"
                         value={formData.blood_pressure}
                         onChange={handleChange}
-                        placeholder="120/80"
+                        placeholder="VD: 120/80"
                       />
                     </Form.Group>
                   </Col>
@@ -325,7 +464,7 @@ const HealthRecordFormPage = () => {
                         name="heart_rate"
                         value={formData.heart_rate}
                         onChange={handleChange}
-                        placeholder="72 bpm"
+                        placeholder="VD: 72"
                       />
                     </Form.Group>
                   </Col>
@@ -335,10 +474,11 @@ const HealthRecordFormPage = () => {
                       <Form.Label>Cân nặng (kg)</Form.Label>
                       <Form.Control
                         type="number"
+                        step="0.1"
                         name="weight"
                         value={formData.weight}
                         onChange={handleChange}
-                        placeholder="55"
+                        placeholder="VD: 55.5"
                       />
                     </Form.Group>
                   </Col>
@@ -348,35 +488,15 @@ const HealthRecordFormPage = () => {
                       <Form.Label>Chiều cao (cm)</Form.Label>
                       <Form.Control
                         type="number"
+                        step="0.1"
                         name="height"
                         value={formData.height}
                         onChange={handleChange}
-                        placeholder="160"
+                        placeholder="VD: 160"
                       />
                     </Form.Group>
                   </Col>
                 </Row>
-              </Card.Body>
-            </Card>
-
-            <Card>
-              <Card.Header className="bg-white border-bottom">
-                <h5 className="mb-0">
-                  <i className="fas fa-sticky-note me-2 text-warning"></i>
-                  Ghi chú
-                </h5>
-              </Card.Header>
-              <Card.Body>
-                <Form.Group>
-                  <Form.Control
-                    as="textarea"
-                    rows={4}
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleChange}
-                    placeholder="Ghi chú thêm..."
-                  />
-                </Form.Group>
               </Card.Body>
             </Card>
 

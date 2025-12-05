@@ -12,6 +12,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { departureService, sisterService } from "@services";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
+import SearchableSelect from "@components/forms/SearchableSelect";
+import DatePicker from "@components/forms/DatePicker";
 
 const DepartureFormPage = () => {
   const { id, sisterId } = useParams();
@@ -172,27 +174,45 @@ const DepartureFormPage = () => {
               <Card.Body>
                 <Row className="g-3">
                   <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>
-                        Nữ tu <span className="text-danger">*</span>
-                      </Form.Label>
-                      <Form.Select
-                        name="sister_id"
-                        value={formData.sister_id}
-                        onChange={handleChange}
-                        disabled={!!sisterId}
-                        required
-                      >
-                        <option value="">Chọn nữ tu</option>
-                        {sisters.map((sister) => (
-                          <option key={sister.id} value={sister.id}>
-                            {sister.religious_name
-                              ? `${sister.religious_name} - ${sister.full_name}`
-                              : sister.full_name}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
+                    <SearchableSelect
+                      label="Nữ tu"
+                      name="sister_id"
+                      value={formData.sister_id}
+                      onChange={handleChange}
+                      disabled={!!sisterId}
+                      required
+                      placeholder="Nhập tên để tìm nữ tu..."
+                      maxDisplayItems={5}
+                      options={(sisters || []).map((sister) => {
+                        const saintName = sister.saint_name || "";
+                        const religiousName = sister.religious_name || "";
+                        const birthName = sister.birth_name || "";
+                        const fullName = sister.full_name || "";
+                        const code = sister.code || "";
+
+                        let label = "";
+                        if (religiousName && fullName) {
+                          label = `${religiousName} - ${fullName}`;
+                        } else if (saintName && birthName) {
+                          label = `${saintName} - ${birthName}`;
+                        } else {
+                          label =
+                            fullName ||
+                            birthName ||
+                            saintName ||
+                            `Nữ tu #${sister.id}`;
+                        }
+
+                        if (code) {
+                          label += ` (${code})`;
+                        }
+
+                        return {
+                          value: sister.id,
+                          label: label,
+                        };
+                      })}
+                    />
                   </Col>
 
                   <Col md={6}>
@@ -217,42 +237,34 @@ const DepartureFormPage = () => {
                   </Col>
 
                   <Col md={4}>
-                    <Form.Group>
-                      <Form.Label>
-                        Ngày đi <span className="text-danger">*</span>
-                      </Form.Label>
-                      <Form.Control
-                        type="date"
-                        name="departure_date"
-                        value={formData.departure_date}
-                        onChange={handleChange}
-                        required
-                      />
-                    </Form.Group>
+                    <DatePicker
+                      label="Ngày đi"
+                      name="departure_date"
+                      value={formData.departure_date}
+                      onChange={handleChange}
+                      required
+                      placeholder="dd/mm/yyyy"
+                    />
                   </Col>
 
                   <Col md={4}>
-                    <Form.Group>
-                      <Form.Label>Dự kiến về</Form.Label>
-                      <Form.Control
-                        type="date"
-                        name="expected_return_date"
-                        value={formData.expected_return_date}
-                        onChange={handleChange}
-                      />
-                    </Form.Group>
+                    <DatePicker
+                      label="Dự kiến về"
+                      name="expected_return_date"
+                      value={formData.expected_return_date}
+                      onChange={handleChange}
+                      placeholder="dd/mm/yyyy"
+                    />
                   </Col>
 
                   <Col md={4}>
-                    <Form.Group>
-                      <Form.Label>Ngày về thực tế</Form.Label>
-                      <Form.Control
-                        type="date"
-                        name="return_date"
-                        value={formData.return_date}
-                        onChange={handleChange}
-                      />
-                    </Form.Group>
+                    <DatePicker
+                      label="Ngày về thực tế"
+                      name="return_date"
+                      value={formData.return_date}
+                      onChange={handleChange}
+                      placeholder="dd/mm/yyyy"
+                    />
                   </Col>
 
                   <Col md={12}>

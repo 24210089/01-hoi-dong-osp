@@ -16,6 +16,8 @@ import * as Yup from "yup";
 import { evaluationService, sisterService } from "@services";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
+import SearchableSelect from "@components/forms/SearchableSelect";
+import DatePicker from "@components/forms/DatePicker";
 
 const validationSchema = Yup.object({
   sister_id: Yup.number().required("Vui lòng chọn Nữ Tu"),
@@ -229,32 +231,47 @@ const EvaluationFormPage = () => {
               <Card.Body>
                 <Row className="g-3">
                   <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>
-                        Nữ Tu <span className="text-danger">*</span>
-                      </Form.Label>
-                      <Form.Select
-                        name="sister_id"
-                        value={formik.values.sister_id}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        isInvalid={
-                          formik.touched.sister_id && formik.errors.sister_id
+                    <SearchableSelect
+                      label="Nữ Tu"
+                      name="sister_id"
+                      value={formik.values.sister_id}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      disabled={Boolean(sisterId)}
+                      required
+                      placeholder="Nhập tên để tìm nữ tu..."
+                      maxDisplayItems={5}
+                      isInvalid={
+                        formik.touched.sister_id && formik.errors.sister_id
+                      }
+                      options={(sisters || []).map((sister) => {
+                        const religiousName = sister.religious_name || "";
+                        const fullName = sister.full_name || "";
+                        const saintName = sister.saint_name || "";
+                        const birthName = sister.birth_name || "";
+                        const code = sister.code || "";
+
+                        let label =
+                          religiousName ||
+                          fullName ||
+                          saintName ||
+                          birthName ||
+                          `Nữ tu #${sister.id}`;
+                        if (code) {
+                          label += ` (${code})`;
                         }
-                        disabled={Boolean(sisterId)}
-                      >
-                        <option value="">-- Chọn Nữ Tu --</option>
-                        {sisters.map((sister) => (
-                          <option key={sister.id} value={sister.id}>
-                            {sister.religious_name || sister.full_name} (
-                            {sister.code})
-                          </option>
-                        ))}
-                      </Form.Select>
-                      <Form.Control.Feedback type="invalid">
+
+                        return {
+                          value: sister.id,
+                          label: label,
+                        };
+                      })}
+                    />
+                    {formik.touched.sister_id && formik.errors.sister_id && (
+                      <div className="invalid-feedback d-block">
                         {formik.errors.sister_id}
-                      </Form.Control.Feedback>
-                    </Form.Group>
+                      </div>
+                    )}
                   </Col>
 
                   <Col md={6}>
@@ -308,25 +325,21 @@ const EvaluationFormPage = () => {
                   </Col>
 
                   <Col md={6}>
-                    <Form.Group>
-                      <Form.Label>
-                        Ngày đánh giá <span className="text-danger">*</span>
-                      </Form.Label>
-                      <Form.Control
-                        type="date"
-                        name="evaluation_date"
-                        value={formik.values.evaluation_date}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        isInvalid={
-                          formik.touched.evaluation_date &&
-                          formik.errors.evaluation_date
-                        }
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.evaluation_date}
-                      </Form.Control.Feedback>
-                    </Form.Group>
+                    <DatePicker
+                      label="Ngày đánh giá"
+                      name="evaluation_date"
+                      value={formik.values.evaluation_date}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      required
+                      placeholder="dd/mm/yyyy"
+                    />
+                    {formik.touched.evaluation_date &&
+                      formik.errors.evaluation_date && (
+                        <div className="invalid-feedback d-block">
+                          {formik.errors.evaluation_date}
+                        </div>
+                      )}
                   </Col>
 
                   <Col md={6}>

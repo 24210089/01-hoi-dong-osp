@@ -19,9 +19,10 @@ const healthService = {
   getList: async (params = {}) => {
     try {
       const response = await api.get(HEALTH_ENDPOINTS.LIST, { params });
+      // axios interceptor already returns response.data, so response is the data itself
       return {
         success: true,
-        data: response.data || { items: [], total: 0 },
+        data: response || { items: [], total: 0 },
       };
     } catch (error) {
       console.error("Error fetching health records:", error);

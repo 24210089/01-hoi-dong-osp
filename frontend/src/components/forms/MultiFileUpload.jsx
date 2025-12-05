@@ -1,23 +1,32 @@
 // src/components/forms/MultiFileUpload.jsx
 
 import React, { useState, useRef } from "react";
-import { Button, ListGroup, Badge, ProgressBar } from "react-bootstrap";
+import { Button, ListGroup, Badge, ProgressBar, Form } from "react-bootstrap";
 import PropTypes from "prop-types";
+import { uploadService } from "@services";
 
 const MultiFileUpload = ({
-  value = [],
+  label,
+  value,
+  files: filesProp,
   onChange,
   accept = "*/*",
   maxSize = 10 * 1024 * 1024, // 10MB default
   maxFiles = 10,
   disabled = false,
+  hint,
 }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState("");
   const fileInputRef = useRef(null);
 
-  const files = Array.isArray(value) ? value : [];
+  // Support both "value" and "files" props
+  const files = Array.isArray(filesProp)
+    ? filesProp
+    : Array.isArray(value)
+    ? value
+    : [];
 
   const formatFileSize = (bytes) => {
     if (bytes === 0) return "0 Bytes";
@@ -60,7 +69,11 @@ const MultiFileUpload = ({
     const validFiles = [];
     for (const file of selectedFiles) {
       if (file.size > maxSize) {
-        setError(`File "${file.name}" vượt quá kích thước cho phép (${formatFileSize(maxSize)})`);
+        setError(
+          `File "${file.name}" vượt quá kích thước cho phép (${formatFileSize(
+            maxSize
+          )})`
+        );
         continue;
       }
       validFiles.push(file);
@@ -69,34 +82,19 @@ const MultiFileUpload = ({
     if (validFiles.length === 0) return;
 
     setUploading(true);
-    setUploadProgress(0);
+    setUploadProgress(10);
 
     try {
-      // Simulate upload progress
-      const uploadedFiles = [];
-      for (let i = 0; i < validFiles.length; i++) {
-        const file = validFiles[i];
-        
-        // Create FormData for upload
-        const formData = new FormData();
-        formData.append("file", file);
+      // Upload files to server
+      const result = await uploadService.uploadDocuments(validFiles);
+      setUploadProgress(90);
 
-        // For now, create a local URL (in production, this would upload to server)
-        const fileUrl = URL.createObjectURL(file);
-        
-        uploadedFiles.push({
-          id: Date.now() + i,
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: fileUrl,
-          uploadedAt: new Date().toISOString(),
-        });
-
-        setUploadProgress(((i + 1) / validFiles.length) * 100);
+      if (result.success && result.files) {
+        onChange([...files, ...result.files]);
+        setUploadProgress(100);
+      } else {
+        setError(result.error || "Có lỗi xảy ra khi upload file");
       }
-
-      onChange([...files, ...uploadedFiles]);
     } catch (err) {
       setError("Có lỗi xảy ra khi upload file");
       console.error("Upload error:", err);
@@ -125,6 +123,9 @@ const MultiFileUpload = ({
 
   return (
     <div className="multi-file-upload">
+      {/* Label */}
+      {label && <Form.Label>{label}</Form.Label>}
+
       {/* Upload Button */}
       <div className="mb-3">
         <input
@@ -146,14 +147,21 @@ const MultiFileUpload = ({
           Chọn file để upload
         </Button>
         <small className="text-muted ms-3">
-          Tối đa {maxFiles} file, mỗi file không quá {formatFileSize(maxSize)}
+          {hint ||
+            `Tối đa ${maxFiles} file, mỗi file không quá ${formatFileSize(
+              maxSize
+            )}`}
         </small>
       </div>
 
       {/* Upload Progress */}
       {uploading && (
         <div className="mb-3">
-          <ProgressBar now={uploadProgress} label={`${Math.round(uploadProgress)}%`} animated />
+          <ProgressBar
+            now={uploadProgress}
+            label={`${Math.round(uploadProgress)}%`}
+            animated
+          />
         </div>
       )}
 
@@ -181,7 +189,8 @@ const MultiFileUpload = ({
                     {formatFileSize(file.size)}
                     {file.uploadedAt && (
                       <span className="ms-2">
-                        • {new Date(file.uploadedAt).toLocaleDateString("vi-VN")}
+                        •{" "}
+                        {new Date(file.uploadedAt).toLocaleDateString("vi-VN")}
                       </span>
                     )}
                   </small>
@@ -232,12 +241,15 @@ const MultiFileUpload = ({
 };
 
 MultiFileUpload.propTypes = {
+  label: PropTypes.string,
   value: PropTypes.array,
+  files: PropTypes.array,
   onChange: PropTypes.func.isRequired,
   accept: PropTypes.string,
   maxSize: PropTypes.number,
   maxFiles: PropTypes.number,
   disabled: PropTypes.bool,
+  hint: PropTypes.string,
 };
 
 export default MultiFileUpload;

@@ -18,15 +18,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Headings - AKKHOR Style (Poppins) */
+/* Headings - Use Roboto for consistency */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-family: "Poppins", sans-serif;
-  font-weight: 400;
+  font-family: "Roboto", sans-serif;
+  font-weight: 700;
   margin: 0 0 20px 0;
   color: #000000;
 }

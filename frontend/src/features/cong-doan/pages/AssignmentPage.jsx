@@ -16,6 +16,8 @@ import { communityService, sisterService } from "@services";
 import { formatDate } from "@utils";
 import Breadcrumb from "@components/common/Breadcrumb";
 import DataTable from "@components/tables/DataTable";
+import SearchableSelect from "@components/forms/SearchableSelect";
+import DatePicker from "@components/forms/DatePicker";
 import "./AssignmentPage.css";
 
 // Role labels and styles
@@ -790,49 +792,70 @@ const AssignmentPage = () => {
           <Form>
             <Row>
               <Col md={6} className="mb-3">
-                <Form.Label>
-                  <i className="fas fa-user text-primary me-1"></i>
-                  Nữ Tu <span className="text-danger">*</span>
-                </Form.Label>
-                <Form.Select
+                <SearchableSelect
+                  label={
+                    <>
+                      <i className="fas fa-user text-primary me-1"></i>Nữ Tu
+                    </>
+                  }
+                  name="sister_id"
                   value={formData.sister_id}
                   onChange={(e) =>
                     handleFormChange("sister_id", e.target.value)
                   }
                   disabled={isEditing}
                   required
-                >
-                  <option value="">-- Chọn nữ tu --</option>
-                  {sisters.map((s) => (
-                    <option key={`form-sister-${s.id}`} value={s.id}>
-                      {s.saint_name
-                        ? `${s.saint_name} ${s.birth_name}`
-                        : s.birth_name}
-                    </option>
-                  ))}
-                </Form.Select>
+                  placeholder="Nhập tên để tìm nữ tu..."
+                  maxDisplayItems={5}
+                  options={(sisters || []).map((s) => {
+                    const saintName = s.saint_name || "";
+                    const birthName = s.birth_name || "";
+                    const code = s.code || "";
+
+                    let label = "";
+                    if (saintName && birthName) {
+                      label = `${saintName} - ${birthName}`;
+                    } else if (birthName) {
+                      label = birthName;
+                    } else if (saintName) {
+                      label = saintName;
+                    } else {
+                      label = `Nữ tu #${s.id}`;
+                    }
+
+                    if (code) {
+                      label += ` (${code})`;
+                    }
+
+                    return {
+                      value: s.id,
+                      label: label,
+                    };
+                  })}
+                />
               </Col>
 
               <Col md={6} className="mb-3">
-                <Form.Label>
-                  <i className="fas fa-home text-primary me-1"></i>
-                  Cộng Đoàn <span className="text-danger">*</span>
-                </Form.Label>
-                <Form.Select
+                <SearchableSelect
+                  label={
+                    <>
+                      <i className="fas fa-home text-primary me-1"></i>Cộng Đoàn
+                    </>
+                  }
+                  name="community_id"
                   value={formData.community_id}
                   onChange={(e) =>
                     handleFormChange("community_id", e.target.value)
                   }
                   disabled={isEditing}
                   required
-                >
-                  <option value="">-- Chọn cộng đoàn --</option>
-                  {communities.map((c) => (
-                    <option key={`form-community-${c.id}`} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </Form.Select>
+                  placeholder="Nhập tên để tìm cộng đoàn..."
+                  maxDisplayItems={5}
+                  options={(communities || []).map((c) => ({
+                    value: c.id,
+                    label: c.name || `Cộng đoàn #${c.id}`,
+                  }))}
+                />
               </Col>
 
               <Col md={6} className="mb-3">
@@ -872,31 +895,35 @@ const AssignmentPage = () => {
               </Col>
 
               <Col md={6} className="mb-3">
-                <Form.Label>
-                  <i className="fas fa-calendar-alt text-primary me-1"></i>
-                  Ngày Bắt Đầu <span className="text-danger">*</span>
-                </Form.Label>
-                <Form.Control
-                  type="date"
+                <DatePicker
+                  label={
+                    <>
+                      <i className="fas fa-calendar-alt text-primary me-1"></i>
+                      Ngày Bắt Đầu
+                    </>
+                  }
                   name="start_date"
                   value={formData.start_date}
                   onChange={(e) =>
                     handleFormChange("start_date", e.target.value)
                   }
                   required
+                  placeholder="dd/mm/yyyy"
                 />
               </Col>
 
               <Col md={6} className="mb-3">
-                <Form.Label>
-                  <i className="fas fa-calendar-check text-primary me-1"></i>
-                  Ngày Kết Thúc
-                </Form.Label>
-                <Form.Control
-                  type="date"
+                <DatePicker
+                  label={
+                    <>
+                      <i className="fas fa-calendar-check text-primary me-1"></i>
+                      Ngày Kết Thúc
+                    </>
+                  }
                   name="end_date"
                   value={formData.end_date}
                   onChange={(e) => handleFormChange("end_date", e.target.value)}
+                  placeholder="dd/mm/yyyy"
                 />
                 <Form.Text className="text-muted">
                   Để trống nếu không xác định

@@ -23,6 +23,7 @@ import { educationService, sisterService } from "@services";
 import Breadcrumb from "@components/common/Breadcrumb";
 import MultiFileUpload from "@components/forms/MultiFileUpload";
 import DatePicker from "@components/forms/DatePicker";
+import SearchableSelect from "@components/forms/SearchableSelect";
 
 // Chuẩn hóa danh sách nữ tu, loại bỏ trùng lặp
 const normalizeSisters = (rawList = []) => {
@@ -271,24 +272,22 @@ const EducationFormPage = () => {
               <Form onSubmit={handleSubmit}>
                 <Row>
                   <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Nữ tu *</Form.Label>
-                      <Form.Select
-                        name="sister_id"
-                        value={formData.sister_id}
-                        onChange={handleChange}
-                        required
-                        disabled={Boolean(sisterId)}
-                      >
-                        <option value="">-- Chọn nữ tu --</option>
-                        {sisters.map((sister) => (
-                          <option key={sister.id} value={sister.id}>
-                            {sister.displayName}
-                            {sister.code ? ` (${sister.code})` : ""}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
+                    <SearchableSelect
+                      label="Nữ tu"
+                      name="sister_id"
+                      value={formData.sister_id}
+                      onChange={handleChange}
+                      required
+                      disabled={Boolean(sisterId)}
+                      placeholder="Nhập tên để tìm..."
+                      maxDisplayItems={5}
+                      options={sisters.map((sister) => ({
+                        value: sister.id,
+                        label:
+                          sister.displayName +
+                          (sister.code ? ` (${sister.code})` : ""),
+                      }))}
+                    />
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">

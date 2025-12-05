@@ -42,7 +42,7 @@
 }
 
 .searchable-select-input::placeholder {
-  color: #6c757d;
+  color: #c0c0c0;
 }
 
 .searchable-select-container.is-invalid .searchable-select-input {

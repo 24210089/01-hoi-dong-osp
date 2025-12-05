@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Card, Nav, Tab } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { healthService } from "@services";
 import { useTable, useDebounce } from "@hooks";
 import HealthCard from "../components/HealthCard";
@@ -33,11 +34,18 @@ const HealthRecordListPage = () => {
       const response = await healthService.getList(params);
 
       if (response.success) {
-        setHealthRecords(response.data.items);
-        table.setTotalItems(response.data.total);
+        // Handle both response formats: { data: [...], pagination: {...} } or { items: [...], total: ... }
+        const items = response.data?.data || response.data?.items || [];
+        const total =
+          response.data?.pagination?.total || response.data?.total || 0;
+        setHealthRecords(items);
+        table.setTotalItems(total);
+      } else {
+        setHealthRecords([]);
       }
     } catch (error) {
       console.error("Error fetching health records:", error);
+      setHealthRecords([]);
     } finally {
       setLoading(false);
     }
@@ -61,18 +69,26 @@ const HealthRecordListPage = () => {
     if (window.confirm("Bạn có chắc chắn muốn xóa hồ sơ sức khỏe này?")) {
       try {
         await healthService.delete(record.id);
+        toast.success("Đã xóa hồ sơ sức khỏe thành công!");
         fetchHealthRecords();
       } catch (error) {
         console.error("Error deleting health record:", error);
+        toast.error(
+          "Lỗi khi xóa hồ sơ sức khỏe: " + (error.message || "Vui lòng thử lại")
+        );
       }
     }
   };
 
+  // Ensure healthRecords is always an array
+  const records = Array.isArray(healthRecords) ? healthRecords : [];
+
+  // Map by general_health field from database (good, average, weak)
   const recordsByStatus = {
-    excellent: healthRecords.filter((r) => r.health_status === "excellent"),
-    good: healthRecords.filter((r) => r.health_status === "good"),
-    fair: healthRecords.filter((r) => r.health_status === "fair"),
-    poor: healthRecords.filter((r) => r.health_status === "poor"),
+    excellent: records.filter((r) => r.general_health === "good"),
+    good: records.filter((r) => r.general_health === "average"),
+    fair: [], // No mapping for fair
+    poor: records.filter((r) => r.general_health === "weak"),
   };
 
   if (loading) {
@@ -87,7 +103,11 @@ const HealthRecordListPage = () => {
   }
 
   return (
-    <Container fluid className="py-4">
+    <Container
+      fluid
+      className="py-4"
+      style={{ fontFamily: "'Roboto', sans-serif" }}
+    >
       <Breadcrumb
         title="Hồ sơ Sức khỏe"
         items={[
@@ -110,7 +130,7 @@ const HealthRecordListPage = () => {
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <small className="text-muted">Tổng số</small>
-                  <h4 className="mb-0">{healthRecords.length}</h4>
+                  <h4 className="mb-0">{records.length}</h4>
                 </div>
                 <div className="stat-icon bg-primary">
                   <i className="fas fa-heartbeat"></i>
@@ -176,7 +196,7 @@ const HealthRecordListPage = () => {
         </Col>
       </Row>
 
-      {healthRecords.length > 0 ? (
+      {records.length > 0 ? (
         <Tab.Container defaultActiveKey="all">
           <Card>
             <Card.Header className="bg-white">
@@ -184,7 +204,7 @@ const HealthRecordListPage = () => {
                 <Nav.Item>
                   <Nav.Link eventKey="all">
                     <i className="fas fa-list me-2"></i>
-                    Tất cả ({healthRecords.length})
+                    Tất cả ({records.length})
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
@@ -217,7 +237,7 @@ const HealthRecordListPage = () => {
               <Tab.Content>
                 <Tab.Pane eventKey="all">
                   <Row className="g-4">
-                    {healthRecords.map((record) => (
+                    {records.map((record) => (
                       <Col key={record.id} xs={12} sm={6} lg={4}>
                         <HealthCard
                           healthRecord={record}
@@ -229,22 +249,24 @@ const HealthRecordListPage = () => {
                     ))}
                   </Row>
                 </Tab.Pane>
-                {Object.entries(recordsByStatus).map(([status, records]) => (
-                  <Tab.Pane key={status} eventKey={status}>
-                    <Row className="g-4">
-                      {records.map((record) => (
-                        <Col key={record.id} xs={12} sm={6} lg={4}>
-                          <HealthCard
-                            healthRecord={record}
-                            onView={handleView}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                          />
-                        </Col>
-                      ))}
-                    </Row>
-                  </Tab.Pane>
-                ))}
+                {Object.entries(recordsByStatus).map(
+                  ([status, statusRecords]) => (
+                    <Tab.Pane key={status} eventKey={status}>
+                      <Row className="g-4">
+                        {statusRecords.map((record) => (
+                          <Col key={record.id} xs={12} sm={6} lg={4}>
+                            <HealthCard
+                              healthRecord={record}
+                              onView={handleView}
+                              onEdit={handleEdit}
+                              onDelete={handleDelete}
+                            />
+                          </Col>
+                        ))}
+                      </Row>
+                    </Tab.Pane>
+                  )
+                )}
               </Tab.Content>
             </Card.Body>
           </Card>

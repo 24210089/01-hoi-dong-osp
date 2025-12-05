@@ -163,7 +163,7 @@ const SearchableSelect = ({
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option, index) => (
                 <div
-                  key={option.value || index}
+                  key={`${option.value}-${index}`}
                   className={`searchable-select-option ${
                     String(value) === String(option.value) ? "selected" : ""
                   }`}

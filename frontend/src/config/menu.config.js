@@ -194,6 +194,12 @@ export const menuConfig = [
         icon: "fas fa-plus-circle",
         path: "/danh-gia/create",
       },
+      {
+        id: "danh-gia-timeline",
+        label: "Timeline Đánh Giá",
+        icon: "fas fa-stream",
+        path: "/danh-gia/timeline",
+      },
     ],
   },
   {

@@ -52,6 +52,19 @@ const EvaluationCard = ({ evaluation, onView, onEdit, onDelete }) => {
           {evaluation.period}
         </h6>
 
+        {/* Sister Name */}
+        {evaluation.sister_name && (
+          <p className="evaluation-sister text-muted mb-2">
+            <i className="fas fa-user text-info me-2"></i>
+            <span className="fw-semibold">{evaluation.sister_name}</span>
+            {evaluation.sister_code && (
+              <span className="text-muted ms-1">
+                ({evaluation.sister_code})
+              </span>
+            )}
+          </p>
+        )}
+
         <p className="evaluation-date text-muted mb-3">
           <i className="fas fa-clock me-2"></i>
           {formatDate(evaluation.evaluation_date)}
@@ -78,11 +91,13 @@ const EvaluationCard = ({ evaluation, onView, onEdit, onDelete }) => {
         )}
 
         {/* Evaluator */}
-        {evaluation.evaluator && (
+        {(evaluation.evaluator_name || evaluation.evaluator) && (
           <div className="evaluator-info">
             <i className="fas fa-user-tie text-success me-2"></i>
             <span className="text-muted">Người đánh giá: </span>
-            <span className="fw-semibold">{evaluation.evaluator}</span>
+            <span className="fw-semibold">
+              {evaluation.evaluator_name || evaluation.evaluator}
+            </span>
           </div>
         )}
 

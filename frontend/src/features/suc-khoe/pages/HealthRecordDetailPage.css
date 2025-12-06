@@ -120,7 +120,11 @@
 }
 
 .health-info-card .card-header.metrics-header {
-  background: linear-gradient(135deg, var(--health-primary) 0%, var(--health-primary-light) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--health-primary) 0%,
+    var(--health-primary-light) 100%
+  );
 }
 
 .health-info-card .card-header.metrics-header i {
@@ -128,7 +132,11 @@
 }
 
 .health-info-card .card-header.diagnosis-header {
-  background: linear-gradient(135deg, var(--health-primary) 0%, var(--health-primary-light) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--health-primary) 0%,
+    var(--health-primary-light) 100%
+  );
   color: var(--health-white);
 }
 
@@ -137,7 +145,11 @@
 }
 
 .health-info-card .card-header.documents-header {
-  background: linear-gradient(135deg, var(--health-primary) 0%, var(--health-primary-light) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--health-primary) 0%,
+    var(--health-primary-light) 100%
+  );
 }
 
 .health-info-card .card-header.documents-header i {
@@ -145,7 +157,11 @@
 }
 
 .health-info-card .card-header.system-header {
-  background: linear-gradient(135deg, var(--health-primary) 0%, var(--health-primary-light) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--health-primary) 0%,
+    var(--health-primary-light) 100%
+  );
   color: var(--health-white);
 }
 

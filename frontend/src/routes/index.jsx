@@ -50,6 +50,7 @@ import {
   EvaluationListPage,
   EvaluationDetailPage,
   EvaluationFormPage,
+  EvaluationTimelinePage,
 } from "@features/danh-gia";
 
 // Hoc Van (Education)
@@ -210,6 +211,14 @@ const AppRoutes = () => {
 
           {/* Danh Gia (Evaluation) */}
           <Route path="/danh-gia" element={<EvaluationListPage />} />
+          <Route
+            path="/danh-gia/timeline"
+            element={<EvaluationTimelinePage />}
+          />
+          <Route
+            path="/danh-gia/timeline/:sisterId"
+            element={<EvaluationTimelinePage />}
+          />
           <Route path="/danh-gia/create" element={<EvaluationFormPage />} />
           <Route path="/danh-gia/:id" element={<EvaluationDetailPage />} />
           <Route path="/danh-gia/:id/edit" element={<EvaluationFormPage />} />

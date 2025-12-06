@@ -17,6 +17,7 @@ import { formatDate, calculateAge, resolveMediaUrl } from "@utils";
 import { JOURNEY_STAGE_LABELS } from "@utils/constants";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
+import "../styles/sister.css";
 
 const SisterDetailPage = () => {
   const { id } = useParams();
@@ -252,6 +253,12 @@ const SisterDetailPage = () => {
                     <Nav.Link eventKey="health">
                       <i className="fas fa-heartbeat me-2"></i>
                       Sức khỏe
+                    </Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item>
+                    <Nav.Link eventKey="evaluation">
+                      <i className="fas fa-clipboard-check me-2"></i>
+                      Đánh giá
                     </Nav.Link>
                   </Nav.Item>
                 </Nav>
@@ -588,59 +595,59 @@ const SisterDetailPage = () => {
                     <div className="d-flex justify-content-between align-items-center mb-3">
                       <h5 className="mb-0">Học vấn</h5>
                       <Button
-                        variant="primary"
+                        variant="outline-primary"
                         size="sm"
-                        onClick={() => navigate(`/nu-tu/${id}/hoc-van/create`)}
+                        onClick={() => navigate(`/hoc-van/timeline/${id}`)}
                       >
-                        + Thêm học vấn
+                        <i className="fas fa-external-link-alt me-2"></i>
+                        Xem chi tiết Timeline
                       </Button>
                     </div>
-                    {sister.education && sister.education.length > 0 ? (
-                      <div className="education-list">
-                        {sister.education.map((edu, index) => (
-                          <Card key={edu.id || index} className="mb-3">
-                            <Card.Body>
-                              <div className="d-flex justify-content-between align-items-start">
-                                <div>
-                                  <h6 className="mb-1">
-                                    {edu.level === "doctorate" && "Tiến sĩ"}
-                                    {edu.level === "master" && "Thạc sĩ"}
-                                    {edu.level === "bachelor" && "Cử nhân"}
-                                    {edu.level === "associate" && "Cao đẳng"}
-                                    {edu.level === "vocational" && "Trung cấp"}
-                                    {edu.level === "high_school" && "THPT"}
-                                    {edu.level === "certificate" && "Chứng chỉ"}
-                                    {edu.level === "other" && "Khác"}
-                                    {![
-                                      "doctorate",
-                                      "master",
-                                      "bachelor",
-                                      "associate",
-                                      "vocational",
-                                      "high_school",
-                                      "certificate",
-                                      "other",
-                                    ].includes(edu.level) && edu.level}
-                                  </h6>
-                                  <p className="mb-1 text-primary">
-                                    {edu.institution}
-                                  </p>
-                                  {edu.major && (
-                                    <p className="mb-1">
-                                      <small className="text-muted">
-                                        Chuyên ngành:{" "}
-                                      </small>
-                                      {edu.major}
-                                    </p>
-                                  )}
-                                  <small className="text-muted">
-                                    {formatDate(edu.start_date)}
-                                    {edu.end_date
-                                      ? ` - ${formatDate(edu.end_date)}`
-                                      : " - Hiện tại"}
-                                  </small>
-                                </div>
-                                <div className="d-flex flex-column align-items-end gap-2">
+                    <div className="timeline">
+                      {sister.education && sister.education.length > 0 ? (
+                        [...sister.education]
+                          .sort(
+                            (a, b) =>
+                              new Date(a.start_date) - new Date(b.start_date)
+                          )
+                          .map((edu, index) => (
+                            <div
+                              key={edu.id || index}
+                              className="timeline-item"
+                            >
+                              <div className="timeline-marker"></div>
+                              <div className="timeline-content">
+                                <div className="d-flex justify-content-between align-items-start mb-2">
+                                  <div>
+                                    <h6 className="mb-1">
+                                      {edu.level === "doctorate" && "Tiến sĩ"}
+                                      {edu.level === "master" && "Thạc sĩ"}
+                                      {edu.level === "bachelor" && "Cử nhân"}
+                                      {edu.level === "associate" && "Cao đẳng"}
+                                      {edu.level === "vocational" &&
+                                        "Trung cấp"}
+                                      {edu.level === "high_school" && "THPT"}
+                                      {edu.level === "certificate" &&
+                                        "Chứng chỉ"}
+                                      {edu.level === "other" && "Khác"}
+                                      {![
+                                        "doctorate",
+                                        "master",
+                                        "bachelor",
+                                        "associate",
+                                        "vocational",
+                                        "high_school",
+                                        "certificate",
+                                        "other",
+                                      ].includes(edu.level) && edu.level}
+                                    </h6>
+                                    <small className="text-muted">
+                                      {formatDate(edu.start_date)}
+                                      {edu.end_date
+                                        ? ` - ${formatDate(edu.end_date)}`
+                                        : " - Hiện tại"}
+                                    </small>
+                                  </div>
                                   <Badge
                                     bg={
                                       edu.status === "da_tot_nghiep"
@@ -663,150 +670,243 @@ const SisterDetailPage = () => {
                                     ].includes(edu.status) &&
                                       (edu.graduation_year || "Đang học")}
                                   </Badge>
-                                  <div className="d-flex gap-1">
-                                    <Button
-                                      variant="outline-primary"
-                                      size="sm"
-                                      onClick={() =>
-                                        navigate(`/hoc-van/${edu.id}`)
-                                      }
-                                    >
-                                      Xem
-                                    </Button>
-                                    <Button
-                                      variant="outline-secondary"
-                                      size="sm"
-                                      onClick={() =>
-                                        navigate(`/hoc-van/${edu.id}/edit`)
-                                      }
-                                    >
-                                      Sửa
-                                    </Button>
-                                  </div>
                                 </div>
+                                <p className="mb-1">
+                                  <i className="fas fa-university me-1"></i>
+                                  {edu.institution}
+                                </p>
+                                {edu.major && (
+                                  <p className="mb-1 small">
+                                    <i className="fas fa-book me-1"></i>
+                                    Chuyên ngành: {edu.major}
+                                  </p>
+                                )}
+                                {edu.gpa && (
+                                  <p className="mb-0 small text-muted">
+                                    GPA: <strong>{edu.gpa}</strong>
+                                  </p>
+                                )}
                               </div>
-                              {edu.gpa && (
-                                <p className="mb-0 mt-2">
-                                  <small className="text-muted">GPA: </small>
-                                  <strong>{edu.gpa}</strong>
-                                </p>
-                              )}
-                              {edu.thesis_title && (
-                                <p className="mb-0 mt-1">
-                                  <small className="text-muted">
-                                    Luận văn:{" "}
-                                  </small>
-                                  {edu.thesis_title}
-                                </p>
-                              )}
-                            </Card.Body>
-                          </Card>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4">
-                        <p className="text-muted mb-3">
-                          Chưa có thông tin học vấn
-                        </p>
-                        <Button
-                          variant="outline-primary"
-                          onClick={() =>
-                            navigate(`/nu-tu/${id}/hoc-van/create`)
-                          }
-                        >
-                          Thêm học vấn đầu tiên
-                        </Button>
-                      </div>
-                    )}
+                            </div>
+                          ))
+                      ) : (
+                        <p className="text-muted">Chưa có thông tin học vấn</p>
+                      )}
+                    </div>
                   </Tab.Pane>
 
                   {/* Mission Tab */}
                   <Tab.Pane eventKey="mission">
-                    <h5 className="mb-3">Sứ vụ</h5>
-                    {sister.missions && sister.missions.length > 0 ? (
-                      <div className="mission-list">
-                        {sister.missions.map((mission, index) => (
-                          <Card key={index} className="mb-3">
-                            <Card.Body>
-                              <div className="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                  <h6 className="mb-1">{mission.position}</h6>
-                                  <p className="mb-1">{mission.organization}</p>
-                                  <small className="text-muted">
-                                    {formatDate(mission.start_date)}
-                                    {mission.end_date
-                                      ? ` - ${formatDate(mission.end_date)}`
-                                      : " - Hiện tại"}
-                                  </small>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <h5 className="mb-0">Sứ vụ</h5>
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        onClick={() => navigate(`/su-vu/timeline/${id}`)}
+                      >
+                        <i className="fas fa-external-link-alt me-2"></i>
+                        Xem chi tiết Timeline
+                      </Button>
+                    </div>
+                    <div className="timeline">
+                      {sister.missions && sister.missions.length > 0 ? (
+                        [...sister.missions]
+                          .sort(
+                            (a, b) =>
+                              new Date(a.start_date) - new Date(b.start_date)
+                          )
+                          .map((mission, index) => (
+                            <div
+                              key={mission.id || index}
+                              className="timeline-item"
+                            >
+                              <div className="timeline-marker"></div>
+                              <div className="timeline-content">
+                                <div className="d-flex justify-content-between align-items-start mb-2">
+                                  <div>
+                                    <h6 className="mb-1">{mission.position}</h6>
+                                    <small className="text-muted">
+                                      {formatDate(mission.start_date)}
+                                      {mission.end_date
+                                        ? ` - ${formatDate(mission.end_date)}`
+                                        : " - Hiện tại"}
+                                    </small>
+                                  </div>
+                                  {mission.type && (
+                                    <Badge bg="success">{mission.type}</Badge>
+                                  )}
                                 </div>
-                                <Badge bg="success">{mission.type}</Badge>
-                              </div>
-                              {mission.description && (
-                                <p className="mb-0 text-muted">
-                                  {mission.description}
+                                <p className="mb-1">
+                                  <i className="fas fa-building me-1"></i>
+                                  {mission.organization}
                                 </p>
-                              )}
-                            </Card.Body>
-                          </Card>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-muted">Chưa có thông tin sứ vụ</p>
-                    )}
+                                {mission.description && (
+                                  <p className="mb-0 text-muted small">
+                                    {mission.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                      ) : (
+                        <p className="text-muted">Chưa có thông tin sứ vụ</p>
+                      )}
+                    </div>
+                  </Tab.Pane>
+
+                  {/* Evaluation Tab */}
+                  <Tab.Pane eventKey="evaluation">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <h5 className="mb-0">Đánh giá</h5>
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        onClick={() => navigate(`/danh-gia/timeline/${id}`)}
+                      >
+                        <i className="fas fa-external-link-alt me-2"></i>
+                        Xem chi tiết Timeline
+                      </Button>
+                    </div>
+                    <div className="timeline">
+                      {sister.evaluations && sister.evaluations.length > 0 ? (
+                        [...sister.evaluations]
+                          .sort(
+                            (a, b) =>
+                              new Date(b.evaluation_date || b.created_at) -
+                              new Date(a.evaluation_date || a.created_at)
+                          )
+                          .map((evaluation, index) => (
+                            <div
+                              key={evaluation.id || index}
+                              className="timeline-item"
+                            >
+                              <div className="timeline-marker"></div>
+                              <div className="timeline-content">
+                                <div className="d-flex justify-content-between align-items-start mb-2">
+                                  <div>
+                                    <h6 className="mb-1">
+                                      {evaluation.period ||
+                                        evaluation.evaluation_type ||
+                                        "Đánh giá"}
+                                    </h6>
+                                    <small className="text-muted">
+                                      {formatDate(evaluation.evaluation_date)}
+                                    </small>
+                                  </div>
+                                  {evaluation.overall_rating && (
+                                    <Badge
+                                      bg={
+                                        evaluation.overall_rating >= 90
+                                          ? "success"
+                                          : evaluation.overall_rating >= 75
+                                          ? "info"
+                                          : evaluation.overall_rating >= 60
+                                          ? "warning"
+                                          : "danger"
+                                      }
+                                    >
+                                      <i className="fas fa-star me-1"></i>
+                                      {evaluation.overall_rating}/100
+                                    </Badge>
+                                  )}
+                                </div>
+                                {evaluation.evaluator_name && (
+                                  <p className="mb-1 small">
+                                    <i className="fas fa-user-tie me-1"></i>
+                                    Người đánh giá: {evaluation.evaluator_name}
+                                  </p>
+                                )}
+                                {evaluation.strengths && (
+                                  <p className="mb-1 small">
+                                    <i className="fas fa-plus-circle text-success me-1"></i>
+                                    {evaluation.strengths}
+                                  </p>
+                                )}
+                                {evaluation.weaknesses && (
+                                  <p className="mb-0 text-muted small">
+                                    <i className="fas fa-minus-circle text-danger me-1"></i>
+                                    {evaluation.weaknesses}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                      ) : (
+                        <p className="text-muted">Chưa có đánh giá</p>
+                      )}
+                    </div>
                   </Tab.Pane>
 
                   {/* Health Tab */}
                   <Tab.Pane eventKey="health">
-                    <h5 className="mb-3">Sức khỏe</h5>
-                    {sister.health_records &&
-                    sister.health_records.length > 0 ? (
-                      <div className="health-list">
-                        {sister.health_records.map((record, index) => (
-                          <Card key={index} className="mb-3">
-                            <Card.Body>
-                              <div className="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                  <h6 className="mb-1">
-                                    Khám ngày {formatDate(record.check_date)}
-                                  </h6>
-                                  <p className="mb-1">
-                                    <strong>Cơ sở y tế:</strong>{" "}
-                                    {record.facility}
-                                  </p>
-                                  <p className="mb-1">
-                                    <strong>Bác sĩ:</strong> {record.doctor}
-                                  </p>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <h5 className="mb-0">Sức khỏe</h5>
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        onClick={() => navigate(`/suc-khoe/timeline/${id}`)}
+                      >
+                        <i className="fas fa-external-link-alt me-2"></i>
+                        Xem chi tiết Timeline
+                      </Button>
+                    </div>
+                    <div className="timeline">
+                      {sister.health_records &&
+                      sister.health_records.length > 0 ? (
+                        [...sister.health_records]
+                          .sort(
+                            (a, b) =>
+                              new Date(b.check_date) - new Date(a.check_date)
+                          )
+                          .map((record, index) => (
+                            <div
+                              key={record.id || index}
+                              className="timeline-item"
+                            >
+                              <div className="timeline-marker"></div>
+                              <div className="timeline-content">
+                                <div className="d-flex justify-content-between align-items-start mb-2">
+                                  <div>
+                                    <h6 className="mb-1">
+                                      Khám ngày {formatDate(record.check_date)}
+                                    </h6>
+                                    <small className="text-muted">
+                                      {record.facility}
+                                    </small>
+                                  </div>
+                                  <Badge
+                                    bg={getHealthStatusColor(
+                                      record.health_status
+                                    )}
+                                  >
+                                    {record.health_status}
+                                  </Badge>
                                 </div>
-                                <Badge
-                                  bg={getHealthStatusColor(
-                                    record.health_status
-                                  )}
-                                >
-                                  {record.health_status}
-                                </Badge>
+                                {record.doctor && (
+                                  <p className="mb-1 small">
+                                    <i className="fas fa-user-md me-1"></i>
+                                    Bác sĩ: {record.doctor}
+                                  </p>
+                                )}
+                                {record.diagnosis && (
+                                  <p className="mb-1 small">
+                                    <strong>Chẩn đoán:</strong>{" "}
+                                    {record.diagnosis}
+                                  </p>
+                                )}
+                                {record.treatment && (
+                                  <p className="mb-0 text-muted small">
+                                    <strong>Điều trị:</strong>{" "}
+                                    {record.treatment}
+                                  </p>
+                                )}
                               </div>
-                              {record.diagnosis && (
-                                <div className="mb-2">
-                                  <strong>Chẩn đoán:</strong> {record.diagnosis}
-                                </div>
-                              )}
-                              {record.treatment && (
-                                <div className="mb-2">
-                                  <strong>Điều trị:</strong> {record.treatment}
-                                </div>
-                              )}
-                              {record.notes && (
-                                <div className="text-muted">
-                                  <strong>Ghi chú:</strong> {record.notes}
-                                </div>
-                              )}
-                            </Card.Body>
-                          </Card>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-muted">Chưa có hồ sơ sức khỏe</p>
-                    )}
+                            </div>
+                          ))
+                      ) : (
+                        <p className="text-muted">Chưa có hồ sơ sức khỏe</p>
+                      )}
+                    </div>
                   </Tab.Pane>
                 </Tab.Content>
               </Card.Body>

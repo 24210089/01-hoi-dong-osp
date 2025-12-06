@@ -26,7 +26,7 @@ const validationSchema = Yup.object({
   evaluation_type: Yup.string().required("Vui lòng chọn loại đánh giá"),
   period: Yup.string().required("Vui lòng nhập kỳ đánh giá"),
   evaluation_date: Yup.date().required("Vui lòng chọn ngày đánh giá"),
-  evaluator: Yup.string().required("Vui lòng nhập tên người đánh giá"),
+  evaluator: Yup.number().required("Vui lòng chọn người đánh giá"),
 });
 
 const EvaluationFormPage = () => {
@@ -85,6 +85,13 @@ const EvaluationFormPage = () => {
       const response = await evaluationService.getById(id);
       if (response.success) {
         const evaluation = response.data;
+
+        // Convert evaluator to number if it's a numeric string
+        let evaluatorValue = evaluation.evaluator || "";
+        if (evaluatorValue && !isNaN(evaluatorValue)) {
+          evaluatorValue = Number(evaluatorValue);
+        }
+
         formik.setValues({
           sister_id: evaluation.sister_id || "",
           evaluation_type: evaluation.type || evaluation.evaluation_type || "",
@@ -92,7 +99,7 @@ const EvaluationFormPage = () => {
           evaluation_date: evaluation.evaluation_date
             ? evaluation.evaluation_date.split("T")[0]
             : "",
-          evaluator: evaluation.evaluator || "",
+          evaluator: evaluatorValue,
           spiritual_life: evaluation.spiritual_life || "",
           community_life: evaluation.community_life || "",
           apostolic_work: evaluation.apostolic_work || "",
@@ -103,7 +110,7 @@ const EvaluationFormPage = () => {
           recommendations: evaluation.recommendations || "",
           notes: evaluation.notes || "",
         });
-        
+
         // Load documents if available
         if (evaluation.documents) {
           try {
@@ -131,7 +138,11 @@ const EvaluationFormPage = () => {
       setError(null);
 
       const payload = {
-        ...values,
+        sister_id: values.sister_id,
+        evaluation_type: values.evaluation_type,
+        period: values.period,
+        evaluation_date: values.evaluation_date,
+        evaluator: values.evaluator ? Number(values.evaluator) : null,
         spiritual_life: values.spiritual_life
           ? Number(values.spiritual_life)
           : null,
@@ -147,6 +158,10 @@ const EvaluationFormPage = () => {
         overall_rating: values.overall_rating
           ? Number(values.overall_rating)
           : null,
+        strengths: values.strengths,
+        weaknesses: values.weaknesses,
+        recommendations: values.recommendations,
+        notes: values.notes,
         documents: documents.length > 0 ? JSON.stringify(documents) : null,
       };
 
@@ -182,7 +197,11 @@ const EvaluationFormPage = () => {
   }
 
   const handleCancel = () => {
-    if (window.confirm("Bạn có chắc chắn muốn hủy? Các thay đổi sẽ không được lưu.")) {
+    if (
+      window.confirm(
+        "Bạn có chắc chắn muốn hủy? Các thay đổi sẽ không được lưu."
+      )
+    ) {
       toast.info("Đã hủy thao tác");
       navigate(sisterId ? `/nu-tu/${sisterId}/danh-gia` : "/danh-gia");
     }
@@ -278,11 +297,10 @@ const EvaluationFormPage = () => {
                       options={(sisters || []).map((sister) => ({
                         value: sister.id,
                         label:
-                          `${
-                            sister.saint_name ? `${sister.saint_name} ` : ""
-                          }${sister.birth_name || ""}${
-                            sister.code ? ` (${sister.code})` : ""
-                          }`.trim() || `Nữ tu #${sister.id}`,
+                          `${sister.saint_name ? `${sister.saint_name} ` : ""}${
+                            sister.birth_name || ""
+                          }${sister.code ? ` (${sister.code})` : ""}`.trim() ||
+                          `Nữ tu #${sister.id}`,
                       }))}
                     />
                     {formik.touched.sister_id && formik.errors.sister_id && (
@@ -347,7 +365,9 @@ const EvaluationFormPage = () => {
                       label="Ngày đánh giá"
                       name="evaluation_date"
                       value={formik.values.evaluation_date}
-                      onChange={formik.handleChange}
+                      onChange={(isoDate) =>
+                        formik.setFieldValue("evaluation_date", isoDate)
+                      }
                       onBlur={formik.handleBlur}
                       required
                       placeholder="dd/mm/yyyy"
@@ -376,11 +396,10 @@ const EvaluationFormPage = () => {
                       options={(sisters || []).map((sister) => ({
                         value: sister.id,
                         label:
-                          `${
-                            sister.saint_name ? `${sister.saint_name} ` : ""
-                          }${sister.birth_name || ""}${
-                            sister.code ? ` (${sister.code})` : ""
-                          }`.trim() || `Nữ tu #${sister.id}`,
+                          `${sister.saint_name ? `${sister.saint_name} ` : ""}${
+                            sister.birth_name || ""
+                          }${sister.code ? ` (${sister.code})` : ""}`.trim() ||
+                          `Nữ tu #${sister.id}`,
                       }))}
                     />
                     {formik.touched.evaluator && formik.errors.evaluator && (

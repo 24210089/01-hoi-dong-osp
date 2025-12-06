@@ -124,6 +124,178 @@ const logAudit = async (req, action, recordId, oldValue, newValue) => {
   }
 };
 
+const getEvaluations = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 12,
+      search = "",
+      sortBy = "evaluation_date",
+      sortOrder = "desc",
+    } = req.query;
+
+    const offset = (page - 1) * limit;
+
+    // Build SQL query manually for complex search and sorting
+    let sql = `SELECT e.*, 
+               s.saint_name, s.birth_name, s.code as sister_code,
+               ev.saint_name as evaluator_saint_name, 
+               ev.birth_name as evaluator_birth_name 
+               FROM evaluations e 
+               LEFT JOIN sisters s ON e.sister_id = s.id 
+               LEFT JOIN sisters ev ON CAST(e.evaluator AS UNSIGNED) = ev.id
+               WHERE 1=1`;
+
+    const params = [];
+
+    // Add search filter
+    if (search && search.trim()) {
+      sql += ` AND (
+        e.period LIKE ? OR 
+        s.saint_name LIKE ? OR 
+        s.birth_name LIKE ? OR
+        ev.saint_name LIKE ? OR 
+        ev.birth_name LIKE ?
+      )`;
+      const searchTerm = `%${search.trim()}%`;
+      params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
+    }
+
+    // Add sorting
+    const validSortFields = [
+      "evaluation_date",
+      "period",
+      "created_at",
+      "overall_rating",
+    ];
+    const sortField = validSortFields.includes(sortBy)
+      ? sortBy
+      : "evaluation_date";
+    const sortDirection = sortOrder.toLowerCase() === "asc" ? "ASC" : "DESC";
+    sql += ` ORDER BY e.${sortField} ${sortDirection}`;
+
+    // Add pagination
+    sql += ` LIMIT ? OFFSET ?`;
+    params.push(parseInt(limit), parseInt(offset));
+
+    const evaluations = await EvaluationModel.executeQuery(sql, params);
+
+    // Format evaluator name for each evaluation
+    const formattedEvaluations = evaluations.map((e) => {
+      let evaluatorName = "-";
+
+      // Check if evaluator is a number (sister ID) and we have sister info
+      if (e.evaluator_saint_name || e.evaluator_birth_name) {
+        evaluatorName = `${e.evaluator_saint_name || ""} ${
+          e.evaluator_birth_name || ""
+        }`.trim();
+      }
+      // If evaluator exists but no sister info found, it might be a text name or invalid ID
+      else if (e.evaluator) {
+        evaluatorName = e.evaluator;
+      }
+
+      // Format sister name
+      let sisterName = "-";
+      if (e.saint_name || e.birth_name) {
+        sisterName = `${e.saint_name || ""} ${e.birth_name || ""}`.trim();
+      }
+
+      return {
+        ...e,
+        evaluator_name: evaluatorName,
+        sister_name: sisterName,
+      };
+    });
+
+    // Count total
+    let countSql = `SELECT COUNT(*) as total 
+                    FROM evaluations e 
+                    LEFT JOIN sisters s ON e.sister_id = s.id 
+                    LEFT JOIN sisters ev ON CAST(e.evaluator AS UNSIGNED) = ev.id
+                    WHERE 1=1`;
+    const countParams = [];
+
+    if (search && search.trim()) {
+      countSql += ` AND (
+        e.period LIKE ? OR 
+        s.saint_name LIKE ? OR 
+        s.birth_name LIKE ? OR
+        ev.saint_name LIKE ? OR 
+        ev.birth_name LIKE ?
+      )`;
+      const searchTerm = `%${search.trim()}%`;
+      countParams.push(
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm,
+        searchTerm
+      );
+    }
+
+    const countResult = await EvaluationModel.executeQuery(
+      countSql,
+      countParams
+    );
+    const total = countResult[0]?.total || 0;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        items: formattedEvaluations,
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("getEvaluations error:", error.message);
+    return res.status(500).json({ message: "Failed to fetch evaluations" });
+  }
+};
+
+const getEvaluationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const evaluation = await EvaluationModel.findById(id);
+
+    if (!evaluation) {
+      return res.status(404).json({ message: "Evaluation not found" });
+    }
+
+    // Get sister information
+    const sister = await SisterModel.findById(evaluation.sister_id);
+
+    // Get evaluator information (if evaluator is a sister ID)
+    let evaluatorName = evaluation.evaluator || "-";
+    if (evaluation.evaluator && !isNaN(evaluation.evaluator)) {
+      const evaluatorSister = await SisterModel.findById(evaluation.evaluator);
+      if (evaluatorSister) {
+        evaluatorName = `${evaluatorSister.saint_name || ""} ${
+          evaluatorSister.birth_name || ""
+        }`.trim();
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        ...evaluation,
+        sister_name: sister
+          ? `${sister.saint_name || ""} ${sister.birth_name || ""}`.trim()
+          : "",
+        sister_code: sister?.code,
+        evaluator_name: evaluatorName,
+      },
+    });
+  } catch (error) {
+    console.error("getEvaluationById error:", error.message);
+    return res.status(500).json({ message: "Failed to fetch evaluation" });
+  }
+};
+
 const getEvaluationsBySister = async (req, res) => {
   try {
     const { sisterId } = req.params;
@@ -280,10 +452,25 @@ const createEvaluation = async (req, res) => {
 const buildUpdatePayload = (body = {}) => {
   const payload = {};
   const mutableFields = [
+    // New fields
+    "evaluation_type",
+    "period",
+    "evaluation_date",
+    "evaluator",
+    "spiritual_life",
+    "community_life",
+    "apostolic_work",
+    "personal_development",
+    "overall_rating",
+    "strengths",
+    "weaknesses",
+    "recommendations",
+    "notes",
+    "documents",
+    // Legacy fields
     "evaluation_period",
     "evaluator_id",
     "general_comments",
-    "recommendations",
   ];
 
   mutableFields.forEach((field) => {
@@ -292,6 +479,7 @@ const buildUpdatePayload = (body = {}) => {
     }
   });
 
+  // Handle legacy scores if present
   const scoreSource =
     body.scores && typeof body.scores === "object" ? body.scores : body;
   const scores = extractScores(scoreSource);
@@ -317,6 +505,11 @@ const updateEvaluation = async (req, res) => {
     }
 
     const payload = buildUpdatePayload(req.body);
+
+    // Debug log
+    console.log("Update payload:", JSON.stringify(payload, null, 2));
+    console.log("evaluation_date in payload:", payload.evaluation_date);
+
     if (!Object.keys(payload).length) {
       return res.status(400).json({ message: "No fields provided for update" });
     }
@@ -331,10 +524,16 @@ const updateEvaluation = async (req, res) => {
     const updated = await EvaluationModel.update(id, payload);
     await logAudit(req, "UPDATE", id, existing, updated);
 
-    return res.status(200).json({ evaluation: updated });
+    return res.status(200).json({
+      success: true,
+      data: updated,
+    });
   } catch (error) {
     console.error("updateEvaluation error:", error.message);
-    return res.status(500).json({ message: "Failed to update evaluation" });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update evaluation",
+    });
   }
 };
 
@@ -503,6 +702,8 @@ const exportEvaluationPDF = async (req, res) => {
 };
 
 module.exports = {
+  getEvaluations,
+  getEvaluationById,
   getEvaluationsBySister,
   createEvaluation,
   updateEvaluation,

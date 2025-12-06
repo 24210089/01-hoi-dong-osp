@@ -127,7 +127,9 @@ const DepartureDetailPage = () => {
                     <i className="fas fa-plane-departure me-2 text-accent"></i>
                     {labelMap[departure.type] || departure.type}
                   </h5>
-                  {fullName && <small className="departure-subtitle">{fullName}</small>}
+                  {fullName && (
+                    <small className="departure-subtitle">{fullName}</small>
+                  )}
                 </div>
                 <div className="d-flex gap-2 flex-wrap justify-content-end">
                   <Badge bg="info" className="badge-soft">
@@ -152,7 +154,9 @@ const DepartureDetailPage = () => {
                   <Col md={6}>
                     <div className="departure-detail-item">
                       <div className="label">Ngày đi</div>
-                      <div className="value">{formatDate(departure.departure_date)}</div>
+                      <div className="value">
+                        {formatDate(departure.departure_date)}
+                      </div>
                     </div>
                   </Col>
                   <Col md={6}>
@@ -169,20 +173,26 @@ const DepartureDetailPage = () => {
                     <div className="departure-detail-item">
                       <div className="label">Ngày về</div>
                       <div className="value">
-                        {departure.return_date ? formatDate(departure.return_date) : "Chưa về"}
+                        {departure.return_date
+                          ? formatDate(departure.return_date)
+                          : "Chưa về"}
                       </div>
                     </div>
                   </Col>
                   <Col md={6}>
                     <div className="departure-detail-item">
                       <div className="label">Địa điểm</div>
-                      <div className="value">{departure.destination || "--"}</div>
+                      <div className="value">
+                        {departure.destination || "--"}
+                      </div>
                     </div>
                   </Col>
                   <Col md={6}>
                     <div className="departure-detail-item">
                       <div className="label">Liên hệ</div>
-                      <div className="value">{departure.contact_phone || "--"}</div>
+                      <div className="value">
+                        {departure.contact_phone || "--"}
+                      </div>
                       <div className="text-muted small">
                         {departure.contact_address || ""}
                       </div>
@@ -191,7 +201,9 @@ const DepartureDetailPage = () => {
                   <Col md={6}>
                     <div className="departure-detail-item">
                       <div className="label">Người duyệt</div>
-                      <div className="value">{departure.approved_by || "--"}</div>
+                      <div className="value">
+                        {departure.approved_by || "--"}
+                      </div>
                     </div>
                   </Col>
                   <Col md={12}>
@@ -233,7 +245,9 @@ const DepartureDetailPage = () => {
                               {doc.name || doc.originalname || url}
                             </a>
                           ) : (
-                            <span>{doc.name || doc.originalname || "Tài liệu"}</span>
+                            <span>
+                              {doc.name || doc.originalname || "Tài liệu"}
+                            </span>
                           )}
                         </li>
                       );

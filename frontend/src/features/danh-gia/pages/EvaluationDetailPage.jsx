@@ -16,6 +16,7 @@ import { evaluationService } from "@services";
 import { formatDate } from "@utils";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
+import "./EvaluationDetailPage.css";
 
 const EvaluationDetailPage = () => {
   const { id } = useParams();
@@ -121,299 +122,359 @@ const EvaluationDetailPage = () => {
     },
   ];
 
-  return (
-    <Container fluid className="py-4">
-      {/* Breadcrumb */}
-      <Breadcrumb
-        title="Chi tiết Đánh giá"
-        items={[
-          { label: "Đánh giá", link: "/danh-gia" },
-          { label: "Chi tiết" },
-        ]}
-      />
+  const evaluationType = evaluation.evaluation_type || "";
+  const typeLabels = {
+    annual: "Đánh giá năm",
+    semi_annual: "Đánh giá 6 tháng",
+    quarterly: "Đánh giá quý",
+    monthly: "Đánh giá tháng",
+    special: "Đánh giá đặc biệt",
+  };
 
-      {/* Header */}
-      <div className="d-flex justify-content-end align-items-center mb-4">
-        <div className="d-flex gap-2">
-          <Button variant="success" onClick={handleEdit}>
-            <i className="fas fa-edit me-2"></i>
-            Chỉnh sửa
-          </Button>
-          <Button variant="danger" onClick={handleDelete}>
-            <i className="fas fa-trash me-2"></i>
-            Xóa
-          </Button>
-          <Button variant="secondary" onClick={() => navigate("/danh-gia")}>
+  return (
+    <div className="evaluation-detail-page">
+      <Container fluid className="py-4">
+        <Breadcrumb
+          title="Chi tiết Đánh giá"
+          items={[
+            { label: "Đánh giá", link: "/danh-gia" },
+            { label: evaluation.sister_name || "Chi tiết" },
+          ]}
+        />
+
+        <div className="evaluation-action-buttons">
+          <Button className="btn-back" onClick={() => navigate("/danh-gia")}>
             <i className="fas fa-arrow-left me-2"></i>
             Quay lại
           </Button>
+          <div className="action-group">
+            <Button className="btn-edit" onClick={handleEdit}>
+              <i className="fas fa-edit me-2"></i>
+              Chỉnh sửa
+            </Button>
+            <Button className="btn-delete" onClick={handleDelete}>
+              <i className="fas fa-trash me-2"></i>
+              Xóa
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <Row className="g-4">
-        {/* Left Column */}
-        <Col lg={8}>
-          {/* Basic Info */}
-          <Card className="mb-4">
-            <Card.Header className="bg-white border-bottom">
-              <h5 className="mb-0">
-                <i className="fas fa-info-circle me-2"></i>
-                Thông tin đánh giá
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              <Row className="g-3">
-                <Col md={6}>
-                  <div className="info-item">
-                    <small className="text-muted d-block mb-1">
-                      Loại đánh giá
-                    </small>
-                    <div className="fw-semibold">
-                      {evaluation.type_label || "-"}
+        <Row className="g-4">
+          <Col lg={8}>
+            {/* Basic Info */}
+            <Card className="evaluation-info-card">
+              <Card.Header className="evaluation-header">
+                <h5>
+                  <i className="fas fa-clipboard-check me-2 text-accent"></i>
+                  {typeLabels[evaluationType] || "Đánh giá"}
+                </h5>
+                {evaluation.sister_name && (
+                  <small className="evaluation-subtitle">
+                    {evaluation.sister_name}
+                  </small>
+                )}
+              </Card.Header>
+              <Card.Body>
+                <Row className="g-3">
+                  <Col md={6}>
+                    <div className="evaluation-detail-item">
+                      <div className="label">Kỳ đánh giá</div>
+                      <div className="value">{evaluation.period || "-"}</div>
                     </div>
-                  </div>
-                </Col>
-                <Col md={6}>
-                  <div className="info-item">
-                    <small className="text-muted d-block mb-1">
-                      Kỳ đánh giá
-                    </small>
-                    <div className="fw-semibold">
-                      {evaluation.period || "-"}
+                  </Col>
+                  <Col md={6}>
+                    <div className="evaluation-detail-item">
+                      <div className="label">Ngày đánh giá</div>
+                      <div className="value">
+                        {formatDate(evaluation.evaluation_date) || "-"}
+                      </div>
                     </div>
-                  </div>
-                </Col>
-                <Col md={6}>
-                  <div className="info-item">
-                    <small className="text-muted d-block mb-1">
-                      Ngày đánh giá
-                    </small>
-                    <div className="fw-semibold">
-                      {formatDate(evaluation.evaluation_date) || "-"}
+                  </Col>
+                  <Col md={12}>
+                    <div className="evaluation-detail-item">
+                      <div className="label">Người đánh giá</div>
+                      <div className="value">
+                        {evaluation.evaluator_name ||
+                          evaluation.evaluator ||
+                          "-"}
+                      </div>
                     </div>
-                  </div>
-                </Col>
-                <Col md={6}>
-                  <div className="info-item">
-                    <small className="text-muted d-block mb-1">
-                      Người đánh giá
-                    </small>
-                    <div className="fw-semibold">
-                      {evaluation.evaluator || "-"}
-                    </div>
-                  </div>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
 
-          {/* Overall Rating */}
-          {evaluation.overall_rating && (
-            <Card className="mb-4">
-              <Card.Header className="bg-white border-bottom">
-                <h5 className="mb-0">
-                  <i className="fas fa-star me-2"></i>
-                  Tổng điểm
+            {/* Overall Rating */}
+            {evaluation.overall_rating && (
+              <Card className="evaluation-info-card">
+                <Card.Header className="evaluation-header">
+                  <h5>
+                    <i className="fas fa-star me-2 text-accent"></i>
+                    Tổng điểm
+                  </h5>
+                </Card.Header>
+                <Card.Body>
+                  <div className="evaluation-rating-display">
+                    <div className="evaluation-rating-number">
+                      {evaluation.overall_rating}
+                    </div>
+                    <div className="evaluation-rating-label">
+                      {getRatingLabel(evaluation.overall_rating)}
+                    </div>
+                    <ProgressBar
+                      now={evaluation.overall_rating}
+                      variant={getRatingColor(evaluation.overall_rating)}
+                      className="evaluation-progress-bar"
+                    />
+                  </div>
+                </Card.Body>
+              </Card>
+            )}
+
+            {/* Category Ratings */}
+            <Card className="evaluation-info-card">
+              <Card.Header className="evaluation-header">
+                <h5>
+                  <i className="fas fa-chart-bar me-2 text-accent"></i>
+                  Điểm theo tiêu chí
                 </h5>
               </Card.Header>
               <Card.Body>
-                <div className="text-center">
-                  <div className="d-flex align-items-baseline justify-content-center mb-2">
-                    <span className="display-4 fw-bold">
-                      {evaluation.overall_rating}
-                    </span>
-                    <span className="text-muted ms-1">/100</span>
-                  </div>
-                  <Badge
-                    bg={getRatingColor(evaluation.overall_rating)}
-                    className="fs-6 px-3 py-2"
-                  >
-                    {getRatingLabel(evaluation.overall_rating)}
-                  </Badge>
-                  <ProgressBar
-                    now={evaluation.overall_rating}
-                    variant={getRatingColor(evaluation.overall_rating)}
-                    className="mt-3"
-                    style={{ height: "12px" }}
-                  />
-                </div>
+                {categories.map(
+                  (category) =>
+                    category.value && (
+                      <div
+                        key={category.key}
+                        className="evaluation-category-item"
+                      >
+                        <div className="evaluation-category-label">
+                          {category.label}
+                        </div>
+                        <div className="evaluation-category-bar">
+                          <ProgressBar
+                            now={category.value}
+                            variant={getRatingColor(category.value)}
+                            className="evaluation-progress-bar"
+                          />
+                        </div>
+                        <div className="evaluation-category-score">
+                          {category.value}
+                        </div>
+                      </div>
+                    )
+                )}
               </Card.Body>
             </Card>
-          )}
 
-          {/* Category Ratings */}
-          <Card className="mb-4">
-            <Card.Header className="bg-white border-bottom">
-              <h5 className="mb-0">
-                <i className="fas fa-chart-bar me-2"></i>
-                Điểm theo tiêu chí
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              <Table responsive borderless>
-                <tbody>
-                  {categories.map(
-                    (category) =>
-                      category.value && (
-                        <tr key={category.key}>
-                          <td style={{ width: "40%" }}>{category.label}</td>
-                          <td style={{ width: "45%" }}>
-                            <ProgressBar
-                              now={category.value}
-                              variant={getRatingColor(category.value)}
-                              style={{ height: "10px" }}
-                            />
-                          </td>
-                          <td style={{ width: "15%" }} className="text-end">
-                            <Badge bg={getRatingColor(category.value)}>
-                              {category.value}
-                            </Badge>
-                          </td>
-                        </tr>
-                      )
+            {/* Comments */}
+            <Card className="evaluation-info-card">
+              <Card.Header className="evaluation-header">
+                <h5>
+                  <i className="fas fa-comment-alt me-2 text-accent"></i>
+                  Nhận xét
+                </h5>
+              </Card.Header>
+              <Card.Body>
+                {evaluation.strengths && (
+                  <div className="evaluation-comment-section">
+                    <div className="evaluation-comment-title">
+                      <i className="fas fa-plus-circle text-success"></i>
+                      Điểm mạnh
+                    </div>
+                    <div className="evaluation-comment-content">
+                      {evaluation.strengths}
+                    </div>
+                  </div>
+                )}
+
+                {evaluation.weaknesses && (
+                  <div className="evaluation-comment-section">
+                    <div className="evaluation-comment-title">
+                      <i className="fas fa-minus-circle text-warning"></i>
+                      Điểm yếu
+                    </div>
+                    <div className="evaluation-comment-content">
+                      {evaluation.weaknesses}
+                    </div>
+                  </div>
+                )}
+
+                {evaluation.recommendations && (
+                  <div className="evaluation-comment-section">
+                    <div className="evaluation-comment-title">
+                      <i className="fas fa-lightbulb text-info"></i>
+                      Khuyến nghị
+                    </div>
+                    <div className="evaluation-comment-content">
+                      {evaluation.recommendations}
+                    </div>
+                  </div>
+                )}
+
+                {evaluation.notes && (
+                  <div className="evaluation-comment-section">
+                    <div className="evaluation-comment-title">
+                      <i className="fas fa-sticky-note text-secondary"></i>
+                      Ghi chú
+                    </div>
+                    <div className="evaluation-comment-content">
+                      {evaluation.notes}
+                    </div>
+                  </div>
+                )}
+
+                {!evaluation.strengths &&
+                  !evaluation.weaknesses &&
+                  !evaluation.recommendations &&
+                  !evaluation.notes && (
+                    <p className="text-muted mb-0">Không có nhận xét</p>
                   )}
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
+              </Card.Body>
+            </Card>
 
-          {/* Comments */}
-          <Card>
-            <Card.Header className="bg-white border-bottom">
-              <h5 className="mb-0">
-                <i className="fas fa-comment-alt me-2"></i>
-                Nhận xét
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              {evaluation.strengths && (
-                <div className="mb-3">
+            {/* Documents */}
+            {evaluation.documents && (
+              <Card className="evaluation-info-card">
+                <Card.Header className="evaluation-header subtle">
                   <h6>
-                    <i className="fas fa-plus-circle text-success me-2"></i>
-                    Điểm mạnh
+                    <i className="fas fa-paperclip me-2 text-accent"></i>
+                    Tài liệu đính kèm
                   </h6>
-                  <p className="text-muted">{evaluation.strengths}</p>
-                </div>
-              )}
+                </Card.Header>
+                <Card.Body>
+                  {(() => {
+                    try {
+                      const docs =
+                        typeof evaluation.documents === "string"
+                          ? JSON.parse(evaluation.documents)
+                          : evaluation.documents;
 
-              {evaluation.weaknesses && (
-                <div className="mb-3">
-                  <h6>
-                    <i className="fas fa-minus-circle text-warning me-2"></i>
-                    Điểm yếu
-                  </h6>
-                  <p className="text-muted">{evaluation.weaknesses}</p>
-                </div>
-              )}
+                      if (!Array.isArray(docs) || docs.length === 0) {
+                        return (
+                          <div className="text-muted">Không có tài liệu</div>
+                        );
+                      }
 
-              {evaluation.recommendations && (
-                <div className="mb-3">
-                  <h6>
-                    <i className="fas fa-lightbulb text-info me-2"></i>
-                    Khuyến nghị
-                  </h6>
-                  <p className="text-muted">{evaluation.recommendations}</p>
-                </div>
-              )}
+                      return (
+                        <div className="evaluation-documents">
+                          {docs.map((doc, index) => (
+                            <a
+                              key={doc.id || index}
+                              href={`http://localhost:5000${doc.url}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <i
+                                className={`fas ${
+                                  doc.type?.includes("pdf")
+                                    ? "fa-file-pdf text-danger"
+                                    : doc.type?.includes("word")
+                                    ? "fa-file-word text-primary"
+                                    : doc.type?.includes("image")
+                                    ? "fa-file-image text-success"
+                                    : "fa-file text-secondary"
+                                }`}
+                              ></i>
+                              <span>{doc.name}</span>
+                            </a>
+                          ))}
+                        </div>
+                      );
+                    } catch (error) {
+                      console.error("Error parsing documents:", error);
+                      return (
+                        <div className="text-danger">Lỗi khi tải tài liệu</div>
+                      );
+                    }
+                  })()}
+                </Card.Body>
+              </Card>
+            )}
+          </Col>
 
-              {evaluation.notes && (
-                <div>
-                  <h6>
-                    <i className="fas fa-sticky-note text-secondary me-2"></i>
-                    Ghi chú
-                  </h6>
-                  <p className="text-muted">{evaluation.notes}</p>
-                </div>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-
-        {/* Right Column - Sister Info */}
-        <Col lg={4}>
-          <Card>
-            <Card.Header className="bg-white border-bottom">
-              <h5 className="mb-0">
-                <i className="fas fa-user me-2"></i>
-                Thông tin Nữ Tu
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              <div className="text-center mb-3">
-                <div
-                  className="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-3"
-                  style={{ width: "80px", height: "80px" }}
-                >
+          {/* Right Column - Sister Info */}
+          <Col lg={4}>
+            <Card className="evaluation-info-card">
+              <Card.Header className="evaluation-header">
+                <h5>
+                  <i className="fas fa-user me-2 text-accent"></i>
+                  Thông tin Nữ Tu
+                </h5>
+              </Card.Header>
+              <Card.Body className="evaluation-sister-card">
+                <div className="evaluation-sister-avatar">
                   {evaluation.sister_avatar ? (
                     <img
                       src={evaluation.sister_avatar}
                       alt={evaluation.sister_name}
-                      className="rounded-circle"
                       style={{
-                        width: "80px",
-                        height: "80px",
+                        width: "100%",
+                        height: "100%",
                         objectFit: "cover",
+                        borderRadius: "50%",
                       }}
                     />
                   ) : (
-                    <i className="fas fa-user fa-2x text-muted"></i>
+                    <i className="fas fa-user"></i>
                   )}
                 </div>
-                {evaluation.sister_religious_name && (
-                  <h5 className="text-primary mb-1">
-                    {evaluation.sister_religious_name}
-                  </h5>
-                )}
-                <h6 className="mb-1">{evaluation.sister_name}</h6>
-                <p className="text-muted mb-0">{evaluation.sister_code}</p>
-              </div>
-
-              <Button
-                variant="primary"
-                className="w-100"
-                onClick={handleViewSister}
-              >
-                <i className="fas fa-user me-2"></i>
-                Xem hồ sơ đầy đủ
-              </Button>
-            </Card.Body>
-          </Card>
-
-          {/* History */}
-          <Card className="mt-4">
-            <Card.Header className="bg-white border-bottom">
-              <h5 className="mb-0">
-                <i className="fas fa-history me-2"></i>
-                Lịch sử
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              <div className="d-flex align-items-center mb-2">
-                <i className="fas fa-plus-circle text-success me-2"></i>
-                <div>
-                  <div className="fw-semibold">Tạo mới</div>
-                  <small className="text-muted">
-                    {formatDate(evaluation.created_at)}
-                  </small>
+                <div className="evaluation-sister-name">
+                  {evaluation.sister_name || "N/A"}
                 </div>
-              </div>
-              {evaluation.updated_at &&
-                evaluation.updated_at !== evaluation.created_at && (
-                  <div className="d-flex align-items-center">
-                    <i className="fas fa-edit text-primary me-2"></i>
-                    <div>
-                      <div className="fw-semibold">Cập nhật</div>
-                      <small className="text-muted">
-                        {formatDate(evaluation.updated_at)}
-                      </small>
+                <div className="evaluation-sister-code">
+                  {evaluation.sister_code || "N/A"}
+                </div>
+
+                <Button
+                  className="evaluation-view-profile-btn"
+                  onClick={handleViewSister}
+                >
+                  <i className="fas fa-user me-2"></i>
+                  Xem hồ sơ đầy đủ
+                </Button>
+              </Card.Body>
+            </Card>
+
+            {/* History */}
+            <Card className="evaluation-info-card">
+              <Card.Header className="evaluation-header subtle">
+                <h6>
+                  <i className="fas fa-history me-2 text-accent"></i>
+                  Lịch sử
+                </h6>
+              </Card.Header>
+              <Card.Body>
+                <div className="evaluation-history-item">
+                  <div className="evaluation-history-icon created">
+                    <i className="fas fa-plus-circle"></i>
+                  </div>
+                  <div className="evaluation-history-content">
+                    <div className="evaluation-history-label">Tạo mới</div>
+                    <div className="evaluation-history-date">
+                      {formatDate(evaluation.created_at)}
                     </div>
                   </div>
-                )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+                </div>
+                {evaluation.updated_at &&
+                  evaluation.updated_at !== evaluation.created_at && (
+                    <div className="evaluation-history-item">
+                      <div className="evaluation-history-icon updated">
+                        <i className="fas fa-edit"></i>
+                      </div>
+                      <div className="evaluation-history-content">
+                        <div className="evaluation-history-label">Cập nhật</div>
+                        <div className="evaluation-history-date">
+                          {formatDate(evaluation.updated_at)}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 };
 

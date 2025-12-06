@@ -13,7 +13,11 @@
 }
 
 .journey-detail-card .card-header {
-  background: linear-gradient(135deg, var(--journey-primary) 0%, var(--journey-primary-light) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--journey-primary) 0%,
+    var(--journey-primary-light) 100%
+  );
   color: #ffffff;
   font-weight: 600;
   padding: 1rem 1.5rem;

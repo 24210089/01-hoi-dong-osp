@@ -78,7 +78,9 @@ async function up() {
       }
     }
 
-    console.log("Migration 026_update_evaluations_table completed successfully");
+    console.log(
+      "Migration 026_update_evaluations_table completed successfully"
+    );
   } catch (error) {
     console.error("Migration failed:", error);
     throw error;

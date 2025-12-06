@@ -13,7 +13,11 @@
 }
 
 .community-profile-card .card-header {
-  background: linear-gradient(135deg, var(--community-primary) 0%, var(--community-primary-light) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--community-primary) 0%,
+    var(--community-primary-light) 100%
+  );
   color: #ffffff;
   font-weight: 600;
   padding: 1rem 1.5rem;

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Card, Nav, Tab } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { evaluationService } from "@services";
 import { useTable, useDebounce } from "@hooks";
 import { EvaluationCard } from "../components";
@@ -62,20 +63,26 @@ const EvaluationListPage = () => {
   const handleDelete = async (evaluation) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa đánh giá này?")) {
       try {
-        await evaluationService.delete(evaluation.id);
-        fetchEvaluations();
+        const response = await evaluationService.delete(evaluation.id);
+        if (response.success) {
+          toast.success("Đã xóa đánh giá thành công!");
+          fetchEvaluations();
+        } else {
+          toast.error(response.error || "Có lỗi xảy ra khi xóa đánh giá");
+        }
       } catch (error) {
         console.error("Error deleting evaluation:", error);
+        toast.error("Không thể xóa đánh giá. Vui lòng thử lại!");
       }
     }
   };
 
   const evaluationsByType = {
-    annual: evaluations.filter((e) => e.type === "annual"),
-    semi_annual: evaluations.filter((e) => e.type === "semi_annual"),
-    quarterly: evaluations.filter((e) => e.type === "quarterly"),
-    monthly: evaluations.filter((e) => e.type === "monthly"),
-    special: evaluations.filter((e) => e.type === "special"),
+    annual: evaluations.filter((e) => e.evaluation_type === "annual"),
+    semi_annual: evaluations.filter((e) => e.evaluation_type === "semi_annual"),
+    quarterly: evaluations.filter((e) => e.evaluation_type === "quarterly"),
+    monthly: evaluations.filter((e) => e.evaluation_type === "monthly"),
+    special: evaluations.filter((e) => e.evaluation_type === "special"),
   };
 
   // Calculate average rating
@@ -107,13 +114,6 @@ const EvaluationListPage = () => {
           { label: "Đánh giá" },
         ]}
       />
-
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <Button variant="primary" onClick={handleAdd}>
-          <i className="fas fa-plus me-2"></i>
-          Thêm Đánh giá
-        </Button>
-      </div>
 
       {/* Statistics */}
       <Row className="g-3 mb-4">

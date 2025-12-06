@@ -6,7 +6,11 @@ const router = express.Router();
 
 router.use(authenticateToken);
 
+router.get("/", evaluationController.getEvaluations);
+
 router.get("/sister/:sisterId", evaluationController.getEvaluationsBySister);
+
+router.get("/:id", evaluationController.getEvaluationById);
 
 router.post("/", evaluationController.createEvaluation);
 

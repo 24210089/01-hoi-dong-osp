@@ -249,6 +249,35 @@
   background: linear-gradient(135deg, #6c7a8d 0%, #4a5568 100%);
 }
 
+/* Evaluation type specific */
+.type-annual .timeline-icon {
+  background: linear-gradient(135deg, #2980b9 0%, #1a5f8a 100%);
+}
+
+.type-semi-annual .timeline-icon {
+  background: linear-gradient(135deg, #8e44ad 0%, #6c3483 100%);
+}
+
+.type-quarterly .timeline-icon {
+  background: linear-gradient(135deg, #1a9e8f 0%, #137568 100%);
+}
+
+.type-monthly .timeline-icon {
+  background: linear-gradient(135deg, #f39c12 0%, #c98200 100%);
+}
+
+.type-special .timeline-icon {
+  background: linear-gradient(135deg, #c0392b 0%, #922b21 100%);
+}
+
+.type-evaluation .timeline-icon {
+  background: linear-gradient(
+    135deg,
+    var(--timeline-primary) 0%,
+    var(--timeline-primary-dark) 100%
+  );
+}
+
 .level-secondary .timeline-icon {
   background: linear-gradient(135deg, var(--timeline-success) 0%, #20c997 100%);
 }
@@ -341,6 +370,37 @@
 .timeline-stage.type-weak {
   background: rgba(231, 76, 60, 0.15);
   color: #c0392b;
+}
+
+/* Evaluation type badges */
+.timeline-stage.type-annual {
+  background: rgba(52, 152, 219, 0.15);
+  color: #2980b9;
+}
+
+.timeline-stage.type-semi-annual {
+  background: rgba(155, 89, 182, 0.15);
+  color: #8e44ad;
+}
+
+.timeline-stage.type-quarterly {
+  background: rgba(42, 215, 197, 0.15);
+  color: #1a9e8f;
+}
+
+.timeline-stage.type-monthly {
+  background: rgba(255, 193, 7, 0.15);
+  color: #c98200;
+}
+
+.timeline-stage.type-special {
+  background: rgba(231, 76, 60, 0.15);
+  color: #c0392b;
+}
+
+.timeline-stage.type-evaluation {
+  background: rgba(149, 165, 166, 0.15);
+  color: #7f8c8d;
 }
 
 /* Education level badges */

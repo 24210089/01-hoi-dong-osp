@@ -1,6 +1,6 @@
 // src/features/hoc-van/pages/EducationListAllPage.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Container,
   Row,
@@ -30,6 +30,8 @@ const EducationListAllPage = () => {
     level: "",
     status: "",
   });
+  const [sortBy, setSortBy] = useState("sister_name");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   // Debounce search - chờ 500ms sau khi ngừng gõ
   useEffect(() => {
@@ -128,6 +130,50 @@ const EducationListAllPage = () => {
     return <Badge bg={statusInfo.variant}>{statusInfo.label}</Badge>;
   };
 
+  const handleSort = (key) => {
+    setSortOrder((prevOrder) =>
+      sortBy === key && prevOrder === "asc" ? "desc" : "asc"
+    );
+    setSortBy(key);
+  };
+
+  const renderSortIcon = (key) => {
+    if (sortBy !== key) return <i className="fas fa-sort text-muted ms-1"></i>;
+    return sortOrder === "asc" ? (
+      <i className="fas fa-sort-up ms-1"></i>
+    ) : (
+      <i className="fas fa-sort-down ms-1"></i>
+    );
+  };
+
+  const sortedEducations = useMemo(() => {
+    const items = [...educations];
+    const getValue = (item) => {
+      if (sortBy === "sister_name") return item.sister_name || item.religious_name || "";
+      if (sortBy === "institution") return item.institution || "";
+      if (sortBy === "major") return item.major || "";
+      if (sortBy === "level") return item.level || "";
+      if (sortBy === "graduation_year") return item.graduation_year || 0;
+      if (sortBy === "status") return item.status || "";
+      return "";
+    };
+
+    items.sort((a, b) => {
+      const aValue = getValue(a);
+      const bValue = getValue(b);
+
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+      }
+
+      return sortOrder === "asc"
+        ? String(aValue).localeCompare(String(bValue))
+        : String(bValue).localeCompare(String(aValue));
+    });
+
+    return items;
+  }, [educations, sortBy, sortOrder]);
+
   if (loading && educations.length === 0) {
     return (
       <div
@@ -143,8 +189,81 @@ const EducationListAllPage = () => {
     <Container fluid className="py-4">
       <Breadcrumb title="Quản lý Học vấn" items={[{ label: "Học vấn" }]} />
 
+      {/* Statistics Cards */}
+      <Row className="g-3 mb-4">
+        <Col xs={6} md={3}>
+          <Card className="stat-card shadow-sm border-0 rounded-3">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <small className="text-muted">Tổng số</small>
+                  <h4 className="mb-0">{educations.length}</h4>
+                </div>
+                <div className="stat-icon bg-primary">
+                  <i className="fas fa-graduation-cap"></i>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col xs={6} md={3}>
+          <Card className="stat-card shadow-sm border-0 rounded-3">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <small className="text-muted">Đang học</small>
+                  <h4 className="mb-0">
+                    {educations.filter((e) => e.status === "dang_hoc").length}
+                  </h4>
+                </div>
+                <div className="stat-icon bg-success">
+                  <i className="fas fa-book-open"></i>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col xs={6} md={3}>
+          <Card className="stat-card shadow-sm border-0 rounded-3">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <small className="text-muted">Đã tốt nghiệp</small>
+                  <h4 className="mb-0">
+                    {
+                      educations.filter((e) => e.status === "da_tot_nghiep")
+                        .length
+                    }
+                  </h4>
+                </div>
+                <div className="stat-icon bg-info">
+                  <i className="fas fa-check"></i>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col xs={6} md={3}>
+          <Card className="stat-card shadow-sm border-0 rounded-3">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <small className="text-muted">Số trình độ</small>
+                  <h4 className="mb-0">
+                    {new Set(educations.map((e) => e.level).filter(Boolean)).size}
+                  </h4>
+                </div>
+                <div className="stat-icon bg-warning">
+                  <i className="fas fa-layer-group"></i>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
       {/* Filters */}
-      <Card className="mb-4">
+      <Card className="mb-4 shadow-sm border-0 rounded-3">
         <Card.Body>
           <Row className="align-items-end">
             <Col md={4}>
@@ -217,8 +336,11 @@ const EducationListAllPage = () => {
       </Card>
 
       {/* Table */}
-      <Card>
-        <Card.Body>
+      <Card
+        className="shadow-sm border-0 rounded-3"
+        style={{ borderRadius: "12px", overflow: "hidden" }}
+      >
+        <Card.Body className="p-0">
           {educations.length === 0 ? (
             <div className="text-center py-5">
               <FaGraduationCap size={48} className="text-muted mb-3" />
@@ -229,62 +351,100 @@ const EducationListAllPage = () => {
             </div>
           ) : (
             <>
-              <Table responsive hover>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Nữ tu</th>
-                    <th>Trường học</th>
-                    <th>Ngành học</th>
-                    <th>Trình độ</th>
-                    <th>Năm tốt nghiệp</th>
-                    <th>Trạng thái</th>
-                    <th className="text-end">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {educations.map((edu, index) => (
-                    <tr key={edu.id}>
-                      <td>{(currentPage - 1) * 10 + index + 1}</td>
-                      <td>
-                        <Link to={`/nu-tu/${edu.sister_id}`}>
-                          {edu.sister_name || edu.religious_name || "N/A"}
-                        </Link>
-                      </td>
-                      <td>{edu.institution || "N/A"}</td>
-                      <td>{edu.major || "N/A"}</td>
-                      <td>{getLevelBadge(edu.level)}</td>
-                      <td>{edu.graduation_year || "Đang học"}</td>
-                      <td>{getStatusBadge(edu.status)}</td>
-                      <td className="text-end">
-                        <Link
-                          to={`/hoc-van/${edu.id}`}
-                          state={{ education: edu }}
-                          className="btn btn-sm btn-outline-info me-1"
-                          title="Xem chi tiết"
-                        >
-                          <FaEye />
-                        </Link>
-                        <Link
-                          to={`/hoc-van/${edu.id}/edit`}
-                          className="btn btn-sm btn-outline-primary me-1"
-                          title="Chỉnh sửa"
-                        >
-                          <FaEdit />
-                        </Link>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => handleDelete(edu.id)}
-                          title="Xóa"
-                        >
-                          <FaTrash />
-                        </Button>
-                      </td>
+              <div className="table-responsive">
+                <Table hover className="mb-0 align-middle">
+                  <thead className="bg-light">
+                    <tr>
+                      <th className="text-nowrap">#</th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("sister_name")}
+                        className="text-nowrap"
+                      >
+                        Nữ tu {renderSortIcon("sister_name")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("institution")}
+                        className="text-nowrap"
+                      >
+                        Trường học {renderSortIcon("institution")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("major")}
+                        className="text-nowrap"
+                      >
+                        Ngành học {renderSortIcon("major")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("level")}
+                        className="text-nowrap"
+                      >
+                        Trình độ {renderSortIcon("level")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("graduation_year")}
+                        className="text-nowrap"
+                      >
+                        Năm tốt nghiệp {renderSortIcon("graduation_year")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("status")}
+                        className="text-nowrap"
+                      >
+                        Trạng thái {renderSortIcon("status")}
+                      </th>
+                      <th className="text-end text-nowrap">Thao tác</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {sortedEducations.map((edu, index) => (
+                      <tr key={edu.id}>
+                        <td>{(currentPage - 1) * 10 + index + 1}</td>
+                        <td>
+                          <Link to={`/nu-tu/${edu.sister_id}`}>
+                            {edu.sister_name || edu.religious_name || "N/A"}
+                          </Link>
+                        </td>
+                        <td>{edu.institution || "N/A"}</td>
+                        <td>{edu.major || "N/A"}</td>
+                        <td>{getLevelBadge(edu.level)}</td>
+                        <td>{edu.graduation_year || "Đang học"}</td>
+                        <td>{getStatusBadge(edu.status)}</td>
+                        <td className="text-end">
+                          <Link
+                            to={`/hoc-van/${edu.id}`}
+                            state={{ education: edu }}
+                            className="btn btn-sm btn-outline-info me-1"
+                            title="Xem chi tiết"
+                          >
+                            <FaEye />
+                          </Link>
+                          <Link
+                            to={`/hoc-van/${edu.id}/edit`}
+                            className="btn btn-sm btn-outline-primary me-1"
+                            title="Chỉnh sửa"
+                          >
+                            <FaEdit />
+                          </Link>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleDelete(edu.id)}
+                            title="Xóa"
+                          >
+                            <FaTrash />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
 
               {/* Pagination */}
               {totalPages > 1 && (

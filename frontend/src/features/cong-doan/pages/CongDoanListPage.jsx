@@ -180,10 +180,7 @@ const CongDoanListPage = () => {
 
   return (
     <Container fluid className="py-4">
-      <Breadcrumb
-        title="Quản lý Cộng đoàn"
-        items={[{ label: "Cộng đoàn" }]}
-      />
+      <Breadcrumb title="Quản lý Cộng đoàn" items={[{ label: "Cộng đoàn" }]} />
 
       {/* Statistics Cards */}
       <StatsCards
@@ -202,7 +199,10 @@ const CongDoanListPage = () => {
           },
           {
             label: "Thành viên",
-            value: communities.reduce((sum, c) => sum + (c.member_count || 0), 0),
+            value: communities.reduce(
+              (sum, c) => sum + (c.member_count || 0),
+              0
+            ),
             icon: "fas fa-users",
             color: "info",
           },
@@ -246,27 +246,27 @@ const CongDoanListPage = () => {
         </Toast>
       </ToastContainer>
 
-        {/* Search & Filter */}
-        <Row className="g-3 mb-4">
-          <Col md={6}>
-            <SearchBox
-              value={searchTerm}
-              onChange={setSearchTerm}
-              onSearch={handleSearch}
-              placeholder="Tìm kiếm cộng đoàn..."
-            />
-          </Col>
-          <Col md={3}>
-            <Form.Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="active">Đang hoạt động</option>
-              <option value="inactive">Không hoạt động</option>
-            </Form.Select>
-          </Col>
-        </Row>
+      {/* Search & Filter */}
+      <Row className="g-3 mb-4">
+        <Col md={6}>
+          <SearchBox
+            value={searchTerm}
+            onChange={setSearchTerm}
+            onSearch={handleSearch}
+            placeholder="Tìm kiếm cộng đoàn..."
+          />
+        </Col>
+        <Col md={3}>
+          <Form.Select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="active">Đang hoạt động</option>
+            <option value="inactive">Không hoạt động</option>
+          </Form.Select>
+        </Col>
+      </Row>
 
       <Card
         className="shadow-sm border-0 rounded-3"

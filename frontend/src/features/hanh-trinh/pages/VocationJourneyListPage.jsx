@@ -89,6 +89,40 @@ const VocationJourneyListPage = () => {
     navigate(`/hanh-trinh/${journey.id}`);
   };
 
+  const handleView = (journey, e) => {
+    e.stopPropagation();
+    navigate(`/hanh-trinh/${journey.id}`);
+  };
+
+  const handleEdit = (journey, e) => {
+    e.stopPropagation();
+    navigate(`/hanh-trinh/${journey.id}/edit`);
+  };
+
+  const handleDelete = async (journey, e) => {
+    e.stopPropagation();
+    if (
+      window.confirm(
+        `Bạn có chắc chắn muốn xóa hành trình "${journey.stage_name}" của ${
+          journey.saint_name || journey.birth_name
+        }?`
+      )
+    ) {
+      try {
+        const response = await journeyService.delete(journey.id);
+        if (response.success) {
+          alert(response.message || "Đã xóa hành trình thành công");
+          fetchJourneys();
+        } else {
+          alert(response.error || "Không thể xóa hành trình");
+        }
+      } catch (error) {
+        console.error("Error deleting journey:", error);
+        alert("Có lỗi xảy ra khi xóa hành trình");
+      }
+    }
+  };
+
   const columns = [
     {
       key: "sister_name",
@@ -151,6 +185,39 @@ const VocationJourneyListPage = () => {
         const months = Math.floor((end - start) / (1000 * 60 * 60 * 24 * 30));
         return `${months} tháng`;
       },
+    },
+    {
+      key: "actions",
+      label: "Thao tác",
+      className: "text-center",
+      render: (row) => (
+        <div className="d-flex gap-1 justify-content-center">
+          <Button
+            variant="outline-info"
+            size="sm"
+            onClick={(e) => handleView(row, e)}
+            title="Xem chi tiết"
+          >
+            <i className="fas fa-eye"></i>
+          </Button>
+          <Button
+            variant="outline-primary"
+            size="sm"
+            onClick={(e) => handleEdit(row, e)}
+            title="Chỉnh sửa"
+          >
+            <i className="fas fa-edit"></i>
+          </Button>
+          <Button
+            variant="outline-danger"
+            size="sm"
+            onClick={(e) => handleDelete(row, e)}
+            title="Xóa"
+          >
+            <i className="fas fa-trash"></i>
+          </Button>
+        </div>
+      ),
     },
   ];
 

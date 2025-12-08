@@ -18,6 +18,8 @@ import { UserCard, UserForm, UserFilter } from "../components";
 import SearchBox from "@components/common/SearchBox";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
+import StatsCards from "@components/common/StatsCards";
+import SearchFilterBar from "@components/common/SearchFilterBar";
 import "./UserListPage.css";
 
 const UserListPage = () => {

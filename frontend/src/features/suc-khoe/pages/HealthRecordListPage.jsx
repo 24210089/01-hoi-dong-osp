@@ -8,6 +8,8 @@ import HealthCard from "../components/HealthCard";
 import SearchBox from "@components/common/SearchBox";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
+import StatsCards from "@components/common/StatsCards";
+import SearchFilterBar from "@components/common/SearchFilterBar";
 
 const HealthRecordListPage = () => {
   const { sisterId } = useParams();
@@ -122,78 +124,40 @@ const HealthRecordListPage = () => {
         </Button>
       </div>
 
-      <Row className="g-3 mb-4">
-        <Col xs={6} md={3}>
-          <Card className="stat-card">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <small className="text-muted">Tổng số</small>
-                  <h4 className="mb-0">{records.length}</h4>
-                </div>
-                <div className="stat-icon bg-primary">
-                  <i className="fas fa-heartbeat"></i>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xs={6} md={3}>
-          <Card className="stat-card">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <small className="text-muted">Sức khỏe tốt</small>
-                  <h4 className="mb-0">{recordsByStatus.good.length}</h4>
-                </div>
-                <div className="stat-icon bg-success">
-                  <i className="fas fa-smile"></i>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xs={6} md={3}>
-          <Card className="stat-card">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <small className="text-muted">Trung bình</small>
-                  <h4 className="mb-0">{recordsByStatus.average.length}</h4>
-                </div>
-                <div className="stat-icon bg-warning">
-                  <i className="fas fa-meh"></i>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xs={6} md={3}>
-          <Card className="stat-card">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <small className="text-muted">Sức khỏe yếu</small>
-                  <h4 className="mb-0">{recordsByStatus.weak.length}</h4>
-                </div>
-                <div className="stat-icon bg-danger">
-                  <i className="fas fa-frown"></i>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+      <StatsCards
+        stats={[
+          {
+            label: "Tổng số",
+            value: records.length,
+            icon: "fas fa-heartbeat",
+            color: "primary",
+          },
+          {
+            label: "Sức khỏe tốt",
+            value: recordsByStatus.good.length,
+            icon: "fas fa-smile",
+            color: "success",
+          },
+          {
+            label: "Trung bình",
+            value: recordsByStatus.average.length,
+            icon: "fas fa-meh",
+            color: "warning",
+          },
+          {
+            label: "Sức khỏe yếu",
+            value: recordsByStatus.weak.length,
+            icon: "fas fa-frown",
+            color: "danger",
+          },
+        ]}
+      />
 
-      <Row className="g-3 mb-4">
-        <Col md={6}>
-          <SearchBox
-            value={table.searchTerm}
-            onChange={table.handleSearch}
-            placeholder="Tìm kiếm theo bệnh viện, bác sĩ, chẩn đoán..."
-          />
-        </Col>
-      </Row>
+      <SearchFilterBar
+        searchValue={table.searchTerm}
+        onSearchChange={table.handleSearch}
+        searchPlaceholder="Tìm kiếm theo bệnh viện, bác sĩ, chẩn đoán..."
+      />
 
       {records.length > 0 ? (
         <Tab.Container defaultActiveKey="all">

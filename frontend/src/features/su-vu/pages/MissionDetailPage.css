@@ -6,6 +6,65 @@
   --mission-accent: #ffa901;
 }
 
+.mission-detail-page {
+  background: linear-gradient(180deg, #f0f1f3 0%, #e9ecef 100%);
+  min-height: 100vh;
+}
+
+.mission-action-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.mission-action-buttons .btn-back {
+  background: #ffffff;
+  border: 2px solid var(--mission-primary);
+  color: var(--mission-primary);
+  font-weight: 500;
+  padding: 0.5rem 1.25rem;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+.mission-action-buttons .btn-back:hover {
+  background: var(--mission-primary);
+  color: #ffffff;
+  transform: translateX(-5px);
+}
+
+.mission-action-buttons .btn-edit {
+  background: linear-gradient(135deg, var(--mission-accent) 0%, #ffbe3d 100%);
+  border: none;
+  color: var(--mission-primary);
+  font-weight: 600;
+  padding: 0.5rem 1.25rem;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 169, 1, 0.3);
+}
+
+.mission-action-buttons .btn-edit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 169, 1, 0.4);
+}
+
+.mission-action-buttons .btn-delete {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.5rem 1.25rem;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+}
+
+.mission-action-buttons .btn-delete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
 .mission-detail-card {
   border-radius: 12px;
   border: none;
@@ -21,6 +80,13 @@
   color: #ffffff;
   font-weight: 600;
   padding: 1rem 1.5rem;
+}
+
+.mission-detail-card .card-header h5,
+.mission-detail-card .card-header i,
+.mission-detail-card .card-header span,
+.mission-detail-card .card-header {
+  color: #ffffff;
 }
 
 .mission-detail-card .card-header i {

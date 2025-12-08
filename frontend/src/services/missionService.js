@@ -117,7 +117,10 @@ const missionService = {
    */
   create: async (data) => {
     try {
-      const response = await api.post(MISSION_ENDPOINTS.CREATE, data);
+      const { documents, ...rest } = data || {};
+
+      // Backend does not accept documents for missions, so strip them out.
+      const response = await api.post(MISSION_ENDPOINTS.CREATE, rest);
       return {
         success: true,
         data: response,
@@ -139,7 +142,10 @@ const missionService = {
    */
   update: async (id, data) => {
     try {
-      const response = await api.put(MISSION_ENDPOINTS.UPDATE(id), data);
+      const { documents, ...rest } = data || {};
+
+      // Strip unsupported documents field to avoid backend validation errors.
+      const response = await api.put(MISSION_ENDPOINTS.UPDATE(id), rest);
       return {
         success: true,
         data: response,

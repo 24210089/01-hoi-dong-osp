@@ -19,6 +19,8 @@ import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
 import Pagination from "@components/common/Pagination";
 import { formatDate } from "@utils";
+import StatsCards from "@components/common/StatsCards";
+import SearchFilterBar from "@components/common/SearchFilterBar";
 
 const ReportListPage = () => {
   const [loading, setLoading] = useState(true);

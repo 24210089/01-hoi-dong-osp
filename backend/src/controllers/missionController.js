@@ -104,9 +104,25 @@ const getMissionById = async (req, res) => {
 
     const { id } = req.params;
     const missions = await MissionModel.executeQuery(
-      `SELECT m.*, s.saint_name as religious_name, s.birth_name as sister_name
+      `SELECT m.*, 
+              s.saint_name AS sister_saint_name,
+              s.birth_name AS sister_name,
+              s.code AS sister_code,
+              s.date_of_birth AS sister_birth_date,
+              s.phone AS sister_phone,
+              s.email AS sister_email,
+              s.photo_url AS sister_avatar,
+              c_active.name AS sister_community
        FROM missions m
        INNER JOIN sisters s ON s.id = m.sister_id
+       LEFT JOIN (
+         SELECT sister_id, community_id
+         FROM community_assignments
+         WHERE end_date IS NULL OR end_date >= CURDATE()
+         ORDER BY start_date DESC
+         LIMIT 1
+       ) ca ON ca.sister_id = s.id
+       LEFT JOIN communities c_active ON ca.community_id = c_active.id
        WHERE m.id = ?`,
       [id]
     );
@@ -118,6 +134,7 @@ const getMissionById = async (req, res) => {
     return res.status(200).json({ data: missions[0] });
   } catch (error) {
     console.error("getMissionById error:", error.message);
+    console.error("getMissionById stack:", error.stack);
     return res.status(500).json({ message: "Failed to fetch mission" });
   }
 };
@@ -137,6 +154,8 @@ const createMission = async (req, res) => {
       notes,
     } = req.body;
 
+    const normalizedEndDate = endDate ? endDate : null;
+
     if (!sisterId || !field || !startDate) {
       return res
         .status(400)
@@ -148,12 +167,19 @@ const createMission = async (req, res) => {
       return res.status(404).json({ message: "Sister not found" });
     }
 
+    // Validate date range
+    if (normalizedEndDate && new Date(normalizedEndDate) < new Date(startDate)) {
+      return res
+        .status(400)
+        .json({ message: "end_date must be after start_date" });
+    }
+
     const payload = {
       sister_id: sisterId,
       field,
       specific_role: specificRole || null,
       start_date: startDate,
-      end_date: endDate || null,
+      end_date: normalizedEndDate,
       notes: notes || null,
     };
 
@@ -183,7 +209,42 @@ const updateMission = async (req, res) => {
       return res.status(404).json({ message: "Mission not found" });
     }
 
-    const payload = { ...req.body };
+    const allowedFields = [
+      "sister_id",
+      "field",
+      "specific_role",
+      "start_date",
+      "end_date",
+      "notes",
+    ];
+
+    const payload = {};
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        payload[field] = req.body[field];
+      }
+    });
+
+    if (payload.end_date === "") {
+      payload.end_date = null;
+    }
+
+    if (!Object.keys(payload).length) {
+      return res
+        .status(400)
+        .json({ message: "No valid fields provided to update" });
+    }
+
+    const startForValidation = payload.start_date ?? mission.start_date;
+    const endForValidation = payload.end_date ?? mission.end_date;
+
+    if (startForValidation && endForValidation) {
+      if (new Date(endForValidation) < new Date(startForValidation)) {
+        return res
+          .status(400)
+          .json({ message: "end_date must be after start_date" });
+      }
+    }
 
     if (payload.sister_id) {
       const sister = await SisterModel.findById(payload.sister_id);

@@ -20,6 +20,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import sisterService from "@services/sisterService";
 import Breadcrumb from "@components/common/Breadcrumb/Breadcrumb";
+import StatsCards from "@components/common/StatsCards";
+import SearchFilterBar from "@components/common/SearchFilterBar";
 
 // Stage labels mapping (từ database ENUM)
 const stageLabels = {
@@ -226,6 +228,38 @@ const SisterListPage = () => {
         items={[{ label: "Quản lý Nữ Tu", link: "/nu-tu" }]}
       />
 
+      {/* Statistics Cards */}
+      <StatsCards
+        stats={[
+          {
+            label: "Tổng số",
+            value: pagination.total,
+            icon: "fas fa-users",
+            color: "primary",
+          },
+          {
+            label: "Đang hoạt động",
+            value: sisters.filter((s) => s.status === "active").length,
+            icon: "fas fa-user-check",
+            color: "success",
+          },
+          {
+            label: "Vĩnh khấn",
+            value: sisters.filter((s) => s.current_stage === "perpetual_vows")
+              .length,
+            icon: "fas fa-cross",
+            color: "info",
+          },
+          {
+            label: "Tạm khấn",
+            value: sisters.filter((s) => s.current_stage === "temporary_vows")
+              .length,
+            icon: "fas fa-praying-hands",
+            color: "warning",
+          },
+        ]}
+      />
+
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <Button variant="primary" onClick={handleCreate}>
@@ -235,20 +269,12 @@ const SisterListPage = () => {
       </div>
 
       {/* Search & View Toggle */}
-      <Row className="g-3 mb-4">
-        <Col md={8}>
-          <InputGroup>
-            <InputGroup.Text>
-              <i className="fas fa-search"></i>
-            </InputGroup.Text>
-            <Form.Control
-              type="text"
-              placeholder="Tìm kiếm theo tên, tên thánh..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </InputGroup>
-        </Col>
+      <SearchFilterBar
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Tìm kiếm theo tên, tên thánh..."
+        onReset={() => setSearchTerm("")}
+      >
         <Col md={4}>
           <ButtonGroup className="w-100">
             <Button
@@ -265,7 +291,7 @@ const SisterListPage = () => {
             </Button>
           </ButtonGroup>
         </Col>
-      </Row>
+      </SearchFilterBar>
 
       {/* Content */}
       {loading ? (

@@ -30,7 +30,7 @@ const getFieldIcon = (field) => {
 };
 
 const MissionCard = ({ mission, onView, onEdit, onDelete }) => {
-  const isActive = !mission.end_date;
+  const isActive = !mission.end_date || new Date(mission.end_date) >= new Date();
 
   return (
     <Card className="mission-card h-100">

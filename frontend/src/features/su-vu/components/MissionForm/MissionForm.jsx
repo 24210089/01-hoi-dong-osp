@@ -8,10 +8,12 @@ import Input from "@components/forms/Input";
 import Select from "@components/forms/Select";
 import DatePicker from "@components/forms/DatePicker";
 import TextArea from "@components/forms/TextArea";
+import FileUpload from "@components/forms/FileUpload";
 
 const MissionForm = ({ show, onHide, mission, onSubmit, sisterId }) => {
   const isEditMode = !!mission;
   const [sisters, setSisters] = useState([]);
+  const [documents, setDocuments] = useState([]);
 
   useEffect(() => {
     if (show && !sisterId) {
@@ -41,7 +43,8 @@ const MissionForm = ({ show, onHide, mission, onSubmit, sisterId }) => {
     handleChange,
     handleBlur,
     setFieldValue,
-    handleSubmit,
+    updateValues,
+    setAllErrors,
   } = useForm(
     mission || {
       sister_id: sisterId || "",
@@ -53,6 +56,36 @@ const MissionForm = ({ show, onHide, mission, onSubmit, sisterId }) => {
     }
   );
 
+  // Sync form values when opening modal in edit mode or switching between add/edit
+  useEffect(() => {
+    if (!show) return;
+
+    if (mission) {
+      // Prefill with existing mission data
+      updateValues({
+        sister_id: mission.sister_id || sisterId || "",
+        field: mission.field || "",
+        specific_role: mission.specific_role || "",
+        start_date: mission.start_date || "",
+        end_date: mission.end_date || "",
+        notes: mission.notes || "",
+        documents: [],
+      });
+    } else {
+      // Reset for new record
+      updateValues({
+        sister_id: sisterId || "",
+        field: "",
+        specific_role: "",
+        start_date: "",
+        end_date: "",
+        notes: "",
+        documents: [],
+      });
+      setDocuments([]);
+    }
+  }, [mission, show, sisterId, updateValues]);
+
   const validate = () => {
     const newErrors = {};
 
@@ -60,6 +93,14 @@ const MissionForm = ({ show, onHide, mission, onSubmit, sisterId }) => {
       newErrors.sister_id = "Nữ tu là bắt buộc";
     if (!values.field) newErrors.field = "Lĩnh vực sứ vụ là bắt buộc";
     if (!values.start_date) newErrors.start_date = "Ngày bắt đầu là bắt buộc";
+
+    if (values.start_date && values.end_date) {
+      const start = new Date(values.start_date);
+      const end = new Date(values.end_date);
+      if (!isNaN(start) && !isNaN(end) && end < start) {
+        newErrors.end_date = "Ngày kết thúc phải sau ngày bắt đầu";
+      }
+    }
 
     return newErrors;
   };
@@ -69,10 +110,16 @@ const MissionForm = ({ show, onHide, mission, onSubmit, sisterId }) => {
 
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
+      setAllErrors(validationErrors);
       return;
     }
 
-    onSubmit(values);
+    onSubmit({
+      ...values,
+      start_date: values.start_date || null,
+      end_date: values.end_date || null,
+      documents,
+    });
   };
 
   return (
@@ -99,10 +146,11 @@ const MissionForm = ({ show, onHide, mission, onSubmit, sisterId }) => {
                   error={errors.sister_id}
                   touched={touched.sister_id}
                   required
+                  disabled={isEditMode}
                 >
                   <option value="">-- Chọn nữ tu --</option>
-                  {sisters.map((sister) => (
-                    <option key={sister.id} value={sister.id}>
+                  {sisters.map((sister, index) => (
+                    <option key={`sister-${sister.id}-${index}`} value={sister.id}>
                       {sister.saint_name ||
                         sister.religious_name ||
                         sister.birth_name}
@@ -165,6 +213,8 @@ const MissionForm = ({ show, onHide, mission, onSubmit, sisterId }) => {
                 value={values.end_date}
                 onChange={(date) => setFieldValue("end_date", date)}
                 onBlur={handleBlur}
+                error={errors.end_date}
+                touched={touched.end_date}
                 hint="Để trống nếu đang làm"
               />
             </Col>
@@ -178,6 +228,14 @@ const MissionForm = ({ show, onHide, mission, onSubmit, sisterId }) => {
                 onBlur={handleBlur}
                 rows={3}
                 placeholder="Ghi chú thêm về sứ vụ..."
+              />
+            </Col>
+
+            <Col md={12}>
+              <FileUpload
+                label="Tệp đính kèm"
+                multiple
+                onChange={(files) => setDocuments(files)}
               />
             </Col>
           </Row>

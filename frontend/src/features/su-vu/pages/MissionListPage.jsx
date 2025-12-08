@@ -45,9 +45,26 @@ const MissionListPage = () => {
       }
 
       if (response.success) {
-        const items = response.data?.items || response.data || [];
-        setMissions(Array.isArray(items) ? items : []);
-        table.setTotalItems(response.data?.total || items.length);
+        const rawItems =
+          response.data?.items ||
+          response.data?.missions ||
+          response.data?.data ||
+          response.data ||
+          [];
+
+        const items = Array.isArray(rawItems)
+          ? rawItems
+          : Array.isArray(rawItems.items)
+          ? rawItems.items
+          : [];
+
+        const total =
+          response.data?.total ??
+          response.data?.meta?.total ??
+          items.length;
+
+        setMissions(items);
+        table.setTotalItems(total);
       }
     } catch (error) {
       console.error("Error fetching missions:", error);
@@ -117,8 +134,12 @@ const MissionListPage = () => {
     }
   };
 
-  const activeMissions = missions.filter((m) => !m.end_date);
-  const completedMissions = missions.filter((m) => m.end_date);
+  const activeMissions = missions.filter(
+    (m) => !m.end_date || new Date(m.end_date) >= new Date()
+  );
+  const completedMissions = missions.filter(
+    (m) => m.end_date && new Date(m.end_date) < new Date()
+  );
 
   if (loading) {
     return (
@@ -134,13 +155,6 @@ const MissionListPage = () => {
   return (
     <Container fluid className="py-4">
       <Breadcrumb title="Quản lý Sứ vụ" items={[{ label: "Quản lý Sứ vụ" }]} />
-
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <Button variant="primary" onClick={handleAdd}>
-          <i className="fas fa-plus me-2"></i>
-          Thêm Sứ vụ
-        </Button>
-      </div>
 
       {/* Search & Filter */}
       <Row className="g-3 mb-4">
@@ -161,7 +175,7 @@ const MissionListPage = () => {
       </Row>
 
       {missions.length > 0 ? (
-        <Tab.Container defaultActiveKey="active">
+        <Tab.Container defaultActiveKey="all">
           <Card>
             <Card.Header className="bg-white">
               <Nav variant="tabs">

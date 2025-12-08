@@ -10,6 +10,8 @@ import { EvaluationCard } from "../components";
 import SearchBox from "@components/common/SearchBox";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
+import StatsCards from "@components/common/StatsCards";
+import SearchFilterBar from "@components/common/SearchFilterBar";
 
 const EvaluationListPage = () => {
   const { sisterId } = useParams();
@@ -116,91 +118,41 @@ const EvaluationListPage = () => {
       />
 
       {/* Statistics */}
-      <Row className="g-3 mb-4">
-        <Col xs={6} md={3}>
-          <Card className="h-100">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <small className="text-muted">Tổng số</small>
-                  <h4 className="mb-0">{evaluations.length}</h4>
-                </div>
-                <div
-                  className="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center"
-                  style={{ width: "48px", height: "48px" }}
-                >
-                  <i className="fas fa-clipboard-check text-primary"></i>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xs={6} md={3}>
-          <Card className="h-100">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <small className="text-muted">Điểm TB</small>
-                  <h4 className="mb-0">{averageRating}</h4>
-                </div>
-                <div
-                  className="rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center"
-                  style={{ width: "48px", height: "48px" }}
-                >
-                  <i className="fas fa-star text-success"></i>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xs={6} md={3}>
-          <Card className="h-100">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <small className="text-muted">Đánh giá năm</small>
-                  <h4 className="mb-0">{evaluationsByType.annual.length}</h4>
-                </div>
-                <div
-                  className="rounded-circle bg-info bg-opacity-10 d-flex align-items-center justify-content-center"
-                  style={{ width: "48px", height: "48px" }}
-                >
-                  <i className="fas fa-calendar-alt text-info"></i>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xs={6} md={3}>
-          <Card className="h-100">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <small className="text-muted">Đánh giá đặc biệt</small>
-                  <h4 className="mb-0">{evaluationsByType.special.length}</h4>
-                </div>
-                <div
-                  className="rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center"
-                  style={{ width: "48px", height: "48px" }}
-                >
-                  <i className="fas fa-exclamation-circle text-warning"></i>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+      <StatsCards
+        stats={[
+          {
+            label: "Tổng số",
+            value: evaluations.length,
+            icon: "fas fa-clipboard-check",
+            color: "primary",
+          },
+          {
+            label: "Điểm TB",
+            value: averageRating,
+            icon: "fas fa-star",
+            color: "success",
+          },
+          {
+            label: "Đánh giá năm",
+            value: evaluationsByType.annual.length,
+            icon: "fas fa-calendar-alt",
+            color: "info",
+          },
+          {
+            label: "Đánh giá đặc biệt",
+            value: evaluationsByType.special.length,
+            icon: "fas fa-exclamation-circle",
+            color: "warning",
+          },
+        ]}
+      />
 
       {/* Search */}
-      <Row className="g-3 mb-4">
-        <Col md={6}>
-          <SearchBox
-            value={table.searchTerm}
-            onChange={table.handleSearch}
-            placeholder="Tìm kiếm theo kỳ đánh giá, người đánh giá..."
-          />
-        </Col>
-      </Row>
+      <SearchFilterBar
+        searchValue={table.searchTerm}
+        onSearchChange={table.handleSearch}
+        searchPlaceholder="Tìm kiếm theo kỳ đánh giá, người đánh giá..."
+      />
 
       {/* Content */}
       {evaluations.length > 0 ? (

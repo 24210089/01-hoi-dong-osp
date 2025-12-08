@@ -5,26 +5,11 @@ import Timeline from "@components/common/Timeline";
 import { missionService } from "@services";
 import { formatDate } from "@utils";
 
-// Mission type configurations
+// Mission type configurations mapped from "field" values in MissionForm
 const missionTypeConfig = {
-  teaching: {
-    label: "Giảng dạy",
+  education: {
+    label: "Giáo dục",
     icon: "fas fa-chalkboard-teacher",
-    className: "type-mission",
-  },
-  healthcare: {
-    label: "Y tế",
-    icon: "fas fa-stethoscope",
-    className: "type-health",
-  },
-  social_work: {
-    label: "Công tác xã hội",
-    icon: "fas fa-hands-helping",
-    className: "type-community",
-  },
-  administration: {
-    label: "Hành chính",
-    icon: "fas fa-briefcase",
     className: "type-education",
   },
   pastoral: {
@@ -32,27 +17,32 @@ const missionTypeConfig = {
     icon: "fas fa-cross",
     className: "type-mission",
   },
-  formation: {
-    label: "Huấn luyện",
-    icon: "fas fa-user-graduate",
-    className: "type-education",
-  },
-  leadership: {
-    label: "Lãnh đạo",
-    icon: "fas fa-crown",
-    className: "level-doctorate",
-  },
-  missionary: {
-    label: "Truyền giáo",
-    icon: "fas fa-globe",
+  publishing: {
+    label: "Xuất bản",
+    icon: "fas fa-book",
     className: "type-mission",
+  },
+  media: {
+    label: "Truyền thông",
+    icon: "fas fa-broadcast-tower",
+    className: "type-mission",
+  },
+  healthcare: {
+    label: "Y tế",
+    icon: "fas fa-stethoscope",
+    className: "type-health",
+  },
+  social: {
+    label: "Xã hội",
+    icon: "fas fa-hands-helping",
+    className: "type-community",
   },
 };
 
-const getMissionConfig = (type) => {
+const getMissionConfig = (field) => {
   return (
-    missionTypeConfig[type] || {
-      label: type || "Sứ vụ khác",
+    missionTypeConfig[field] || {
+      label: field || "Sứ vụ khác",
       icon: "fas fa-tasks",
       className: "type-mission",
     }
@@ -66,12 +56,19 @@ const MissionTimelinePage = () => {
       const response = await missionService.getBySister(sisterId);
       if (response && response.success) {
         // Backend returns { sister: {...}, missions: [...] }
-        const items =
+        const rawItems =
           response.data?.missions ||
           response.data?.items ||
+          response.data?.data ||
           response.data ||
           [];
-        // Sort by start_date descending
+
+        const items = Array.isArray(rawItems)
+          ? rawItems
+          : Array.isArray(rawItems.missions)
+          ? rawItems.missions
+          : [];
+
         return items.sort(
           (a, b) =>
             new Date(b.start_date || b.created_at) -
@@ -87,7 +84,7 @@ const MissionTimelinePage = () => {
 
   // Get item config based on mission type
   const getItemConfig = (item) => {
-    return getMissionConfig(item.mission_type || item.type);
+    return getMissionConfig(item.field || item.mission_type || item.type);
   };
 
   // Render item content
@@ -99,7 +96,7 @@ const MissionTimelinePage = () => {
         {item.end_date ? ` - ${formatDate(item.end_date)}` : " - Hiện tại"}
       </div>
       <h3 className="timeline-title">
-        {item.position || item.title || config.label}
+        {item.specific_role || item.position || item.title || config.label}
       </h3>
       <span className={`timeline-stage ${config.className}`}>
         {config.label}
@@ -135,7 +132,9 @@ const MissionTimelinePage = () => {
   // Calculate stats
   const calculateStats = (items, sister) => {
     const total = items.length;
-    const currentMissions = items.filter((i) => !i.end_date).length;
+    const currentMissions = items.filter(
+      (i) => !i.end_date || new Date(i.end_date) >= new Date()
+    ).length;
     const uniqueTypes = [...new Set(items.map((i) => i.mission_type || i.type))]
       .length;
     const yearsOfService = items.reduce((total, item) => {

@@ -20,6 +20,8 @@ import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import SearchBox from "@components/common/SearchBox";
 import Breadcrumb from "@components/common/Breadcrumb";
 import Pagination from "@components/common/Pagination";
+import StatsCards from "@components/common/StatsCards";
+import SearchFilterBar from "@components/common/SearchFilterBar";
 
 const CongDoanListPage = () => {
   const navigate = useNavigate();
@@ -131,6 +133,41 @@ const CongDoanListPage = () => {
 
   return (
     <Container fluid className="py-4">
+      <Breadcrumb
+        title="Quản lý Cộng đoàn"
+        items={[{ label: "Cộng đoàn" }]}
+      />
+
+      {/* Statistics Cards */}
+      <StatsCards
+        stats={[
+          {
+            label: "Tổng số",
+            value: communities.length,
+            icon: "fas fa-home",
+            color: "primary",
+          },
+          {
+            label: "Đang hoạt động",
+            value: communities.filter((c) => c.status === "active").length,
+            icon: "fas fa-check-circle",
+            color: "success",
+          },
+          {
+            label: "Thành viên",
+            value: communities.reduce((sum, c) => sum + (c.member_count || 0), 0),
+            icon: "fas fa-users",
+            color: "info",
+          },
+          {
+            label: "Cấp tỉnh",
+            value: communities.filter((c) => c.type === "provincial").length,
+            icon: "fas fa-building",
+            color: "warning",
+          },
+        ]}
+      />
+
       {/* Toast Notification */}
       <ToastContainer
         position="top-end"

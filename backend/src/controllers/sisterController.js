@@ -183,17 +183,16 @@ const getAllSisters = async (req, res) => {
          INNER JOIN (
            SELECT sister_id, 
                   MAX(CASE WHEN end_date IS NULL THEN 1 ELSE 0 END) as has_current,
-                  MAX(start_date) as max_start_date
+                  MAX(start_date) as max_start_date,
+                  MAX(id) as max_id
            FROM vocation_journey
            GROUP BY sister_id
          ) vj2 ON vj1.sister_id = vj2.sister_id 
-              AND (
-                (vj2.has_current = 1 AND vj1.end_date IS NULL) 
-                OR (vj2.has_current = 0 AND vj1.start_date = vj2.max_start_date)
-              )
+              AND vj1.id = vj2.max_id
        ) vj_latest ON s.id = vj_latest.sister_id
        LEFT JOIN communities c_journey ON vj_latest.community_id = c_journey.id
        ${whereClause} 
+       GROUP BY s.id
        ORDER BY s.created_at DESC 
        LIMIT ? OFFSET ?`,
       [...params, limit, offset]

@@ -1,25 +1,27 @@
 // src/features/users/pages/UserListPage.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Container,
   Row,
   Col,
   Button,
   Card,
-  Nav,
-  Tab,
+  Table,
+  Badge,
+  Pagination,
   Modal,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { userService } from "@services";
 import { useTable, useDebounce } from "@hooks";
-import { UserCard, UserForm, UserFilter } from "../components";
+import { UserForm, UserFilter } from "../components";
 import SearchBox from "@components/common/SearchBox";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
 import StatsCards from "@components/common/StatsCards";
 import SearchFilterBar from "@components/common/SearchFilterBar";
+import { formatDate } from "@utils";
 import "./UserListPage.css";
 
 const UserListPage = () => {
@@ -40,7 +42,7 @@ const UserListPage = () => {
   useEffect(() => {
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [table.sortBy, table.sortOrder]);
 
   const fetchUsers = async () => {
     try {
@@ -146,6 +148,69 @@ const UserListPage = () => {
   const activeUsers = (users || []).filter((u) => u.status === "active");
   const inactiveUsers = (users || []).filter((u) => u.status === "inactive");
 
+  const handleSort = (key) => {
+    table.handleSort(key);
+  };
+
+  const renderSortIcon = (key) => {
+    if (table.sortBy !== key) return <i className="fas fa-sort text-muted ms-1"></i>;
+    return table.sortOrder === "asc" ? (
+      <i className="fas fa-sort-up ms-1"></i>
+    ) : (
+      <i className="fas fa-sort-down ms-1"></i>
+    );
+  };
+
+  const roleLabel = (role) => {
+    const map = {
+      admin: "Quản trị viên",
+      superior_general: "Tổng quyền",
+      superior_provincial: "Bề trên Tỉnh",
+      superior_community: "Bề trên Cộng đoàn",
+      secretary: "Thư ký",
+      viewer: "Người xem",
+    };
+    return map[role] || role || "-";
+  };
+
+  const sortedUsers = useMemo(() => {
+    const items = [...(users || [])];
+
+    const getValue = (item) => {
+      switch (table.sortBy) {
+        case "full_name":
+          return item.full_name || "";
+        case "username":
+          return item.username || "";
+        case "email":
+          return item.email || "";
+        case "role":
+          return item.role || "";
+        case "status":
+          return item.status || "";
+        case "created_at":
+          return item.created_at ? new Date(item.created_at).getTime() : 0;
+        default:
+          return item.full_name || "";
+      }
+    };
+
+    items.sort((a, b) => {
+      const aVal = getValue(a);
+      const bVal = getValue(b);
+
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return table.sortOrder === "asc" ? aVal - bVal : bVal - aVal;
+      }
+
+      return table.sortOrder === "asc"
+        ? String(aVal).localeCompare(String(bVal))
+        : String(bVal).localeCompare(String(aVal));
+    });
+
+    return items;
+  }, [users, table.sortBy, table.sortOrder]);
+
   if (loading) {
     return (
       <div
@@ -248,109 +313,167 @@ const UserListPage = () => {
       </Row>
 
       {/* Content */}
-      {(users || []).length > 0 ? (
-        <Tab.Container defaultActiveKey="all">
-          <Card>
-            <Card.Header className="bg-white">
-              <Nav variant="tabs">
-                <Nav.Item>
-                  <Nav.Link eventKey="all">
-                    <i className="fas fa-list me-2"></i>
-                    Tất cả ({(users || []).length})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="admin">
-                    <i className="fas fa-user-shield me-2"></i>
-                    Quản trị ({usersByRole.admin.length})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="superior_general">
-                    <i className="fas fa-crown me-2"></i>
-                    Tổng quyền ({usersByRole.superior_general.length})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="superior_provincial">
-                    <i className="fas fa-user-tie me-2"></i>
-                    Tỉnh ({usersByRole.superior_provincial.length})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="superior_community">
-                    <i className="fas fa-users me-2"></i>
-                    Cộng đoàn ({usersByRole.superior_community.length})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="secretary">
-                    <i className="fas fa-user-edit me-2"></i>
-                    Thư ký ({usersByRole.secretary.length})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="viewer">
-                    <i className="fas fa-eye me-2"></i>
-                    Xem ({usersByRole.viewer.length})
-                  </Nav.Link>
-                </Nav.Item>
-              </Nav>
-            </Card.Header>
-            <Card.Body>
-              <Tab.Content>
-                <Tab.Pane eventKey="all">
-                  <Row className="g-4">
-                    {users.map((user) => (
-                      <Col key={user.id} xs={12} sm={6} lg={4} xl={3}>
-                        <UserCard
-                          user={user}
-                          onView={handleView}
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                          onResetPassword={handleResetPassword}
-                        />
-                      </Col>
-                    ))}
-                  </Row>
-                </Tab.Pane>
-                {Object.entries(usersByRole).map(([role, roleUsers]) => (
-                  <Tab.Pane key={role} eventKey={role}>
-                    <Row className="g-4">
-                      {roleUsers.map((user) => (
-                        <Col key={user.id} xs={12} sm={6} lg={4} xl={3}>
-                          <UserCard
-                            user={user}
-                            onView={handleView}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                            onResetPassword={handleResetPassword}
-                          />
-                        </Col>
-                      ))}
-                    </Row>
-                  </Tab.Pane>
-                ))}
-              </Tab.Content>
-            </Card.Body>
-          </Card>
-        </Tab.Container>
-      ) : (
-        <Card>
-          <Card.Body className="text-center py-5">
-            <i
-              className="fas fa-users text-muted mb-3"
-              style={{ fontSize: "3rem" }}
-            ></i>
-            <h5>Chưa có người dùng</h5>
-            <p className="text-muted">Thêm người dùng đầu tiên để bắt đầu</p>
-            <Button variant="primary" onClick={handleAdd}>
-              <i className="fas fa-plus me-2"></i>
-              Thêm Người dùng
-            </Button>
-          </Card.Body>
-        </Card>
-      )}
+      <Card
+        className="shadow-sm border-0 rounded-3"
+        style={{ borderRadius: "12px", overflow: "hidden" }}
+      >
+        <Card.Body className="p-0">
+          {(users || []).length === 0 ? (
+            <div className="text-center py-5">
+              <i
+                className="fas fa-users text-muted mb-3"
+                style={{ fontSize: "3rem" }}
+              ></i>
+              <h5>Chưa có người dùng</h5>
+              <p className="text-muted">Thêm người dùng đầu tiên để bắt đầu</p>
+              <Button variant="primary" onClick={handleAdd}>
+                <i className="fas fa-plus me-2"></i>
+                Thêm Người dùng
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="table-responsive">
+                <Table hover className="mb-0 align-middle">
+                  <thead className="bg-light">
+                    <tr>
+                      <th className="text-nowrap">#</th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("full_name")}
+                        className="text-nowrap"
+                      >
+                        Họ và tên {renderSortIcon("full_name")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("username")}
+                        className="text-nowrap"
+                      >
+                        Tên đăng nhập {renderSortIcon("username")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("email")}
+                        className="text-nowrap"
+                      >
+                        Email {renderSortIcon("email")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("role")}
+                        className="text-nowrap"
+                      >
+                        Vai trò {renderSortIcon("role")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("status")}
+                        className="text-nowrap"
+                      >
+                        Trạng thái {renderSortIcon("status")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("created_at")}
+                        className="text-nowrap"
+                      >
+                        Ngày tạo {renderSortIcon("created_at")}
+                      </th>
+                      <th className="text-end text-nowrap">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedUsers.map((user, index) => {
+                      const isActive = user.status === "active";
+                      return (
+                        <tr key={user.id}>
+                          <td>{(table.currentPage - 1) * table.pageSize + index + 1}</td>
+                          <td className="fw-semibold text-primary">{user.full_name || "-"}</td>
+                          <td>{user.username || "-"}</td>
+                          <td>{user.email || "-"}</td>
+                          <td>{roleLabel(user.role)}</td>
+                          <td>
+                            <Badge bg={isActive ? "success" : "secondary"}>
+                              {isActive ? "Đang hoạt động" : "Đã khóa"}
+                            </Badge>
+                          </td>
+                          <td className="text-nowrap">
+                            {user.created_at ? formatDate(user.created_at) : "-"}
+                          </td>
+                          <td className="text-end">
+                            <Button
+                              variant="outline-info"
+                              size="sm"
+                              className="me-1"
+                              onClick={() => handleView(user)}
+                              title="Xem chi tiết"
+                            >
+                              <i className="fas fa-eye"></i>
+                            </Button>
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              className="me-1"
+                              onClick={() => handleEdit(user)}
+                              title="Chỉnh sửa"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </Button>
+                            <Button
+                              variant="outline-warning"
+                              size="sm"
+                              className="me-1"
+                              onClick={() => handleResetPassword(user)}
+                              title="Đặt lại mật khẩu"
+                            >
+                              <i className="fas fa-key"></i>
+                            </Button>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleDelete(user)}
+                              title="Xóa"
+                            >
+                              <i className="fas fa-trash"></i>
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </div>
+            </>
+          )}
+        </Card.Body>
+        {table.totalPages > 1 && (
+          <Card.Footer className="bg-white d-flex justify-content-between align-items-center">
+            <small className="text-muted">
+              Trang {table.currentPage} / {table.totalPages}
+            </small>
+            <Pagination className="mb-0">
+              <Pagination.First
+                onClick={() => table.firstPage()}
+                disabled={table.currentPage === 1}
+              />
+              <Pagination.Prev
+                onClick={() => table.previousPage()}
+                disabled={table.currentPage === 1}
+              />
+              <Pagination.Item active>{table.currentPage}</Pagination.Item>
+              <Pagination.Next
+                onClick={() => table.nextPage()}
+                disabled={table.currentPage === table.totalPages}
+              />
+              <Pagination.Last
+                onClick={() => table.lastPage()}
+                disabled={table.currentPage === table.totalPages}
+              />
+            </Pagination>
+          </Card.Footer>
+        )}
+      </Card>
 
       {/* User Form Modal */}
       <UserForm

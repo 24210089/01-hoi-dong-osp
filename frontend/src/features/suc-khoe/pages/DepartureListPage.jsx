@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Container,
   Row,
   Col,
   Button,
   Card,
-  Nav,
-  Tab,
+  Table,
   Badge,
+  Pagination,
 } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { departureService } from "@services";
 import { useTable, useDebounce } from "@hooks";
-import DepartureCard from "../components/DepartureCard";
 import SearchBox from "@components/common/SearchBox";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
+import { formatDate } from "@utils";
 
 const DepartureListPage = () => {
   const { sisterId } = useParams();
@@ -31,7 +31,7 @@ const DepartureListPage = () => {
 
   useEffect(() => {
     fetchDepartures();
-  }, [sisterId, table.currentPage, table.pageSize, debouncedSearch]);
+  }, [sisterId, table.currentPage, table.pageSize, debouncedSearch, table.sortBy, table.sortOrder]);
 
   const fetchDepartures = async () => {
     try {
@@ -89,6 +89,78 @@ const DepartureListPage = () => {
 
   const activeCount = departures.filter((d) => !d.return_date).length;
   const returnedCount = departures.filter((d) => d.return_date).length;
+
+  const handleSort = (key) => {
+    table.handleSort(key);
+  };
+
+  const renderSortIcon = (key) => {
+    if (table.sortBy !== key) return <i className="fas fa-sort text-muted ms-1"></i>;
+    return table.sortOrder === "asc" ? (
+      <i className="fas fa-sort-up ms-1"></i>
+    ) : (
+      <i className="fas fa-sort-down ms-1"></i>
+    );
+  };
+
+  const typeLabel = (type) => {
+    const map = {
+      temporary: "Tạm thời",
+      medical: "Khám chữa bệnh",
+      study: "Học tập",
+      mission: "Công tác",
+      other: "Khác",
+    };
+    return map[type] || type || "-";
+  };
+
+  const sisterName = (d) => {
+    const saint = d.sister_saint_name || d.saint_name;
+    const birth = d.sister_birth_name || d.birth_name;
+    if (saint && birth) return `${saint} ${birth}`;
+    return saint || birth || `Nữ tu #${d.sister_id || "?"}`;  
+  };
+
+  const sortedDepartures = useMemo(() => {
+    const items = [...departures];
+
+    const getValue = (item) => {
+      switch (table.sortBy) {
+        case "sister":
+          return sisterName(item);
+        case "departure_date":
+          return item.departure_date ? new Date(item.departure_date).getTime() : 0;
+        case "return_date":
+          return item.return_date ? new Date(item.return_date).getTime() : 0;
+        case "destination":
+          return item.destination || "";
+        case "reason":
+          return item.reason || "";
+        case "type":
+          return item.type || "";
+        case "status": {
+          return item.return_date ? "returned" : "active";
+        }
+        default:
+          return item.departure_date ? new Date(item.departure_date).getTime() : 0;
+      }
+    };
+
+    items.sort((a, b) => {
+      const aVal = getValue(a);
+      const bVal = getValue(b);
+
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return table.sortOrder === "asc" ? aVal - bVal : bVal - aVal;
+      }
+
+      return table.sortOrder === "asc"
+        ? String(aVal).localeCompare(String(bVal))
+        : String(bVal).localeCompare(String(aVal));
+    });
+
+    return items;
+  }, [departures, table.sortBy, table.sortOrder]);
 
   if (loading) {
     return (
@@ -184,99 +256,164 @@ const DepartureListPage = () => {
         </Col>
       </Row>
 
-      {departures.length > 0 ? (
-        <Tab.Container defaultActiveKey="all">
-          <Card>
-            <Card.Header className="bg-white">
-              <Nav variant="tabs">
-                <Nav.Item>
-                  <Nav.Link eventKey="all">
-                    <i className="fas fa-list me-2"></i>
-                    Tất cả ({departures.length})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="active">
-                    <i className="fas fa-walking me-2"></i>
-                    Đang đi vắng ({activeCount})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="returned">
-                    <i className="fas fa-home me-2"></i>
-                    Đã trở về ({returnedCount})
-                  </Nav.Link>
-                </Nav.Item>
-              </Nav>
-            </Card.Header>
-            <Card.Body>
-              <Tab.Content>
-                <Tab.Pane eventKey="all">
-                  <Row className="g-4">
-                    {departures.map((departure) => (
-                      <Col key={departure.id} xs={12} sm={6} lg={4}>
-                        <DepartureCard
-                          departure={departure}
-                          onView={handleView}
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                        />
-                      </Col>
-                    ))}
-                  </Row>
-                </Tab.Pane>
-                <Tab.Pane eventKey="active">
-                  <Row className="g-4">
-                    {departures
-                      .filter((d) => !d.return_date)
-                      .map((departure) => (
-                        <Col key={departure.id} xs={12} sm={6} lg={4}>
-                          <DepartureCard
-                            departure={departure}
-                            onView={handleView}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                          />
-                        </Col>
-                      ))}
-                  </Row>
-                </Tab.Pane>
-                <Tab.Pane eventKey="returned">
-                  <Row className="g-4">
-                    {departures
-                      .filter((d) => d.return_date)
-                      .map((departure) => (
-                        <Col key={departure.id} xs={12} sm={6} lg={4}>
-                          <DepartureCard
-                            departure={departure}
-                            onView={handleView}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                          />
-                        </Col>
-                      ))}
-                  </Row>
-                </Tab.Pane>
-              </Tab.Content>
-            </Card.Body>
-          </Card>
-        </Tab.Container>
-      ) : (
-        <Card>
-          <Card.Body className="text-center py-5">
-            <i
-              className="fas fa-plane-departure text-muted mb-3"
-              style={{ fontSize: "3rem" }}
-            ></i>
-            <h5>Chưa có phiếu đi vắng</h5>
-            <p className="text-muted">Đăng ký phiếu đi vắng đầu tiên</p>
-            <Button variant="primary" onClick={handleAdd}>
-              <i className="fas fa-plus me-2"></i>
-              Đăng ký Đi vắng
-            </Button>
-          </Card.Body>
-        </Card>
-      )}
+      <Card
+        className="shadow-sm border-0 rounded-3"
+        style={{ borderRadius: "12px", overflow: "hidden" }}
+      >
+        <Card.Body className="p-0">
+          {departures.length === 0 ? (
+            <div className="text-center py-5">
+              <i
+                className="fas fa-plane-departure text-muted mb-3"
+                style={{ fontSize: "3rem" }}
+              ></i>
+              <h5>Chưa có phiếu đi vắng</h5>
+              <p className="text-muted">Đăng ký phiếu đi vắng đầu tiên</p>
+              <Button variant="primary" onClick={handleAdd}>
+                <i className="fas fa-plus me-2"></i>
+                Đăng ký Đi vắng
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="table-responsive">
+                <Table hover className="mb-0 align-middle">
+                  <thead className="bg-light">
+                    <tr>
+                      <th className="text-nowrap">#</th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("sister")}
+                        className="text-nowrap"
+                      >
+                        Nữ tu {renderSortIcon("sister")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("departure_date")}
+                        className="text-nowrap"
+                      >
+                        Ngày đi {renderSortIcon("departure_date")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("return_date")}
+                        className="text-nowrap"
+                      >
+                        Ngày về {renderSortIcon("return_date")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("destination")}
+                        className="text-nowrap"
+                      >
+                        Địa điểm {renderSortIcon("destination")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("reason")}
+                        className="text-nowrap"
+                      >
+                        Lý do {renderSortIcon("reason")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("type")}
+                        className="text-nowrap"
+                      >
+                        Loại {renderSortIcon("type")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("status")}
+                        className="text-nowrap"
+                      >
+                        Trạng thái {renderSortIcon("status")}
+                      </th>
+                      <th className="text-end text-nowrap">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedDepartures.map((departure, index) => {
+                      const isActive = !departure.return_date;
+                      return (
+                        <tr key={departure.id}>
+                          <td>{(table.currentPage - 1) * table.pageSize + index + 1}</td>
+                          <td className="fw-semibold text-primary">{sisterName(departure)}</td>
+                          <td className="text-nowrap">
+                            {departure.departure_date ? formatDate(departure.departure_date) : "-"}
+                          </td>
+                          <td className="text-nowrap">
+                            {departure.return_date ? formatDate(departure.return_date) : "Chưa về"}
+                          </td>
+                          <td>{departure.destination || "-"}</td>
+                          <td className="text-truncate" style={{ maxWidth: 200 }}>
+                            {departure.reason || "-"}
+                          </td>
+                          <td>{typeLabel(departure.type)}</td>
+                          <td>
+                            <Badge bg={isActive ? "warning" : "success"}>
+                              {isActive ? "Đang đi vắng" : "Đã trở về"}
+                            </Badge>
+                          </td>
+                          <td className="text-end">
+                            <Button
+                              variant="outline-info"
+                              size="sm"
+                              className="me-1"
+                              onClick={() => handleView(departure)}
+                              title="Xem chi tiết"
+                            >
+                              <i className="fas fa-eye"></i>
+                            </Button>
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              className="me-1"
+                              onClick={() => handleEdit(departure)}
+                              title="Chỉnh sửa"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </Button>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleDelete(departure)}
+                              title="Xóa"
+                            >
+                              <i className="fas fa-trash"></i>
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </div>
+            </>
+          )}
+        </Card.Body>
+        {table.totalPages > 1 && (
+          <Card.Footer className="bg-white d-flex justify-content-between align-items-center">
+            <small className="text-muted">
+              Trang {table.currentPage} / {table.totalPages}
+            </small>
+            <Pagination className="mb-0">
+              <Pagination.First onClick={() => table.firstPage()} disabled={table.currentPage === 1} />
+              <Pagination.Prev onClick={() => table.previousPage()} disabled={table.currentPage === 1} />
+              <Pagination.Item active>{table.currentPage}</Pagination.Item>
+              <Pagination.Next
+                onClick={() => table.nextPage()}
+                disabled={table.currentPage === table.totalPages}
+              />
+              <Pagination.Last
+                onClick={() => table.lastPage()}
+                disabled={table.currentPage === table.totalPages}
+              />
+            </Pagination>
+          </Card.Footer>
+        )}
+      </Card>
     </Container>
   );
 };

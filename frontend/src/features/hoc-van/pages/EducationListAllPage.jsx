@@ -149,7 +149,8 @@ const EducationListAllPage = () => {
   const sortedEducations = useMemo(() => {
     const items = [...educations];
     const getValue = (item) => {
-      if (sortBy === "sister_name") return item.sister_name || item.religious_name || "";
+      if (sortBy === "sister_name")
+        return item.sister_name || item.religious_name || "";
       if (sortBy === "institution") return item.institution || "";
       if (sortBy === "major") return item.major || "";
       if (sortBy === "level") return item.level || "";
@@ -250,7 +251,10 @@ const EducationListAllPage = () => {
                 <div>
                   <small className="text-muted">Số trình độ</small>
                   <h4 className="mb-0">
-                    {new Set(educations.map((e) => e.level).filter(Boolean)).size}
+                    {
+                      new Set(educations.map((e) => e.level).filter(Boolean))
+                        .size
+                    }
                   </h4>
                 </div>
                 <div className="stat-icon bg-warning">

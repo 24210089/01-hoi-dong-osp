@@ -1,17 +1,26 @@
 // src/features/su-vu/pages/MissionListPage.jsx (Updated)
 
-import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Card, Nav, Tab } from "react-bootstrap";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Card,
+  Table,
+  Badge,
+  Pagination,
+} from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { missionService } from "@services";
 import { useTable, useDebounce } from "@hooks";
-import MissionCard from "../components/MissionCard";
 import MissionForm from "../components/MissionForm";
 import MissionFilter from "../components/MissionFilter";
 import SearchBox from "@components/common/SearchBox";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
+import { formatDate } from "@utils";
 
 const MissionListPage = () => {
   const navigate = useNavigate();
@@ -29,7 +38,7 @@ const MissionListPage = () => {
 
   useEffect(() => {
     fetchMissions();
-  }, [table.currentPage, table.pageSize, debouncedSearch, table.filters]);
+  }, [table.currentPage, table.pageSize, debouncedSearch, table.filters, table.sortBy, table.sortOrder]);
 
   const fetchMissions = async () => {
     try {
@@ -141,6 +150,73 @@ const MissionListPage = () => {
     (m) => m.end_date && new Date(m.end_date) < new Date()
   );
 
+  const handleSort = (key) => {
+    table.handleSort(key);
+  };
+
+  const renderSortIcon = (key) => {
+    if (table.sortBy !== key) {
+      return <i className="fas fa-sort text-muted ms-1"></i>;
+    }
+    return table.sortOrder === "asc" ? (
+      <i className="fas fa-sort-up ms-1"></i>
+    ) : (
+      <i className="fas fa-sort-down ms-1"></i>
+    );
+  };
+
+  const fieldLabel = (field) => {
+    const map = {
+      education: "Giáo dục",
+      pastoral: "Mục vụ",
+      publishing: "Xuất bản",
+      media: "Truyền thông",
+      healthcare: "Y tế",
+      social: "Xã hội",
+    };
+    return map[field] || field || "-";
+  };
+
+  const sortedMissions = useMemo(() => {
+    const items = [...missions];
+
+    const getValue = (item) => {
+      switch (table.sortBy) {
+        case "religious_name":
+          return item.religious_name || item.sister_name || "";
+        case "specific_role":
+          return item.specific_role || "";
+        case "organization":
+          return item.organization || "";
+        case "field":
+          return item.field || "";
+        case "start_date":
+          return item.start_date ? new Date(item.start_date).getTime() : 0;
+        case "status": {
+          const isActive = !item.end_date || new Date(item.end_date) >= new Date();
+          return isActive ? "active" : "completed";
+        }
+        default:
+          return item.start_date ? new Date(item.start_date).getTime() : 0;
+      }
+    };
+
+    items.sort((a, b) => {
+      const aVal = getValue(a);
+      const bVal = getValue(b);
+
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return table.sortOrder === "asc" ? aVal - bVal : bVal - aVal;
+      }
+
+      return table.sortOrder === "asc"
+        ? String(aVal).localeCompare(String(bVal))
+        : String(bVal).localeCompare(String(aVal));
+    });
+
+    return items;
+  }, [missions, table.sortBy, table.sortOrder]);
+
   if (loading) {
     return (
       <div
@@ -155,6 +231,72 @@ const MissionListPage = () => {
   return (
     <Container fluid className="py-4">
       <Breadcrumb title="Quản lý Sứ vụ" items={[{ label: "Quản lý Sứ vụ" }]} />
+
+      {/* Statistics Cards */}
+      <Row className="g-3 mb-4">
+        <Col xs={6} md={3}>
+          <Card className="stat-card shadow-sm border-0 rounded-3">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <small className="text-muted">Tổng số</small>
+                  <h4 className="mb-0">{table.totalItems || missions.length}</h4>
+                </div>
+                <div className="stat-icon bg-primary">
+                  <i className="fas fa-briefcase"></i>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col xs={6} md={3}>
+          <Card className="stat-card shadow-sm border-0 rounded-3">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <small className="text-muted">Đang làm</small>
+                  <h4 className="mb-0">{activeMissions.length}</h4>
+                </div>
+                <div className="stat-icon bg-success">
+                  <i className="fas fa-play"></i>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col xs={6} md={3}>
+          <Card className="stat-card shadow-sm border-0 rounded-3">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <small className="text-muted">Đã kết thúc</small>
+                  <h4 className="mb-0">{completedMissions.length}</h4>
+                </div>
+                <div className="stat-icon bg-info">
+                  <i className="fas fa-check"></i>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col xs={6} md={3}>
+          <Card className="stat-card shadow-sm border-0 rounded-3">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <small className="text-muted">Lĩnh vực</small>
+                  <h4 className="mb-0">
+                    {new Set(missions.map((m) => m.field).filter(Boolean)).size}
+                  </h4>
+                </div>
+                <div className="stat-icon bg-warning">
+                  <i className="fas fa-layer-group"></i>
+                </div>
+              </div>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
       {/* Search & Filter */}
       <Row className="g-3 mb-4">
@@ -174,97 +316,161 @@ const MissionListPage = () => {
         </Col>
       </Row>
 
-      {missions.length > 0 ? (
-        <Tab.Container defaultActiveKey="all">
-          <Card>
-            <Card.Header className="bg-white">
-              <Nav variant="tabs">
-                <Nav.Item>
-                  <Nav.Link eventKey="active">
-                    <i className="fas fa-play-circle me-2"></i>
-                    Đang làm ({activeMissions.length})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="completed">
-                    <i className="fas fa-check-circle me-2"></i>
-                    Đã kết thúc ({completedMissions.length})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="all">
-                    <i className="fas fa-list me-2"></i>
-                    Tất cả ({missions.length})
-                  </Nav.Link>
-                </Nav.Item>
-              </Nav>
-            </Card.Header>
-            <Card.Body>
-              <Tab.Content>
-                <Tab.Pane eventKey="active">
-                  <Row className="g-4">
-                    {activeMissions.map((mission) => (
-                      <Col key={mission.id} xs={12} sm={6} lg={4}>
-                        <MissionCard
-                          mission={mission}
-                          onView={handleView}
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                        />
-                      </Col>
-                    ))}
-                  </Row>
-                </Tab.Pane>
-                <Tab.Pane eventKey="completed">
-                  <Row className="g-4">
-                    {completedMissions.map((mission) => (
-                      <Col key={mission.id} xs={12} sm={6} lg={4}>
-                        <MissionCard
-                          mission={mission}
-                          onView={handleView}
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                        />
-                      </Col>
-                    ))}
-                  </Row>
-                </Tab.Pane>
-                <Tab.Pane eventKey="all">
-                  <Row className="g-4">
-                    {missions.map((mission) => (
-                      <Col key={mission.id} xs={12} sm={6} lg={4}>
-                        <MissionCard
-                          mission={mission}
-                          onView={handleView}
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                        />
-                      </Col>
-                    ))}
-                  </Row>
-                </Tab.Pane>
-              </Tab.Content>
-            </Card.Body>
-          </Card>
-        </Tab.Container>
-      ) : (
-        <Card>
-          <Card.Body className="text-center py-5">
-            <i
-              className="fas fa-briefcase text-muted mb-3"
-              style={{ fontSize: "3rem" }}
-            ></i>
-            <h5>Chưa có thông tin sứ vụ</h5>
-            <p className="text-muted">
-              Thêm sứ vụ đầu tiên để theo dõi công tác
-            </p>
-            <Button variant="primary" onClick={handleAdd}>
-              <i className="fas fa-plus me-2"></i>
-              Thêm Sứ vụ
-            </Button>
-          </Card.Body>
-        </Card>
-      )}
+      <Card
+        className="shadow-sm border-0 rounded-3"
+        style={{ borderRadius: "12px", overflow: "hidden" }}
+      >
+        <Card.Body className="p-0">
+          {missions.length === 0 ? (
+            <div className="text-center py-5">
+              <i
+                className="fas fa-briefcase text-muted mb-3"
+                style={{ fontSize: "3rem" }}
+              ></i>
+              <h5>Chưa có thông tin sứ vụ</h5>
+              <p className="text-muted">
+                Thêm sứ vụ đầu tiên để theo dõi công tác
+              </p>
+              <Button variant="primary" onClick={handleAdd}>
+                <i className="fas fa-plus me-2"></i>
+                Thêm Sứ vụ
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="table-responsive">
+                <Table hover className="mb-0 align-middle">
+                  <thead className="bg-light">
+                    <tr>
+                      <th className="text-nowrap">#</th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("religious_name")}
+                        className="text-nowrap"
+                      >
+                        Nữ tu {renderSortIcon("religious_name")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("specific_role")}
+                        className="text-nowrap"
+                      >
+                        Chức vụ {renderSortIcon("specific_role")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("organization")}
+                        className="text-nowrap"
+                      >
+                        Tổ chức {renderSortIcon("organization")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("field")}
+                        className="text-nowrap"
+                      >
+                        Lĩnh vực {renderSortIcon("field")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("start_date")}
+                        className="text-nowrap"
+                      >
+                        Thời gian {renderSortIcon("start_date")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("status")}
+                        className="text-nowrap"
+                      >
+                        Trạng thái {renderSortIcon("status")}
+                      </th>
+                      <th className="text-nowrap text-end">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedMissions.map((mission, index) => {
+                      const isActive =
+                        !mission.end_date || new Date(mission.end_date) >= new Date();
+                      return (
+                        <tr key={mission.id}>
+                          <td>{(table.currentPage - 1) * table.pageSize + index + 1}</td>
+                          <td className="fw-semibold text-primary">
+                            {mission.religious_name || mission.sister_name || "N/A"}
+                          </td>
+                          <td>{mission.specific_role || "-"}</td>
+                          <td>{mission.organization || "-"}</td>
+                          <td>{fieldLabel(mission.field)}</td>
+                          <td className="text-nowrap">
+                            {mission.start_date ? formatDate(mission.start_date) : "-"}
+                            {" "}
+                            {mission.end_date
+                              ? `- ${formatDate(mission.end_date)}`
+                              : "- Hiện tại"}
+                          </td>
+                          <td>
+                            <Badge bg={isActive ? "success" : "secondary"}>
+                              {isActive ? "Đang làm" : "Đã kết thúc"}
+                            </Badge>
+                          </td>
+                          <td className="text-end">
+                            <Button
+                              variant="outline-info"
+                              size="sm"
+                              className="me-1"
+                              onClick={() => handleView(mission)}
+                              title="Xem chi tiết"
+                            >
+                              <i className="fas fa-eye"></i>
+                            </Button>
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              className="me-1"
+                              onClick={() => handleEdit(mission)}
+                              title="Chỉnh sửa"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </Button>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleDelete(mission)}
+                              title="Xóa"
+                            >
+                              <i className="fas fa-trash"></i>
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </div>
+            </>
+          )}
+        </Card.Body>
+        {table.totalPages > 1 && (
+          <Card.Footer className="bg-white d-flex justify-content-between align-items-center">
+            <small className="text-muted">
+              Trang {table.currentPage} / {table.totalPages}
+            </small>
+            <Pagination className="mb-0">
+              <Pagination.First onClick={() => table.firstPage()} disabled={table.currentPage === 1} />
+              <Pagination.Prev onClick={() => table.previousPage()} disabled={table.currentPage === 1} />
+              <Pagination.Item active>{table.currentPage}</Pagination.Item>
+              <Pagination.Next
+                onClick={() => table.nextPage()}
+                disabled={table.currentPage === table.totalPages}
+              />
+              <Pagination.Last
+                onClick={() => table.lastPage()}
+                disabled={table.currentPage === table.totalPages}
+              />
+            </Pagination>
+          </Card.Footer>
+        )}
+      </Card>
 
       <MissionForm
         show={showForm}

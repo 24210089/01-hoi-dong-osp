@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Card, Nav, Tab } from "react-bootstrap";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Card,
+  Table,
+  Badge,
+  Pagination,
+} from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { healthService } from "@services";
 import { useTable, useDebounce } from "@hooks";
-import HealthCard from "../components/HealthCard";
-import SearchBox from "@components/common/SearchBox";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
 import StatsCards from "@components/common/StatsCards";
 import SearchFilterBar from "@components/common/SearchFilterBar";
+import { formatDate } from "@utils";
 
 const HealthRecordListPage = () => {
   const { sisterId } = useParams();
@@ -25,7 +33,7 @@ const HealthRecordListPage = () => {
 
   useEffect(() => {
     fetchHealthRecords();
-  }, [sisterId, table.currentPage, table.pageSize, debouncedSearch]);
+  }, [sisterId, table.currentPage, table.pageSize, debouncedSearch, table.sortBy, table.sortOrder]);
 
   const fetchHealthRecords = async () => {
     try {
@@ -51,12 +59,6 @@ const HealthRecordListPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleAdd = () => {
-    navigate(
-      sisterId ? `/nu-tu/${sisterId}/suc-khoe/create` : "/suc-khoe/create"
-    );
   };
 
   const handleView = (record) => {
@@ -92,6 +94,73 @@ const HealthRecordListPage = () => {
     weak: records.filter((r) => r.general_health === "weak"),
   };
 
+  const handleSort = (key) => {
+    table.handleSort(key);
+  };
+
+  const renderSortIcon = (key) => {
+    if (table.sortBy !== key) return <i className="fas fa-sort text-muted ms-1"></i>;
+    return table.sortOrder === "asc" ? (
+      <i className="fas fa-sort-up ms-1"></i>
+    ) : (
+      <i className="fas fa-sort-down ms-1"></i>
+    );
+  };
+
+  const healthStatusBadge = (status) => {
+    const map = {
+      good: { label: "Tốt", variant: "success" },
+      average: { label: "Trung bình", variant: "warning" },
+      weak: { label: "Yếu", variant: "danger" },
+    };
+    return map[status] || { label: status || "Chưa xác định", variant: "secondary" };
+  };
+
+  const sisterName = (r) => {
+    const saint = r.sister_saint_name || r.saint_name;
+    const birth = r.sister_birth_name || r.birth_name;
+    if (saint && birth) return `${saint} ${birth}`;
+    return saint || birth || `Nữ tu #${r.sister_id || "?"}`;
+  };
+
+  const sortedRecords = useMemo(() => {
+    const items = [...records];
+
+    const getValue = (item) => {
+      switch (table.sortBy) {
+        case "sister":
+          return sisterName(item);
+        case "checkup_date":
+          return item.checkup_date ? new Date(item.checkup_date).getTime() : 0;
+        case "diagnosis":
+          return item.diagnosis || "";
+        case "doctor":
+          return item.doctor || "";
+        case "checkup_place":
+          return item.checkup_place || "";
+        case "general_health":
+          return item.general_health || "";
+        default:
+          return item.checkup_date ? new Date(item.checkup_date).getTime() : 0;
+      }
+    };
+
+    items.sort((a, b) => {
+      const aVal = getValue(a);
+      const bVal = getValue(b);
+
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return table.sortOrder === "asc" ? aVal - bVal : bVal - aVal;
+      }
+
+      return table.sortOrder === "asc"
+        ? String(aVal).localeCompare(String(bVal))
+        : String(bVal).localeCompare(String(aVal));
+    });
+
+    return items;
+  }, [records, table.sortBy, table.sortOrder]);
+
   if (loading) {
     return (
       <div
@@ -116,13 +185,6 @@ const HealthRecordListPage = () => {
           { label: "Hồ sơ Sức khỏe" },
         ]}
       />
-
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <Button variant="primary" onClick={handleAdd}>
-          <i className="fas fa-plus me-2"></i>
-          Thêm Hồ sơ
-        </Button>
-      </div>
 
       <StatsCards
         stats={[
@@ -159,93 +221,150 @@ const HealthRecordListPage = () => {
         searchPlaceholder="Tìm kiếm theo bệnh viện, bác sĩ, chẩn đoán..."
       />
 
-      {records.length > 0 ? (
-        <Tab.Container defaultActiveKey="all">
-          <Card>
-            <Card.Header className="bg-white">
-              <Nav variant="tabs">
-                <Nav.Item>
-                  <Nav.Link eventKey="all">
-                    <i className="fas fa-list me-2"></i>
-                    Tất cả ({records.length})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="good">
-                    <i className="fas fa-smile me-2"></i>
-                    Tốt ({recordsByStatus.good.length})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="average">
-                    <i className="fas fa-meh me-2"></i>
-                    Trung bình ({recordsByStatus.average.length})
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="weak">
-                    <i className="fas fa-frown me-2"></i>
-                    Yếu ({recordsByStatus.weak.length})
-                  </Nav.Link>
-                </Nav.Item>
-              </Nav>
-            </Card.Header>
-            <Card.Body>
-              <Tab.Content>
-                <Tab.Pane eventKey="all">
-                  <Row className="g-4">
-                    {records.map((record) => (
-                      <Col key={record.id} xs={12} sm={6} lg={4}>
-                        <HealthCard
-                          healthRecord={record}
-                          onView={handleView}
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                        />
-                      </Col>
-                    ))}
-                  </Row>
-                </Tab.Pane>
-                {Object.entries(recordsByStatus).map(
-                  ([status, statusRecords]) => (
-                    <Tab.Pane key={status} eventKey={status}>
-                      <Row className="g-4">
-                        {statusRecords.map((record) => (
-                          <Col key={record.id} xs={12} sm={6} lg={4}>
-                            <HealthCard
-                              healthRecord={record}
-                              onView={handleView}
-                              onEdit={handleEdit}
-                              onDelete={handleDelete}
-                            />
-                          </Col>
-                        ))}
-                      </Row>
-                    </Tab.Pane>
-                  )
-                )}
-              </Tab.Content>
-            </Card.Body>
-          </Card>
-        </Tab.Container>
-      ) : (
-        <Card>
-          <Card.Body className="text-center py-5">
-            <i
-              className="fas fa-heartbeat text-muted mb-3"
-              style={{ fontSize: "3rem" }}
-            ></i>
-            <h5>Chưa có hồ sơ sức khỏe</h5>
-            <p className="text-muted">
-              Thêm hồ sơ đầu tiên để theo dõi sức khỏe
-            </p>
-            <Button variant="primary" onClick={handleAdd}>
-              <i className="fas fa-plus me-2"></i>
-              Thêm Hồ sơ
-            </Button>
-          </Card.Body>
-        </Card>
-      )}
+      <Card
+        className="shadow-sm border-0 rounded-3"
+        style={{ borderRadius: "12px", overflow: "hidden" }}
+      >
+        <Card.Body className="p-0">
+          {records.length === 0 ? (
+            <div className="text-center py-5">
+              <i
+                className="fas fa-heartbeat text-muted mb-3"
+                style={{ fontSize: "3rem" }}
+              ></i>
+              <h5>Chưa có hồ sơ sức khỏe</h5>
+              <p className="text-muted">
+                Thêm hồ sơ đầu tiên để theo dõi sức khỏe
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="table-responsive">
+                <Table hover className="mb-0 align-middle">
+                  <thead className="bg-light">
+                    <tr>
+                      <th className="text-nowrap">#</th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("sister")}
+                        className="text-nowrap"
+                      >
+                        Nữ tu {renderSortIcon("sister")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("checkup_date")}
+                        className="text-nowrap"
+                      >
+                        Ngày khám {renderSortIcon("checkup_date")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("diagnosis")}
+                        className="text-nowrap"
+                      >
+                        Chẩn đoán {renderSortIcon("diagnosis")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("doctor")}
+                        className="text-nowrap"
+                      >
+                        Bác sĩ {renderSortIcon("doctor")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("checkup_place")}
+                        className="text-nowrap"
+                      >
+                        Nơi khám {renderSortIcon("checkup_place")}
+                      </th>
+                      <th
+                        role="button"
+                        onClick={() => handleSort("general_health")}
+                        className="text-nowrap"
+                      >
+                        Tình trạng {renderSortIcon("general_health")}
+                      </th>
+                      <th className="text-end text-nowrap">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedRecords.map((record, index) => {
+                      const badge = healthStatusBadge(record.general_health);
+                      return (
+                        <tr key={record.id}>
+                          <td>{(table.currentPage - 1) * table.pageSize + index + 1}</td>
+                          <td className="fw-semibold text-primary">{sisterName(record)}</td>
+                          <td className="text-nowrap">
+                            {record.checkup_date ? formatDate(record.checkup_date) : "-"}
+                          </td>
+                          <td className="text-truncate" style={{ maxWidth: 220 }}>
+                            {record.diagnosis || "-"}
+                          </td>
+                          <td>{record.doctor || "-"}</td>
+                          <td>{record.checkup_place || "-"}</td>
+                          <td>
+                            <Badge bg={badge.variant}>{badge.label}</Badge>
+                          </td>
+                          <td className="text-end">
+                            <Button
+                              variant="outline-info"
+                              size="sm"
+                              className="me-1"
+                              onClick={() => handleView(record)}
+                              title="Xem chi tiết"
+                            >
+                              <i className="fas fa-eye"></i>
+                            </Button>
+                            <Button
+                              variant="outline-primary"
+                              size="sm"
+                              className="me-1"
+                              onClick={() => handleEdit(record)}
+                              title="Chỉnh sửa"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </Button>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => handleDelete(record)}
+                              title="Xóa"
+                            >
+                              <i className="fas fa-trash"></i>
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </div>
+            </>
+          )}
+        </Card.Body>
+        {table.totalPages > 1 && (
+          <Card.Footer className="bg-white d-flex justify-content-between align-items-center">
+            <small className="text-muted">
+              Trang {table.currentPage} / {table.totalPages}
+            </small>
+            <Pagination className="mb-0">
+              <Pagination.First onClick={() => table.firstPage()} disabled={table.currentPage === 1} />
+              <Pagination.Prev onClick={() => table.previousPage()} disabled={table.currentPage === 1} />
+              <Pagination.Item active>{table.currentPage}</Pagination.Item>
+              <Pagination.Next
+                onClick={() => table.nextPage()}
+                disabled={table.currentPage === table.totalPages}
+              />
+              <Pagination.Last
+                onClick={() => table.lastPage()}
+                disabled={table.currentPage === table.totalPages}
+              />
+            </Pagination>
+          </Card.Footer>
+        )}
+      </Card>
     </Container>
   );
 };

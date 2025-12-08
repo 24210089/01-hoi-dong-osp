@@ -38,7 +38,14 @@ const MissionListPage = () => {
 
   useEffect(() => {
     fetchMissions();
-  }, [table.currentPage, table.pageSize, debouncedSearch, table.filters, table.sortBy, table.sortOrder]);
+  }, [
+    table.currentPage,
+    table.pageSize,
+    debouncedSearch,
+    table.filters,
+    table.sortBy,
+    table.sortOrder,
+  ]);
 
   const fetchMissions = async () => {
     try {
@@ -68,9 +75,7 @@ const MissionListPage = () => {
           : [];
 
         const total =
-          response.data?.total ??
-          response.data?.meta?.total ??
-          items.length;
+          response.data?.total ?? response.data?.meta?.total ?? items.length;
 
         setMissions(items);
         table.setTotalItems(total);
@@ -193,7 +198,8 @@ const MissionListPage = () => {
         case "start_date":
           return item.start_date ? new Date(item.start_date).getTime() : 0;
         case "status": {
-          const isActive = !item.end_date || new Date(item.end_date) >= new Date();
+          const isActive =
+            !item.end_date || new Date(item.end_date) >= new Date();
           return isActive ? "active" : "completed";
         }
         default:
@@ -240,7 +246,9 @@ const MissionListPage = () => {
               <div className="d-flex justify-content-between align-items-center">
                 <div>
                   <small className="text-muted">Tổng số</small>
-                  <h4 className="mb-0">{table.totalItems || missions.length}</h4>
+                  <h4 className="mb-0">
+                    {table.totalItems || missions.length}
+                  </h4>
                 </div>
                 <div className="stat-icon bg-primary">
                   <i className="fas fa-briefcase"></i>
@@ -391,19 +399,27 @@ const MissionListPage = () => {
                   <tbody>
                     {sortedMissions.map((mission, index) => {
                       const isActive =
-                        !mission.end_date || new Date(mission.end_date) >= new Date();
+                        !mission.end_date ||
+                        new Date(mission.end_date) >= new Date();
                       return (
                         <tr key={mission.id}>
-                          <td>{(table.currentPage - 1) * table.pageSize + index + 1}</td>
+                          <td>
+                            {(table.currentPage - 1) * table.pageSize +
+                              index +
+                              1}
+                          </td>
                           <td className="fw-semibold text-primary">
-                            {mission.religious_name || mission.sister_name || "N/A"}
+                            {mission.religious_name ||
+                              mission.sister_name ||
+                              "N/A"}
                           </td>
                           <td>{mission.specific_role || "-"}</td>
                           <td>{mission.organization || "-"}</td>
                           <td>{fieldLabel(mission.field)}</td>
                           <td className="text-nowrap">
-                            {mission.start_date ? formatDate(mission.start_date) : "-"}
-                            {" "}
+                            {mission.start_date
+                              ? formatDate(mission.start_date)
+                              : "-"}{" "}
                             {mission.end_date
                               ? `- ${formatDate(mission.end_date)}`
                               : "- Hiện tại"}
@@ -456,8 +472,14 @@ const MissionListPage = () => {
               Trang {table.currentPage} / {table.totalPages}
             </small>
             <Pagination className="mb-0">
-              <Pagination.First onClick={() => table.firstPage()} disabled={table.currentPage === 1} />
-              <Pagination.Prev onClick={() => table.previousPage()} disabled={table.currentPage === 1} />
+              <Pagination.First
+                onClick={() => table.firstPage()}
+                disabled={table.currentPage === 1}
+              />
+              <Pagination.Prev
+                onClick={() => table.previousPage()}
+                disabled={table.currentPage === 1}
+              />
               <Pagination.Item active>{table.currentPage}</Pagination.Item>
               <Pagination.Next
                 onClick={() => table.nextPage()}

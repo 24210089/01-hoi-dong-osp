@@ -31,7 +31,14 @@ const DepartureListPage = () => {
 
   useEffect(() => {
     fetchDepartures();
-  }, [sisterId, table.currentPage, table.pageSize, debouncedSearch, table.sortBy, table.sortOrder]);
+  }, [
+    sisterId,
+    table.currentPage,
+    table.pageSize,
+    debouncedSearch,
+    table.sortBy,
+    table.sortOrder,
+  ]);
 
   const fetchDepartures = async () => {
     try {
@@ -95,7 +102,8 @@ const DepartureListPage = () => {
   };
 
   const renderSortIcon = (key) => {
-    if (table.sortBy !== key) return <i className="fas fa-sort text-muted ms-1"></i>;
+    if (table.sortBy !== key)
+      return <i className="fas fa-sort text-muted ms-1"></i>;
     return table.sortOrder === "asc" ? (
       <i className="fas fa-sort-up ms-1"></i>
     ) : (
@@ -118,7 +126,7 @@ const DepartureListPage = () => {
     const saint = d.sister_saint_name || d.saint_name;
     const birth = d.sister_birth_name || d.birth_name;
     if (saint && birth) return `${saint} ${birth}`;
-    return saint || birth || `Nữ tu #${d.sister_id || "?"}`;  
+    return saint || birth || `Nữ tu #${d.sister_id || "?"}`;
   };
 
   const sortedDepartures = useMemo(() => {
@@ -129,7 +137,9 @@ const DepartureListPage = () => {
         case "sister":
           return sisterName(item);
         case "departure_date":
-          return item.departure_date ? new Date(item.departure_date).getTime() : 0;
+          return item.departure_date
+            ? new Date(item.departure_date).getTime()
+            : 0;
         case "return_date":
           return item.return_date ? new Date(item.return_date).getTime() : 0;
         case "destination":
@@ -142,7 +152,9 @@ const DepartureListPage = () => {
           return item.return_date ? "returned" : "active";
         }
         default:
-          return item.departure_date ? new Date(item.departure_date).getTime() : 0;
+          return item.departure_date
+            ? new Date(item.departure_date).getTime()
+            : 0;
       }
     };
 
@@ -338,16 +350,29 @@ const DepartureListPage = () => {
                       const isActive = !departure.return_date;
                       return (
                         <tr key={departure.id}>
-                          <td>{(table.currentPage - 1) * table.pageSize + index + 1}</td>
-                          <td className="fw-semibold text-primary">{sisterName(departure)}</td>
-                          <td className="text-nowrap">
-                            {departure.departure_date ? formatDate(departure.departure_date) : "-"}
+                          <td>
+                            {(table.currentPage - 1) * table.pageSize +
+                              index +
+                              1}
+                          </td>
+                          <td className="fw-semibold text-primary">
+                            {sisterName(departure)}
                           </td>
                           <td className="text-nowrap">
-                            {departure.return_date ? formatDate(departure.return_date) : "Chưa về"}
+                            {departure.departure_date
+                              ? formatDate(departure.departure_date)
+                              : "-"}
+                          </td>
+                          <td className="text-nowrap">
+                            {departure.return_date
+                              ? formatDate(departure.return_date)
+                              : "Chưa về"}
                           </td>
                           <td>{departure.destination || "-"}</td>
-                          <td className="text-truncate" style={{ maxWidth: 200 }}>
+                          <td
+                            className="text-truncate"
+                            style={{ maxWidth: 200 }}
+                          >
                             {departure.reason || "-"}
                           </td>
                           <td>{typeLabel(departure.type)}</td>
@@ -399,8 +424,14 @@ const DepartureListPage = () => {
               Trang {table.currentPage} / {table.totalPages}
             </small>
             <Pagination className="mb-0">
-              <Pagination.First onClick={() => table.firstPage()} disabled={table.currentPage === 1} />
-              <Pagination.Prev onClick={() => table.previousPage()} disabled={table.currentPage === 1} />
+              <Pagination.First
+                onClick={() => table.firstPage()}
+                disabled={table.currentPage === 1}
+              />
+              <Pagination.Prev
+                onClick={() => table.previousPage()}
+                disabled={table.currentPage === 1}
+              />
               <Pagination.Item active>{table.currentPage}</Pagination.Item>
               <Pagination.Next
                 onClick={() => table.nextPage()}

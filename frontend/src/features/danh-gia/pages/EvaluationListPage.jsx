@@ -35,7 +35,14 @@ const EvaluationListPage = () => {
 
   useEffect(() => {
     fetchEvaluations();
-  }, [sisterId, table.currentPage, table.pageSize, debouncedSearch, table.sortBy, table.sortOrder]);
+  }, [
+    sisterId,
+    table.currentPage,
+    table.pageSize,
+    debouncedSearch,
+    table.sortBy,
+    table.sortOrder,
+  ]);
 
   const fetchEvaluations = async () => {
     try {
@@ -109,7 +116,8 @@ const EvaluationListPage = () => {
   };
 
   const renderSortIcon = (key) => {
-    if (table.sortBy !== key) return <i className="fas fa-sort text-muted ms-1"></i>;
+    if (table.sortBy !== key)
+      return <i className="fas fa-sort text-muted ms-1"></i>;
     return table.sortOrder === "asc" ? (
       <i className="fas fa-sort-up ms-1"></i>
     ) : (
@@ -143,7 +151,9 @@ const EvaluationListPage = () => {
         case "sister":
           return sisterName(item);
         case "evaluation_date":
-          return item.evaluation_date ? new Date(item.evaluation_date).getTime() : 0;
+          return item.evaluation_date
+            ? new Date(item.evaluation_date).getTime()
+            : 0;
         case "evaluation_type":
           return item.evaluation_type || "";
         case "evaluator":
@@ -153,7 +163,9 @@ const EvaluationListPage = () => {
         case "period":
           return item.period || "";
         default:
-          return item.evaluation_date ? new Date(item.evaluation_date).getTime() : 0;
+          return item.evaluation_date
+            ? new Date(item.evaluation_date).getTime()
+            : 0;
       }
     };
 
@@ -313,7 +325,11 @@ const EvaluationListPage = () => {
                           : "danger";
                       return (
                         <tr key={evaluation.id}>
-                          <td>{(table.currentPage - 1) * table.pageSize + index + 1}</td>
+                          <td>
+                            {(table.currentPage - 1) * table.pageSize +
+                              index +
+                              1}
+                          </td>
                           <td className="fw-semibold text-primary">
                             {sisterName(evaluation)}
                           </td>

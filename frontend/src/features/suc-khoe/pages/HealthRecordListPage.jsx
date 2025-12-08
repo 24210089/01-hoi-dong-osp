@@ -33,7 +33,14 @@ const HealthRecordListPage = () => {
 
   useEffect(() => {
     fetchHealthRecords();
-  }, [sisterId, table.currentPage, table.pageSize, debouncedSearch, table.sortBy, table.sortOrder]);
+  }, [
+    sisterId,
+    table.currentPage,
+    table.pageSize,
+    debouncedSearch,
+    table.sortBy,
+    table.sortOrder,
+  ]);
 
   const fetchHealthRecords = async () => {
     try {
@@ -99,7 +106,8 @@ const HealthRecordListPage = () => {
   };
 
   const renderSortIcon = (key) => {
-    if (table.sortBy !== key) return <i className="fas fa-sort text-muted ms-1"></i>;
+    if (table.sortBy !== key)
+      return <i className="fas fa-sort text-muted ms-1"></i>;
     return table.sortOrder === "asc" ? (
       <i className="fas fa-sort-up ms-1"></i>
     ) : (
@@ -113,7 +121,9 @@ const HealthRecordListPage = () => {
       average: { label: "Trung bình", variant: "warning" },
       weak: { label: "Yếu", variant: "danger" },
     };
-    return map[status] || { label: status || "Chưa xác định", variant: "secondary" };
+    return (
+      map[status] || { label: status || "Chưa xác định", variant: "secondary" }
+    );
   };
 
   const sisterName = (r) => {
@@ -294,12 +304,23 @@ const HealthRecordListPage = () => {
                       const badge = healthStatusBadge(record.general_health);
                       return (
                         <tr key={record.id}>
-                          <td>{(table.currentPage - 1) * table.pageSize + index + 1}</td>
-                          <td className="fw-semibold text-primary">{sisterName(record)}</td>
-                          <td className="text-nowrap">
-                            {record.checkup_date ? formatDate(record.checkup_date) : "-"}
+                          <td>
+                            {(table.currentPage - 1) * table.pageSize +
+                              index +
+                              1}
                           </td>
-                          <td className="text-truncate" style={{ maxWidth: 220 }}>
+                          <td className="fw-semibold text-primary">
+                            {sisterName(record)}
+                          </td>
+                          <td className="text-nowrap">
+                            {record.checkup_date
+                              ? formatDate(record.checkup_date)
+                              : "-"}
+                          </td>
+                          <td
+                            className="text-truncate"
+                            style={{ maxWidth: 220 }}
+                          >
                             {record.diagnosis || "-"}
                           </td>
                           <td>{record.doctor || "-"}</td>
@@ -350,8 +371,14 @@ const HealthRecordListPage = () => {
               Trang {table.currentPage} / {table.totalPages}
             </small>
             <Pagination className="mb-0">
-              <Pagination.First onClick={() => table.firstPage()} disabled={table.currentPage === 1} />
-              <Pagination.Prev onClick={() => table.previousPage()} disabled={table.currentPage === 1} />
+              <Pagination.First
+                onClick={() => table.firstPage()}
+                disabled={table.currentPage === 1}
+              />
+              <Pagination.Prev
+                onClick={() => table.previousPage()}
+                disabled={table.currentPage === 1}
+              />
               <Pagination.Item active>{table.currentPage}</Pagination.Item>
               <Pagination.Next
                 onClick={() => table.nextPage()}

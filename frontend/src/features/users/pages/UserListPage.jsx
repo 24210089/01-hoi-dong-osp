@@ -153,7 +153,8 @@ const UserListPage = () => {
   };
 
   const renderSortIcon = (key) => {
-    if (table.sortBy !== key) return <i className="fas fa-sort text-muted ms-1"></i>;
+    if (table.sortBy !== key)
+      return <i className="fas fa-sort text-muted ms-1"></i>;
     return table.sortOrder === "asc" ? (
       <i className="fas fa-sort-up ms-1"></i>
     ) : (
@@ -388,8 +389,14 @@ const UserListPage = () => {
                       const isActive = user.status === "active";
                       return (
                         <tr key={user.id}>
-                          <td>{(table.currentPage - 1) * table.pageSize + index + 1}</td>
-                          <td className="fw-semibold text-primary">{user.full_name || "-"}</td>
+                          <td>
+                            {(table.currentPage - 1) * table.pageSize +
+                              index +
+                              1}
+                          </td>
+                          <td className="fw-semibold text-primary">
+                            {user.full_name || "-"}
+                          </td>
                           <td>{user.username || "-"}</td>
                           <td>{user.email || "-"}</td>
                           <td>{roleLabel(user.role)}</td>
@@ -399,7 +406,9 @@ const UserListPage = () => {
                             </Badge>
                           </td>
                           <td className="text-nowrap">
-                            {user.created_at ? formatDate(user.created_at) : "-"}
+                            {user.created_at
+                              ? formatDate(user.created_at)
+                              : "-"}
                           </td>
                           <td className="text-end">
                             <Button

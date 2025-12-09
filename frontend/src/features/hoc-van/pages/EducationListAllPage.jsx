@@ -278,6 +278,7 @@ const EducationListAllPage = () => {
                   placeholder="Tên nữ tu, trường học, ngành học..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  size="lg"
                 />
               </Form.Group>
             </Col>
@@ -290,6 +291,7 @@ const EducationListAllPage = () => {
                     setFilter({ ...filter, level: e.target.value });
                     setCurrentPage(1);
                   }}
+                  size="lg"
                 >
                   <option value="">Tất cả</option>
                   <option value="high_school">THPT</option>
@@ -312,6 +314,7 @@ const EducationListAllPage = () => {
                     setFilter({ ...filter, status: e.target.value });
                     setCurrentPage(1);
                   }}
+                  size="lg"
                 >
                   <option value="">Tất cả</option>
                   <option value="dang_hoc">Đang học</option>
@@ -325,6 +328,7 @@ const EducationListAllPage = () => {
               <Button
                 variant="outline-secondary"
                 className="w-100"
+                size="lg"
                 onClick={() => {
                   setSearchTerm("");
                   setDebouncedSearch("");

@@ -10,6 +10,7 @@ import {
   Table,
   Badge,
   Pagination,
+  Form,
 } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -307,22 +308,73 @@ const MissionListPage = () => {
       </Row>
 
       {/* Search & Filter */}
-      <Row className="g-3 mb-4">
-        <Col md={8}>
-          <SearchBox
-            value={table.searchTerm}
-            onChange={table.handleSearch}
-            placeholder="Tìm kiếm theo chức vụ, tổ chức, tên nữ tu..."
-          />
-        </Col>
-        <Col md={4}>
-          <MissionFilter
-            filters={table.filters}
-            onFilterChange={table.updateFilters}
-            onClearFilters={table.clearFilters}
-          />
-        </Col>
-      </Row>
+      <Card className="mb-4 shadow-sm border-0 rounded-3">
+        <Card.Body>
+          <Row className="align-items-end">
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Tìm kiếm</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Chức vụ, tổ chức, tên nữ tu..."
+                  value={table.searchTerm}
+                  onChange={(e) => table.handleSearch(e.target.value)}
+                  size="lg"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Lĩnh vực</Form.Label>
+                <Form.Select
+                  value={table.filters?.field || ""}
+                  onChange={(e) =>
+                    table.updateFilters({ ...table.filters, field: e.target.value })
+                  }
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="education">Giáo dục</option>
+                  <option value="pastoral">Mục vụ</option>
+                  <option value="publishing">Xuất bản</option>
+                  <option value="media">Truyền thông</option>
+                  <option value="healthcare">Y tế</option>
+                  <option value="social">Xã hội</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Trạng thái</Form.Label>
+                <Form.Select
+                  value={table.filters?.status || ""}
+                  onChange={(e) =>
+                    table.updateFilters({ ...table.filters, status: e.target.value })
+                  }
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="active">Đang làm</option>
+                  <option value="completed">Đã kết thúc</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={2}>
+              <Button
+                variant="outline-secondary"
+                className="w-100"
+                size="lg"
+                onClick={() => {
+                  table.handleSearch("");
+                  table.clearFilters();
+                }}
+              >
+                Xóa bộ lọc
+              </Button>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
 
       <Card
         className="shadow-sm border-0 rounded-3"

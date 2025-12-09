@@ -12,6 +12,7 @@ import {
   Form,
   Alert,
   Spinner,
+  Pagination,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -331,46 +332,76 @@ const SisterListPage = () => {
       />
 
       {/* Search & Filter */}
-      <Row className="g-3 mb-4">
-        <Col md={6}>
-          <Form.Control
-            type="text"
-            placeholder="Tìm kiếm theo tên, tên thánh..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </Col>
-        <Col md={3}>
-          <Form.Select
-            value={stageFilter}
-            onChange={(e) => setStageFilter(e.target.value)}
-          >
-            <option value="">Tất cả giai đoạn</option>
-            {Object.entries(stageLabels).map(([key, value]) => (
-              <option key={key} value={key}>
-                {value.label}
-              </option>
-            ))}
-          </Form.Select>
-        </Col>
-        <Col md={3}>
-          <Form.Select
-            value={communityFilter}
-            onChange={(e) => setCommunityFilter(e.target.value)}
-          >
-            <option value="">Tất cả cộng đoàn</option>
-            {Array.from(
-              new Set(
-                sisters.map((s) => s.current_community_name).filter(Boolean)
-              )
-            ).map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </Form.Select>
-        </Col>
-      </Row>
+      <Card className="mb-4 shadow-sm border-0 rounded-3">
+        <Card.Body>
+          <Row className="align-items-end">
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Tìm kiếm</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Tên, tên thánh..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  size="lg"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Giai đoạn</Form.Label>
+                <Form.Select
+                  value={stageFilter}
+                  onChange={(e) => setStageFilter(e.target.value)}
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  {Object.entries(stageLabels).map(([key, value]) => (
+                    <option key={key} value={key}>
+                      {value.label}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Cộng đoàn</Form.Label>
+                <Form.Select
+                  value={communityFilter}
+                  onChange={(e) => setCommunityFilter(e.target.value)}
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  {Array.from(
+                    new Set(
+                      sisters.map((s) => s.current_community_name).filter(Boolean)
+                    )
+                  ).map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={2}>
+              <Button
+                variant="outline-secondary"
+                className="w-100"
+                size="lg"
+                onClick={() => {
+                  setSearchTerm("");
+                  setStageFilter("");
+                  setCommunityFilter("");
+                }}
+              >
+                Xóa bộ lọc
+              </Button>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
 
       {/* Content */}
       {loading ? (

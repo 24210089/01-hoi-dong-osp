@@ -247,26 +247,51 @@ const CongDoanListPage = () => {
       </ToastContainer>
 
       {/* Search & Filter */}
-      <Row className="g-3 mb-4">
-        <Col md={6}>
-          <SearchBox
-            value={searchTerm}
-            onChange={setSearchTerm}
-            onSearch={handleSearch}
-            placeholder="Tìm kiếm cộng đoàn..."
-          />
-        </Col>
-        <Col md={3}>
-          <Form.Select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="active">Đang hoạt động</option>
-            <option value="inactive">Không hoạt động</option>
-          </Form.Select>
-        </Col>
-      </Row>
+      <Card className="mb-4 shadow-sm border-0 rounded-3">
+        <Card.Body>
+          <Row className="align-items-end">
+            <Col md={6}>
+              <Form.Group>
+                <Form.Label>Tìm kiếm</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Tên cộng đoàn, mã số..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  size="lg"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Trạng thái</Form.Label>
+                <Form.Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  size="lg"
+                >
+                  <option value="all">Tất cả</option>
+                  <option value="active">Đang hoạt động</option>
+                  <option value="inactive">Không hoạt động</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={2}>
+              <Button
+                variant="outline-secondary"
+                className="w-100"
+                size="lg"
+                onClick={() => {
+                  setSearchTerm("");
+                  setStatusFilter("all");
+                }}
+              >
+                Xóa bộ lọc
+              </Button>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
 
       <Card
         className="shadow-sm border-0 rounded-3"

@@ -308,53 +308,69 @@ const VocationJourneyListPage = () => {
       </Row>
 
       {/* Search & Filter */}
-      <Row className="g-3 mb-4">
-        <Col md={5}>
-          <Form.Control
-            type="text"
-            placeholder="Tìm kiếm theo tên nữ tu, địa điểm..."
-            value={table.searchTerm}
-            onChange={(e) => table.handleSearch(e.target.value)}
-          />
-        </Col>
-        <Col md={3}>
-          <Form.Select
-            value={stageFilter}
-            onChange={(e) => setStageFilter(e.target.value)}
-          >
-            <option value="">Tất cả giai đoạn</option>
-            {stages.map((stage) => (
-              <option key={stage.code} value={stage.code}>
-                {stage.name}
-              </option>
-            ))}
-          </Form.Select>
-        </Col>
-        <Col md={2}>
-          <Form.Select
-            value={table.pageSize}
-            onChange={(e) => table.changePageSize(Number(e.target.value))}
-          >
-            <option value={10}>10 dòng</option>
-            <option value={20}>20 dòng</option>
-            <option value={50}>50 dòng</option>
-            <option value={100}>100 dòng</option>
-          </Form.Select>
-        </Col>
-        <Col md={2}>
-          <Button
-            variant="outline-secondary"
-            className="w-100"
-            onClick={() => {
-              setStageFilter("");
-              table.handleSearch("");
-            }}
-          >
-            <i className="fas fa-redo me-2"></i>
-            Đặt lại
-          </Button>
-        </Col>
-      </Row>
+      <Card className="mb-4 shadow-sm border-0 rounded-3">
+        <Card.Body>
+          <Row className="align-items-end">
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Tìm kiếm</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Tên nữ tu, địa điểm..."
+                  value={table.searchTerm}
+                  onChange={(e) => table.handleSearch(e.target.value)}
+                  size="lg"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Giai đoạn</Form.Label>
+                <Form.Select
+                  value={stageFilter}
+                  onChange={(e) => setStageFilter(e.target.value)}
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  {stages.map((stage) => (
+                    <option key={stage.code} value={stage.code}>
+                      {stage.name}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Số dòng</Form.Label>
+                <Form.Select
+                  value={table.pageSize}
+                  onChange={(e) => table.changePageSize(Number(e.target.value))}
+                  size="lg"
+                >
+                  <option value={10}>10 dòng</option>
+                  <option value={20}>20 dòng</option>
+                  <option value={50}>50 dòng</option>
+                  <option value={100}>100 dòng</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={2}>
+              <Button
+                variant="outline-secondary"
+                className="w-100"
+                size="lg"
+                onClick={() => {
+                  setStageFilter("");
+                  table.handleSearch("");
+                }}
+              >
+                Xóa bộ lọc
+              </Button>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
 
       {/* Table */}
       {loading ? (

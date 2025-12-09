@@ -11,6 +11,7 @@ import {
   Badge,
   Pagination,
   Modal,
+  Form,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { userService } from "@services";
@@ -296,22 +297,73 @@ const UserListPage = () => {
       </Row>
 
       {/* Search & Filter */}
-      <Row className="g-3 mb-4">
-        <Col md={8}>
-          <SearchBox
-            value={table.searchTerm}
-            onChange={table.handleSearch}
-            placeholder="Tìm kiếm theo tên, email, tên đăng nhập..."
-          />
-        </Col>
-        <Col md={4}>
-          <UserFilter
-            filters={table.filters}
-            onFilterChange={table.updateFilters}
-            onClearFilters={table.clearFilters}
-          />
-        </Col>
-      </Row>
+      <Card className="mb-4 shadow-sm border-0 rounded-3">
+        <Card.Body>
+          <Row className="align-items-end">
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Tìm kiếm</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Tên, email, tên đăng nhập..."
+                  value={table.searchTerm}
+                  onChange={(e) => table.handleSearch(e.target.value)}
+                  size="lg"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Vai trò</Form.Label>
+                <Form.Select
+                  value={table.filters?.role || ""}
+                  onChange={(e) =>
+                    table.updateFilters({ ...table.filters, role: e.target.value })
+                  }
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="admin">Quản trị viên</option>
+                  <option value="superior_general">Tổng quyền</option>
+                  <option value="superior_provincial">Bề trên Tỉnh</option>
+                  <option value="superior_community">Bề trên Cộng đoàn</option>
+                  <option value="secretary">Thư ký</option>
+                  <option value="viewer">Người xem</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Trạng thái</Form.Label>
+                <Form.Select
+                  value={table.filters?.status || ""}
+                  onChange={(e) =>
+                    table.updateFilters({ ...table.filters, status: e.target.value })
+                  }
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="active">Đang hoạt động</option>
+                  <option value="inactive">Đã khóa</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={2}>
+              <Button
+                variant="outline-secondary"
+                className="w-100"
+                size="lg"
+                onClick={() => {
+                  table.handleSearch("");
+                  table.clearFilters();
+                }}
+              >
+                Xóa bộ lọc
+              </Button>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
 
       {/* Content */}
       <Card

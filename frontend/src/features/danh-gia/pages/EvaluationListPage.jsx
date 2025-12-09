@@ -10,6 +10,7 @@ import {
   Table,
   Badge,
   Pagination,
+  Form,
 } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -236,12 +237,80 @@ const EvaluationListPage = () => {
         ]}
       />
 
-      {/* Search */}
-      <SearchFilterBar
-        searchValue={table.searchTerm}
-        onSearchChange={table.handleSearch}
-        searchPlaceholder="Tìm kiếm theo kỳ đánh giá, người đánh giá..."
-      />
+      {/* Search & Filter */}
+      <Card className="mb-4 shadow-sm border-0 rounded-3">
+        <Card.Body>
+          <Row className="align-items-end">
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Tìm kiếm</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Kỳ đánh giá, người đánh giá..."
+                  value={table.searchTerm}
+                  onChange={(e) => table.handleSearch(e.target.value)}
+                  size="lg"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Loại đánh giá</Form.Label>
+                <Form.Select
+                  value={table.filters?.evaluation_type || ""}
+                  onChange={(e) =>
+                    table.updateFilters({
+                      ...table.filters,
+                      evaluation_type: e.target.value,
+                    })
+                  }
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="annual">Năm</option>
+                  <option value="semi_annual">6 tháng</option>
+                  <option value="quarterly">Quý</option>
+                  <option value="monthly">Tháng</option>
+                  <option value="special">Đặc biệt</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Mức điểm</Form.Label>
+                <Form.Select
+                  value={table.filters?.rating_range || ""}
+                  onChange={(e) =>
+                    table.updateFilters({
+                      ...table.filters,
+                      rating_range: e.target.value,
+                    })
+                  }
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="excellent">Xuất sắc (≥8)</option>
+                  <option value="good">Tốt (6-7.9)</option>
+                  <option value="average">Trung bình (&lt;6)</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={2}>
+              <Button
+                variant="outline-secondary"
+                className="w-100"
+                size="lg"
+                onClick={() => {
+                  table.handleSearch("");
+                  table.clearFilters();
+                }}
+              >
+                Xóa bộ lọc
+              </Button>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
 
       {/* Content */}
       <Card

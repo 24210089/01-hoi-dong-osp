@@ -8,6 +8,7 @@ import {
   Table,
   Badge,
   Pagination,
+  Form,
 } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -225,11 +226,88 @@ const HealthRecordListPage = () => {
         ]}
       />
 
-      <SearchFilterBar
-        searchValue={table.searchTerm}
-        onSearchChange={table.handleSearch}
-        searchPlaceholder="Tìm kiếm theo bệnh viện, bác sĩ, chẩn đoán..."
-      />
+      <Card className="mb-4 shadow-sm border-0 rounded-3">
+        <Card.Body>
+          <Row className="align-items-end">
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Tìm kiếm</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Bệnh viện, bác sĩ, chẩn đoán..."
+                  value={table.searchTerm}
+                  onChange={(e) => table.handleSearch(e.target.value)}
+                  size="lg"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Tình trạng sức khỏe</Form.Label>
+                <Form.Select
+                  value={table.filters?.general_health || ""}
+                  onChange={(e) =>
+                    table.updateFilters({
+                      ...table.filters,
+                      general_health: e.target.value,
+                    })
+                  }
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="good">Tốt</option>
+                  <option value="average">Trung bình</option>
+                  <option value="weak">Yếu</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Năm khám</Form.Label>
+                <Form.Select
+                  value={table.filters?.year || ""}
+                  onChange={(e) =>
+                    table.updateFilters({ ...table.filters, year: e.target.value })
+                  }
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  {Array.from(
+                    new Set(
+                      records
+                        .map((r) =>
+                          r.checkup_date
+                            ? new Date(r.checkup_date).getFullYear()
+                            : null
+                        )
+                        .filter(Boolean)
+                    )
+                  )
+                    .sort((a, b) => b - a)
+                    .map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={2}>
+              <Button
+                variant="outline-secondary"
+                className="w-100"
+                size="lg"
+                onClick={() => {
+                  table.handleSearch("");
+                  table.clearFilters();
+                }}
+              >
+                Xóa bộ lọc
+              </Button>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
 
       <Card
         className="shadow-sm border-0 rounded-3"

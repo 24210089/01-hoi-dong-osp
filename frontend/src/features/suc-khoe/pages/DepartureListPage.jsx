@@ -8,6 +8,7 @@ import {
   Table,
   Badge,
   Pagination,
+  Form,
 } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { departureService } from "@services";
@@ -258,15 +259,72 @@ const DepartureListPage = () => {
         </Col>
       </Row>
 
-      <Row className="g-3 mb-4">
-        <Col md={6}>
-          <SearchBox
-            value={table.searchTerm}
-            onChange={table.handleSearch}
-            placeholder="Tìm kiếm theo tên, địa điểm, lý do..."
-          />
-        </Col>
-      </Row>
+      <Card className="mb-4 shadow-sm border-0 rounded-3">
+        <Card.Body>
+          <Row className="align-items-end">
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Tìm kiếm</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Tên, địa điểm, lý do..."
+                  value={table.searchTerm}
+                  onChange={(e) => table.handleSearch(e.target.value)}
+                  size="lg"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Loại đi vắng</Form.Label>
+                <Form.Select
+                  value={table.filters?.type || ""}
+                  onChange={(e) =>
+                    table.updateFilters({ ...table.filters, type: e.target.value })
+                  }
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="temporary">Tạm thời</option>
+                  <option value="medical">Khám chữa bệnh</option>
+                  <option value="study">Học tập</option>
+                  <option value="mission">Công tác</option>
+                  <option value="other">Khác</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Trạng thái</Form.Label>
+                <Form.Select
+                  value={table.filters?.status || ""}
+                  onChange={(e) =>
+                    table.updateFilters({ ...table.filters, status: e.target.value })
+                  }
+                  size="lg"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="active">Đang đi vắng</option>
+                  <option value="returned">Đã trở về</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={2}>
+              <Button
+                variant="outline-secondary"
+                className="w-100"
+                size="lg"
+                onClick={() => {
+                  table.handleSearch("");
+                  table.clearFilters();
+                }}
+              >
+                Xóa bộ lọc
+              </Button>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
 
       <Card
         className="shadow-sm border-0 rounded-3"

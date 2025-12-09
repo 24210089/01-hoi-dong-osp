@@ -26,6 +26,7 @@ import MultiFileUpload from "@components/forms/MultiFileUpload";
 import LoadingSpinner from "@components/common/Loading/LoadingSpinner";
 import Breadcrumb from "@components/common/Breadcrumb";
 import { isValidEmail, isValidPhone } from "@utils/validators";
+import "./SisterFormPage.css";
 
 const SisterFormPage = () => {
   const { id } = useParams();
@@ -395,69 +396,69 @@ const SisterFormPage = () => {
       />
 
       <Form onSubmit={handleSubmit}>
-        <Row className="g-4">
-          {/* Left Column - Avatar */}
-          <Col lg={3}>
-            <Card>
-              <Card.Body>
-                <h5 className="mb-3">Ảnh đại diện</h5>
-                <FileUpload
-                  onChange={(event) => {
-                    const selectedFiles = event?.target?.value || [];
-                    const file =
-                      Array.isArray(selectedFiles) && selectedFiles.length > 0
-                        ? selectedFiles[0]
-                        : null;
-                    setFieldValue("photo_file", file);
-                  }}
-                  accept="image/*"
-                  maxSize={5 * 1024 * 1024}
-                  preview
-                />
-              </Card.Body>
-            </Card>
-          </Col>
-
-          {/* Right Column - Form */}
-          <Col lg={9}>
-            <Tab.Container defaultActiveKey="basic">
-              <Card>
-                <Card.Header className="bg-white">
-                  <Nav variant="tabs">
-                    <Nav.Item>
-                      <Nav.Link eventKey="basic">
-                        <i className="fas fa-user me-2"></i>
-                        Thông tin cơ bản
-                      </Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link eventKey="family">
-                        <i className="fas fa-users me-2"></i>
-                        Thông tin gia đình
-                      </Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link eventKey="sacraments">
-                        <i className="fas fa-church me-2"></i>
-                        Bí tích
-                      </Nav.Link>
-                    </Nav.Item>
-
-                    <Nav.Item>
-                      <Nav.Link eventKey="documents">
-                        <i className="fas fa-folder-open me-2"></i>
-                        Tài liệu
-                      </Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link eventKey="notes">
-                        <i className="fas fa-sticky-note me-2"></i>
-                        Ghi chú
-                      </Nav.Link>
-                    </Nav.Item>
-                  </Nav>
+        <Tab.Container defaultActiveKey="basic">
+          <Row className="g-4">
+            {/* Left Column - Avatar & Navigation */}
+            <Col lg={3}>
+              <Card className="health-info-card">
+                <Card.Header className="documents-header">
+                  <i className="fas fa-camera"></i>
+                  <span>Ảnh đại diện</span>
                 </Card.Header>
+                <Card.Body>
+                  <FileUpload
+                    onChange={(event) => {
+                      const selectedFiles = event?.target?.value || [];
+                      const file =
+                        Array.isArray(selectedFiles) && selectedFiles.length > 0
+                          ? selectedFiles[0]
+                          : null;
+                      setFieldValue("photo_file", file);
+                    }}
+                    accept="image/*"
+                    maxSize={5 * 1024 * 1024}
+                    preview
+                  />
+                </Card.Body>
+              </Card>
+            </Col>
 
+            {/* Right Column - Form */}
+            <Col lg={9}>
+              {/* Navigation Tabs */}
+              <Card className="health-info-card mb-3">
+                <Card.Body className="p-2">
+                  <Nav variant="pills" className="nav-horizontal-tabs">
+                    <Nav.Link eventKey="basic">
+                      <i className="fas fa-user"></i>
+                      Thông tin cơ bản
+                    </Nav.Link>
+                    <Nav.Link eventKey="family">
+                      <i className="fas fa-users"></i>
+                      Thông tin gia đình
+                    </Nav.Link>
+                    <Nav.Link eventKey="sacraments">
+                      <i className="fas fa-church"></i>
+                      Bí tích
+                    </Nav.Link>
+                    <Nav.Link eventKey="documents">
+                      <i className="fas fa-folder-open"></i>
+                      Tài liệu
+                    </Nav.Link>
+                    <Nav.Link eventKey="notes">
+                      <i className="fas fa-sticky-note"></i>
+                      Ghi chú
+                    </Nav.Link>
+                  </Nav>
+                </Card.Body>
+              </Card>
+
+              {/* Form Content */}
+              <Card className="health-info-card">
+                <Card.Header>
+                  <i className="fas fa-user-edit"></i>
+                  <span>Thông tin Nữ Tu</span>
+                </Card.Header>
                 <Card.Body>
                   <Tab.Content>
                     {/* Basic Info Tab */}
@@ -809,10 +810,10 @@ const SisterFormPage = () => {
                   </Tab.Content>
                 </Card.Body>
 
-                <Card.Footer className="bg-white border-top">
+                <Card.Footer>
                   <div className="d-flex justify-content-end gap-2">
                     <Button
-                      variant="secondary"
+                      variant="outline-secondary"
                       onClick={handleCancel}
                       disabled={submitting}
                     >
@@ -839,9 +840,9 @@ const SisterFormPage = () => {
                   </div>
                 </Card.Footer>
               </Card>
-            </Tab.Container>
-          </Col>
-        </Row>
+            </Col>
+          </Row>
+        </Tab.Container>
       </Form>
     </Container>
   );

@@ -221,65 +221,96 @@ const ProfilePage = () => {
       )}
 
       <Row className="g-4">
-        {/* Left Column - User Info */}
-        <Col lg={4}>
-          <Card className="profile-card">
-            <Card.Body className="text-center">
-              <div className="profile-avatar-large mx-auto mb-3">
-                {user.avatar ? (
-                  <img src={user.avatar} alt={user.full_name} />
-                ) : (
-                  <div className="avatar-placeholder">
+        <Tab.Container activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
+          {/* Left Column - User Info */}
+          <Col lg={3}>
+            {/* Avatar Card */}
+            <Card className="health-info-card">
+              <Card.Header className="documents-header">
+                <i className="fas fa-user-circle"></i>
+                <span>Hồ sơ cá nhân</span>
+              </Card.Header>
+              <Card.Body className="text-center">
+                <div className="avatar-section">
+                  <div className="avatar-large">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt={user.full_name} />
+                    ) : (
+                      <div className="avatar-placeholder-large">
+                        <i className="fas fa-user"></i>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="name-display">
+                    <div className="user-name">{user.full_name}</div>
+                    <div className="username">@{user.username}</div>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+
+            {/* Quick Info Card */}
+            <Card className="health-info-card">
+              <Card.Header className="system-header">
+                <i className="fas fa-info-circle"></i>
+                <span>Thông tin nhanh</span>
+              </Card.Header>
+              <Card.Body className="p-2">
+                <div className="quick-info">
+                  <div className="quick-info-item">
+                    <i className="fas fa-envelope text-primary"></i>
+                    <div className="info-content">
+                      <small className="text-muted">Email</small>
+                      <div className="fw-semibold">{user.email}</div>
+                    </div>
+                  </div>
+
+                  {user.phone && (
+                    <div className="quick-info-item">
+                      <i className="fas fa-phone text-success"></i>
+                      <div className="info-content">
+                        <small className="text-muted">Điện thoại</small>
+                        <div className="fw-semibold">{user.phone}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="quick-info-item">
+                    <i className="fas fa-user-tag text-info"></i>
+                    <div className="info-content">
+                      <small className="text-muted">Vai trò</small>
+                      <div className="fw-semibold">{user.role_label}</div>
+                    </div>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          {/* Right Column - Forms */}
+          <Col lg={9}>
+            {/* Navigation Tabs */}
+            <Card className="health-info-card mb-3">
+              <Card.Body className="p-2">
+                <Nav variant="pills" className="nav-horizontal-tabs">
+                  <Nav.Link eventKey="profile">
                     <i className="fas fa-user"></i>
-                  </div>
-                )}
-              </div>
-
-              <h4 className="mb-1">{user.full_name}</h4>
-              <p className="text-muted mb-3">@{user.username}</p>
-
-              <div className="profile-info">
-                <div className="info-item">
-                  <i className="fas fa-envelope text-primary me-2"></i>
-                  <span>{user.email}</span>
-                </div>
-                {user.phone && (
-                  <div className="info-item">
-                    <i className="fas fa-phone text-success me-2"></i>
-                    <span>{user.phone}</span>
-                  </div>
-                )}
-                <div className="info-item">
-                  <i className="fas fa-user-tag text-info me-2"></i>
-                  <span>{user.role_label}</span>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-
-        {/* Right Column - Forms */}
-        <Col lg={8}>
-          <Tab.Container
-            activeKey={activeTab}
-            onSelect={(k) => setActiveTab(k)}
-          >
-            <Card>
-              <Card.Header className="bg-white">
-                <Nav variant="tabs">
-                  <Nav.Item>
-                    <Nav.Link eventKey="profile">
-                      <i className="fas fa-user me-2"></i>
-                      Thông tin cá nhân
-                    </Nav.Link>
-                  </Nav.Item>
-                  <Nav.Item>
-                    <Nav.Link eventKey="password">
-                      <i className="fas fa-lock me-2"></i>
-                      Đổi mật khẩu
-                    </Nav.Link>
-                  </Nav.Item>
+                    Thông tin cá nhân
+                  </Nav.Link>
+                  <Nav.Link eventKey="password">
+                    <i className="fas fa-lock"></i>
+                    Đổi mật khẩu
+                  </Nav.Link>
                 </Nav>
+              </Card.Body>
+            </Card>
+
+            {/* Content Card */}
+            <Card className="health-info-card">
+              <Card.Header>
+                <i className="fas fa-edit"></i>
+                <span>Chỉnh sửa thông tin</span>
               </Card.Header>
               <Card.Body>
                 <Tab.Content>
@@ -482,8 +513,8 @@ const ProfilePage = () => {
                 </Tab.Content>
               </Card.Body>
             </Card>
-          </Tab.Container>
-        </Col>
+          </Col>
+        </Tab.Container>
       </Row>
     </Container>
   );

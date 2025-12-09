@@ -32,8 +32,10 @@ const getRoleLabel = (role) => {
 
 const InfoItem = ({ label, value }) => (
   <div className="info-item">
-    <small className="text-muted d-block mb-1">{label}</small>
-    <div className="fw-semibold">{value || "-"}</div>
+    <label>{label}</label>
+    <div className={`value ${!value || value === "-" ? "empty" : ""}`}>
+      {value || "Chưa cập nhật"}
+    </div>
   </div>
 );
 
@@ -135,8 +137,9 @@ const CommunityDetailPage = () => {
         ]}
       />
 
+      {/* Action Buttons */}
       <div className="d-flex justify-content-end align-items-center mb-4">
-        <div className="d-flex gap-2">
+        <div className="action-buttons">
           <Button variant="success" onClick={handleEdit}>
             <i className="fas fa-edit me-2"></i>Chỉnh sửa
           </Button>
@@ -149,112 +152,184 @@ const CommunityDetailPage = () => {
         </div>
       </div>
 
-      <Row className="g-4">
-        <Col lg={4}>
-          <Card className="community-profile-card">
-            <Card.Body className="text-center">
-              <div className="community-icon-large mb-3">
-                <span style={{ fontSize: "3rem" }}>🏠</span>
-              </div>
-              <h3 className="mb-2">{community.name}</h3>
-              <p className="text-muted mb-3">{community.code}</p>
-              <Badge
-                bg={community.status === "active" ? "success" : "secondary"}
-                className="mb-3"
-              >
-                {community.status === "active"
-                  ? "Đang hoạt động"
-                  : "Không hoạt động"}
-              </Badge>
-
-              <div className="quick-stats mt-3">
-                <div className="d-flex justify-content-around">
-                  <div>
-                    <small className="text-muted">Thành viên</small>
-                    <h4 className="mb-0">{members.length}</h4>
+      <Tab.Container defaultActiveKey="info">
+        <Row className="g-4">
+          {/* Left Column - Icon & Quick Info */}
+          <Col lg={3}>
+            {/* Community Icon Card */}
+            <Card className="health-info-card">
+              <Card.Header className="documents-header">
+                <i className="fas fa-home"></i>
+                <span>Cộng Đoàn</span>
+              </Card.Header>
+              <Card.Body className="text-center">
+                <div className="community-icon-section">
+                  <div className="community-icon-large">
+                    <span style={{ fontSize: "3rem" }}>🏠</span>
                   </div>
-                  <div>
-                    <small className="text-muted">Thành lập</small>
-                    <div className="fw-semibold">
-                      {formatDate(community.established_date)}
+                  <div className="name-display">
+                    <h3 className="community-name">{community.name}</h3>
+                    <div className="code">
+                      <i className="fas fa-id-card me-2"></i>
+                      {community.code}
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <Badge
+                      bg={
+                        community.status === "active" ? "success" : "secondary"
+                      }
+                    >
+                      {community.status === "active"
+                        ? "Đang hoạt động"
+                        : "Không hoạt động"}
+                    </Badge>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+
+            {/* Quick Info Card */}
+            <Card className="health-info-card">
+              <Card.Header className="system-header">
+                <i className="fas fa-info-circle"></i>
+                <span>Thông tin nhanh</span>
+              </Card.Header>
+              <Card.Body className="p-2">
+                <div className="quick-info">
+                  <div className="quick-info-item">
+                    <i className="fas fa-users text-primary"></i>
+                    <div className="info-content">
+                      <small className="text-muted">Số thành viên</small>
+                      <div className="fw-semibold">{members.length}</div>
+                    </div>
+                  </div>
+
+                  <div className="quick-info-item">
+                    <i className="fas fa-calendar-alt text-success"></i>
+                    <div className="info-content">
+                      <small className="text-muted">Ngày thành lập</small>
+                      <div className="fw-semibold">
+                        {formatDate(community.established_date)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="quick-info-item">
+                    <i className="fas fa-map-marker-alt text-info"></i>
+                    <div className="info-content">
+                      <small className="text-muted">Địa chỉ</small>
+                      <div className="fw-semibold">
+                        {community.address || "-"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="quick-info-item">
+                    <i className="fas fa-phone text-warning"></i>
+                    <div className="info-content">
+                      <small className="text-muted">Điện thoại</small>
+                      <div className="fw-semibold">
+                        {community.phone || "-"}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Card.Body>
+            </Card>
 
-              <Button
-                variant="primary"
-                className="w-100 mt-3"
-                onClick={handleAssignMembers}
-              >
-                <i className="fas fa-user-plus me-2"></i>Phân công thành viên
-              </Button>
-            </Card.Body>
-          </Card>
-        </Col>
+            {/* Action Card */}
+            <Card className="health-info-card">
+              <Card.Body>
+                <Button
+                  variant="primary"
+                  className="w-100"
+                  onClick={handleAssignMembers}
+                >
+                  <i className="fas fa-user-plus me-2"></i>Phân công thành viên
+                </Button>
+              </Card.Body>
+            </Card>
+          </Col>
 
-        <Col lg={8}>
-          <Tab.Container defaultActiveKey="info">
-            <Card>
-              <Card.Header className="bg-white">
-                <Nav variant="tabs">
-                  <Nav.Item>
-                    <Nav.Link eventKey="info">
-                      <i className="fas fa-info-circle me-2"></i>Thông tin
-                    </Nav.Link>
-                  </Nav.Item>
-                  <Nav.Item>
-                    <Nav.Link eventKey="members">
-                      <i className="fas fa-users me-2"></i>Thành viên (
-                      {members.length})
-                    </Nav.Link>
-                  </Nav.Item>
+          {/* Right Column - Content */}
+          <Col lg={9}>
+            {/* Navigation Tabs */}
+            <Card className="health-info-card mb-3">
+              <Card.Body className="p-2">
+                <Nav variant="pills" className="nav-horizontal-tabs">
+                  <Nav.Link eventKey="info">
+                    <i className="fas fa-info-circle"></i>
+                    Thông tin
+                  </Nav.Link>
+                  <Nav.Link eventKey="members">
+                    <i className="fas fa-users"></i>
+                    Thành viên ({members.length})
+                  </Nav.Link>
                 </Nav>
-              </Card.Header>
+              </Card.Body>
+            </Card>
 
+            {/* Content Card */}
+            <Card className="health-info-card">
+              <Card.Header>
+                <i className="fas fa-info-circle"></i>
+                <span>Chi tiết thông tin</span>
+              </Card.Header>
               <Card.Body>
                 <Tab.Content>
                   <Tab.Pane eventKey="info">
-                    <h5 className="mb-3">Thông tin cơ bản</h5>
-                    <Row className="g-3">
-                      <Col md={6}>
-                        <InfoItem
-                          label="Tên cộng đoàn"
-                          value={community.name}
-                        />
-                      </Col>
-                      <Col md={6}>
-                        <InfoItem label="Mã số" value={community.code} />
-                      </Col>
-                      <Col md={6}>
-                        <InfoItem
-                          label="Ngày thành lập"
-                          value={formatDate(community.established_date)}
-                        />
-                      </Col>
-                      <Col md={6}>
-                        <InfoItem
-                          label="Trạng thái"
-                          value={
-                            community.status === "active"
-                              ? "Đang hoạt động"
-                              : "Không hoạt động"
-                          }
-                        />
-                      </Col>
-                      <Col md={12}>
-                        <InfoItem label="Địa chỉ" value={community.address} />
-                      </Col>
-                      <Col md={6}>
-                        <InfoItem label="Điện thoại" value={community.phone} />
-                      </Col>
-                      <Col md={6}>
-                        <InfoItem label="Email" value={community.email} />
-                      </Col>
-                      <Col md={12}>
-                        <InfoItem label="Mô tả" value={community.description} />
-                      </Col>
-                    </Row>
+                    <div className="info-section">
+                      <h5>
+                        <i className="fas fa-home"></i>
+                        Thông tin cơ bản
+                      </h5>
+                      <Row className="g-3">
+                        <Col md={6}>
+                          <InfoItem
+                            label="Tên cộng đoàn"
+                            value={community.name}
+                          />
+                        </Col>
+                        <Col md={6}>
+                          <InfoItem label="Mã số" value={community.code} />
+                        </Col>
+                        <Col md={6}>
+                          <InfoItem
+                            label="Ngày thành lập"
+                            value={formatDate(community.established_date)}
+                          />
+                        </Col>
+                        <Col md={6}>
+                          <InfoItem
+                            label="Trạng thái"
+                            value={
+                              community.status === "active"
+                                ? "Đang hoạt động"
+                                : "Không hoạt động"
+                            }
+                          />
+                        </Col>
+                        <Col md={12}>
+                          <InfoItem label="Địa chỉ" value={community.address} />
+                        </Col>
+                        <Col md={6}>
+                          <InfoItem
+                            label="Điện thoại"
+                            value={community.phone}
+                          />
+                        </Col>
+                        <Col md={6}>
+                          <InfoItem label="Email" value={community.email} />
+                        </Col>
+                        <Col md={12}>
+                          <InfoItem
+                            label="Mô tả"
+                            value={community.description}
+                          />
+                        </Col>
+                      </Row>
+                    </div>
                   </Tab.Pane>
 
                   <Tab.Pane eventKey="members">
@@ -331,9 +406,9 @@ const CommunityDetailPage = () => {
                 </Tab.Content>
               </Card.Body>
             </Card>
-          </Tab.Container>
-        </Col>
-      </Row>
+          </Col>
+        </Row>
+      </Tab.Container>
     </Container>
   );
 };

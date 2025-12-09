@@ -41,13 +41,231 @@
   align-items: center;
 }
 
+.health-info-card .card-header i,
+.health-info-card .card-header span {
+  color: var(--health-white);
+}
+
 .health-info-card .card-header i {
   color: var(--health-accent);
   margin-right: 0.75rem;
   font-size: 1.1rem;
 }
 
+/* Header variants */
 .health-info-card .card-header.documents-header {
+  background: linear-gradient(135deg, #1e5ba8 0%, #0d3d6b 100%);
+}
+
+.health-info-card .card-header.system-header {
+  background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+}
+
+.health-info-card .card-body {
+  padding: 1.5rem;
+}
+
+/* Horizontal Navigation Tabs */
+.nav-horizontal-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  --bs-nav-pills-link-active-bg: var(--health-primary);
+}
+
+.nav-horizontal-tabs .nav-link {
+  color: #495057;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  background: #f8f9fa;
+  border: 2px solid transparent;
+}
+
+.nav-horizontal-tabs .nav-link i {
+  color: var(--health-accent);
+  font-size: 1rem;
+}
+
+.nav-horizontal-tabs .nav-link:hover {
+  background-color: #e9ecef;
+  border-color: var(--health-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.nav-horizontal-tabs .nav-link.active {
+  background: linear-gradient(
+    135deg,
+    var(--health-primary) 0%,
+    var(--health-primary-light) 100%
+  );
+  color: white;
+  border-color: var(--health-primary);
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(4, 41, 84, 0.3);
+}
+
+.nav-horizontal-tabs .nav-link.active i {
+  color: var(--health-accent);
+}
+
+/* Community Icon Section */
+.community-icon-section {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.community-icon-large {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.name-display {
+  margin-top: 1rem;
+}
+
+.name-display .community-name {
+  color: var(--health-primary);
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.name-display .code {
+  color: #868e96;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+}
+
+/* Quick Info Items */
+.quick-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.quick-info-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.quick-info-item:hover {
+  background: #e9ecef;
+  transform: translateX(5px);
+}
+
+.quick-info-item i {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+  margin-top: 0.25rem;
+  min-width: 30px;
+}
+
+.quick-info-item .info-content {
+  flex: 1;
+}
+
+.quick-info-item small {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+}
+
+.quick-info-item .fw-semibold {
+  font-size: 1rem;
+  color: #212529;
+}
+
+/* Info Display Section */
+.info-section {
+  margin-bottom: 2rem;
+}
+
+.info-section h5 {
+  color: var(--health-primary);
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--health-accent);
+  display: flex;
+  align-items: center;
+}
+
+.info-section h5 i {
+  color: var(--health-accent);
+  margin-right: 0.75rem;
+}
+
+.info-item {
+  margin-bottom: 1.25rem;
+}
+
+.info-item label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  display: block;
+  font-size: 0.9rem;
+}
+
+.info-item .value {
+  color: #212529;
+  font-size: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 3px solid var(--health-accent);
+}
+
+.info-item .value.empty {
+  color: #adb5bd;
+  font-style: italic;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+  border-radius: 10px;
+  padding: 0.625rem 1.25rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.action-buttons .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Badge Styling */
+.badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* Legacy styles - keep for compatibility */
   background: linear-gradient(
     135deg,
     var(--health-primary) 0%,
@@ -175,10 +393,50 @@
   margin-top: 0.25rem;
 }
 
-@media (max-width: 992px) {
+/* Responsive */
+@media (max-width: 991.98px) {
   .community-icon-large {
     width: 100px;
     height: 100px;
-    font-size: 3rem;
+  }
+
+  .nav-horizontal-tabs .nav-link {
+    padding: 0.625rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .community-icon-large {
+    width: 80px;
+    height: 80px;
+    font-size: 2.5rem;
+  }
+
+  .name-display .community-name {
+    font-size: 1.25rem;
+  }
+
+  .quick-info-item {
+    padding: 0.75rem;
+  }
+
+  .quick-info-item i {
+    font-size: 1.25rem;
+  }
+
+  .nav-horizontal-tabs {
+    gap: 0.35rem;
+  }
+
+  .nav-horizontal-tabs .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .nav-horizontal-tabs .nav-link i {
+    display: none;
   }
 }

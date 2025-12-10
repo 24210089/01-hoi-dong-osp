@@ -13,7 +13,6 @@ export { default as reportService } from "./reportService";
 export { default as userService } from "./userService";
 export { default as journeyService } from "./journeyService";
 export { default as departureService } from "./departureService";
-export { default as permissionService } from "./permissionService";
 export { default as settingService } from "./settingService";
 export { default as lookupService } from "./lookupService";
 export { default as chatbotService } from "./chatbotService";

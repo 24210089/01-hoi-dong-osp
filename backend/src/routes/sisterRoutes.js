@@ -1,6 +1,6 @@
 const express = require("express");
 const sisterController = require("../controllers/sisterController");
-const { authenticateToken, authorize } = require("../middlewares/auth");
+const { authenticateToken } = require("../middlewares/auth");
 const {
   validateSisterCreate,
   validateSisterUpdate,
@@ -11,13 +11,6 @@ const { logAction } = require("../middlewares/auditLog");
 const { cacheMiddleware } = require("../middlewares/cache");
 
 const router = express.Router();
-
-const editorRoles = [
-  "admin",
-  "secretary",
-  "superior_general",
-  "superior_provincial",
-];
 
 const logSisterAction = (action) =>
   logAction({
@@ -35,7 +28,6 @@ router.get("/:id", sisterController.getSisterById);
 
 router.post(
   "/",
-  authorize(...editorRoles),
   validateSisterCreate,
   handleValidationErrors,
   (req, res, next) => {
@@ -48,7 +40,6 @@ router.post(
 
 router.put(
   "/:id",
-  authorize(...editorRoles),
   validateSisterUpdate,
   handleValidationErrors,
   (req, res, next) => {
@@ -62,7 +53,6 @@ router.put(
 
 router.delete(
   "/:id",
-  authorize(...editorRoles),
   (req, res, next) => {
     res.locals.auditAction = "DELETE";
     next();
@@ -73,7 +63,6 @@ router.delete(
 
 router.post(
   "/:id/photo",
-  authorize(...editorRoles),
   uploadPhoto,
   sisterController.updateSisterPhoto,
   logSisterAction("UPLOAD_PHOTO")
@@ -81,7 +70,6 @@ router.post(
 
 router.post(
   "/:id/documents",
-  authorize(...editorRoles),
   uploadDocuments,
   sisterController.uploadSisterDocuments,
   logSisterAction("UPLOAD_DOCUMENTS")
@@ -89,7 +77,6 @@ router.post(
 
 router.delete(
   "/:id/documents/:docIndex",
-  authorize(...editorRoles),
   sisterController.deleteSisterDocument,
   logSisterAction("DELETE_DOCUMENT")
 );

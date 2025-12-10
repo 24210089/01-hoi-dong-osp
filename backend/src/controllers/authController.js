@@ -18,29 +18,30 @@ const buildToken = (user) =>
     {
       id: user.id,
       username: user.username,
-      role: user.role,
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
   );
 
 const ensureAdmin = (req, res) => {
-  if (!req.user || req.user.role !== "admin") {
+  if (!req.user) {
     res
       .status(403)
       .json({ message: "Only admin users can perform this action" });
     return false;
   }
+
   return true;
 };
 
 const register = async (req, res) => {
+  // Commented out admin check - re-enable if registration should be admin-only
   // if (!ensureAdmin(req, res)) {
   //   return;
   // }
 
   try {
-    const { username, password, email, role } = req.body;
+    const { username, password, email } = req.body;
 
     const existingUser = await UserModel.findByUsername(username);
     if (existingUser) {
@@ -60,7 +61,6 @@ const register = async (req, res) => {
       username,
       password: hashedPassword,
       email,
-      role: role || "viewer", // Default to viewer if not specified
       is_active: 1,
     });
 

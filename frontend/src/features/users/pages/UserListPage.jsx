@@ -1,3 +1,268 @@
+import React, { useState, useEffect } from 'react';
+import {
+    </Container>
+  Dropdown,
+  Form,
+  InputGroup,
+  Alert,
+} from 'react-bootstrap';
+import userService from '@services/userService';
+import UserForm from '../components/UserForm';
+import ProtectedComponent from '@components/common/ProtectedComponent';
+import './UserListPage.css';
+
+const UserListPage = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState('');
+  useEffect(() => {
+    loadUsers();
+  }, []);
+  const loadUsers = async () => {
+    try {
+      setLoading(true);
+  setError('');
+  const response = await userService.getAll();
+      
+      if (response.success) {
+        setUsers(response.data);
+      } else {
+        setError('Không thể tải danh sách người dùng');
+      }
+    } catch (err) {
+      console.error('Load users error:', err);
+      setError('Đã có lỗi xảy ra khi tải danh sách người dùng');
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleCreate = () => {
+    setSelectedUser(null);
+    setShowForm(true);
+  const handleEdit = (user) => {
+    setSelectedUser(user);
+    setShowForm(true);
+  const handleDelete = async (user) => {
+    if (!window.confirm(`Bạn có chắc muốn xóa người dùng "${user.username}"?`)) {
+      return;
+    try {
+      const response = await userService.delete(user.id);
+      
+      if (response.success) {
+        loadUsers();
+      } else {
+        alert(response.error || 'Không thể xóa người dùng');
+      }
+    } catch (err) {
+      console.error('Delete user error:', err);
+      alert('Đã có lỗi xảy ra khi xóa người dùng');
+    }
+  const filteredUsers = users.filter(user => {
+    const search = searchTerm.toLowerCase();
+    return (
+  user.username.toLowerCase().includes(search) ||
+  (user.full_name && user.full_name.toLowerCase().includes(search)) ||
+  user.email.toLowerCase().includes(search)
+    );
+  });
+
+  return (
+    <Container fluid className="py-4">
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 className="mb-1">
+            <i className="fas fa-users me-2"></i>
+            Quản lý Người dùng
+          </h2>
+          <p className="text-muted mb-0">
+            Quản lý tài khoản và phân quyền người dùng
+          </p>
+        </div>
+        <ProtectedComponent permission="users.create">
+          <Button variant="primary" onClick={handleCreate}>
+            <i className="fas fa-plus me-2"></i>
+            Tạo người dùng mới
+          </Button>
+        </ProtectedComponent>
+  </div>
+
+  {/* Error Alert */}
+  {error && (
+        <Alert variant="danger" dismissible onClose={() => setError('')}>
+          <i className="fas fa-exclamation-circle me-2"></i>
+          {error}
+        </Alert>
+      )}
+
+      {/* Search & Filters */}
+      <Card className="mb-4">
+        <Card.Body>
+          <InputGroup>
+            <InputGroup.Text>
+              <i className="fas fa-search"></i>
+            </InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="Tìm kiếm theo tên đăng nhập, họ tên, email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <Button
+                variant="outline-secondary"
+                onClick={() => setSearchTerm('')}
+              >
+                <i className="fas fa-times"></i>
+              </Button>
+            )}
+          </InputGroup>
+        </Card.Body>
+  </Card>
+
+  {/* Users Table */}
+  <Card>
+        <Card.Header className="bg-white">
+          <h5 className="mb-0">
+            <i className="fas fa-list me-2"></i>
+            Danh sách Người dùng
+            <Badge bg="secondary" className="ms-2">
+              {filteredUsers.length}
+            </Badge>
+          </h5>
+        </Card.Header>
+        <Card.Body className="p-0">
+          {loading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-3 text-muted">Đang tải dữ liệu...</p>
+            </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="text-center py-5">
+              <i className="fas fa-inbox fa-3x text-muted mb-3"></i>
+              <p className="text-muted">
+                {searchTerm ? 'Không tìm thấy người dùng nào' : 'Chưa có người dùng nào'}
+              </p>
+            </div>
+          ) : (
+            <div className="table-responsive">
+              <Table hover className="mb-0">
+                <thead className="bg-light">
+                  <tr>
+                    <th style={{ width: '50px' }}>#</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Họ và tên</th>
+                    <th>Email</th>
+                    <th className="text-center">Số quyền</th>
+                    <th className="text-center">Cộng đoàn</th>
+                    <th className="text-center">Trạng thái</th>
+                    <th className="text-center">Ngày tạo</th>
+                    <th className="text-center" style={{ width: '100px' }}>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsers.map((user, index) => (
+                    <tr key={user.id}>
+                      <td>{index + 1}</td>
+                      <td>
+                        <div className="d-flex align-items-center">
+                          <div className="user-avatar me-2">
+                            {user.avatar ? (
+                              <img src={user.avatar} alt={user.username} />
+                            ) : (
+                              <i className="fas fa-user"></i>
+                            )}
+                          </div>
+                          <strong>{user.username}</strong>
+                        </div>
+                      </td>
+                      <td>{user.full_name || '-'}</td>
+                      <td>
+                        <i className="fas fa-envelope me-1 text-muted"></i>
+                        {user.email}
+                      </td>
+                      <td className="text-center">
+                        <Badge bg="info">
+                          <i className="fas fa-shield-alt me-1"></i>
+                          {user.permission_count || 0}
+                        </Badge>
+                      </td>
+                      <td className="text-center">
+                        <Badge bg="success">
+                          <i className="fas fa-home me-1"></i>
+                          {user.community_count || 0}
+                        </Badge>
+                      </td>
+                      <td className="text-center">
+                        <Badge bg={user.is_active ? 'success' : 'secondary'}>
+                          {user.is_active ? 'Hoạt động' : 'Tạm khóa'}
+                        </Badge>
+                      </td>
+                      <td className="text-center">
+                        {new Date(user.created_at).toLocaleDateString('vi-VN')}
+                      </td>
+                      <td className="text-center">
+                        <Dropdown>
+                          <Dropdown.Toggle
+                            variant="light"
+                            size="sm"
+                            className="btn-action"
+                          >
+                            <i className="fas fa-ellipsis-v"></i>
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu align="end">
+                            <ProtectedComponent permission="users.view">
+                              <Dropdown.Item onClick={() => handleEdit(user)}>
+                                <i className="fas fa-eye me-2"></i>
+                                Xem chi tiết
+                              </Dropdown.Item>
+                            </ProtectedComponent>
+                            <ProtectedComponent permission="users.edit">
+                              <Dropdown.Item onClick={() => handleEdit(user)}>
+                                <i className="fas fa-edit me-2"></i>
+                                Chỉnh sửa
+                              </Dropdown.Item>
+                            </ProtectedComponent>
+                            <ProtectedComponent permission="users.delete">
+                              <Dropdown.Divider />
+                              <Dropdown.Item
+                                className="text-danger"
+                                onClick={() => handleDelete(user)}
+                              >
+                                <i className="fas fa-trash me-2"></i>
+                                Xóa
+                              </Dropdown.Item>
+                            </ProtectedComponent>
+                          </Dropdown.Menu>
+                        </Dropdown>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          )}
+        </Card.Body>
+      </Card>
+
+      {/* User Form Modal */}
+      <UserForm
+        show={showForm}
+        onHide={() => setShowForm(false)}
+        user={selectedUser}
+        onSuccess={loadUsers}
+      />
+
+    </Container>
+  );
+}
+
+export default UserListPage;
 // src/features/users/pages/UserListPage.jsx
 
 import React, { useState, useEffect, useMemo } from "react";

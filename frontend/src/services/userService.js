@@ -3,27 +3,87 @@
 import api from "./api";
 import { API_ENDPOINTS } from "./apiEndpoints";
 
-const userService = {
+import api from './api';
+
+class UserService {
   /**
-   * Get list of users
-   * @param {object} params
-   * @returns {Promise}
+   * Get all users
    */
-  getList: async (params = {}) => {
-    try {
-      const response = await api.get(API_ENDPOINTS.USER.LIST || "/users", {
-        params,
-      });
-      // Backend already returns {success: true, data: {items: [], total: 0}}
-      return response;
-    } catch (error) {
-      return {
-        success: false,
-        error:
-          error.response?.data?.message || "Lỗi khi tải danh sách người dùng",
-      };
-    }
-  },
+  async getAll() {
+    const response = await api.get('/users');
+    return response.data;
+  }
+
+  /**
+   * Get user by ID
+   */
+  async getById(id) {
+    const response = await api.get(`/users/${id}`);
+    return response.data;
+  }
+
+  /**
+   * Create new user
+   */
+  async create(data) {
+    const response = await api.post('/users', data);
+    return response.data;
+  }
+
+  /**
+   * Update user
+   */
+  async update(id, data) {
+    const response = await api.put(`/users/${id}`, data);
+    return response.data;
+  }
+
+  /**
+   * Delete user
+   */
+  async delete(id) {
+    const response = await api.delete(`/users/${id}`);
+    return response.data;
+  }
+
+  /**
+   * Get user's permissions
+   */
+  async getPermissions(id) {
+    const response = await api.get(`/users/${id}/permissions`);
+    return response.data;
+  }
+
+  /**
+   * Update user's permissions
+   */
+  async updatePermissions(id, permissionIds) {
+    const response = await api.put(`/users/${id}/permissions`, {
+      permission_ids: permissionIds,
+    });
+    return response.data;
+  }
+
+  /**
+   * Get user's community permissions
+   */
+  async getCommunityPermissions(id) {
+    const response = await api.get(`/users/${id}/community-permissions`);
+    return response.data;
+  }
+
+  /**
+   * Update user's community permissions
+   */
+  async updateCommunityPermissions(id, communityPermissions) {
+    const response = await api.put(`/users/${id}/community-permissions`, {
+      community_permissions: communityPermissions,
+    });
+    return response.data;
+  }
+}
+
+export default new UserService();
 
   /**
    * Get user by ID

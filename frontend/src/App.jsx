@@ -1,3 +1,24 @@
+// frontend/src/App.jsx
+
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from '@context/AuthContext';
+import AppRoutes from '@routes';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import './App.css';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+
+export default App;
 // src/App.jsx
 
 import React from "react";

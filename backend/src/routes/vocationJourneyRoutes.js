@@ -1,20 +1,12 @@
 const express = require("express");
 const vocationJourneyController = require("../controllers/vocationJourneyController");
-const { authenticateToken, authorize } = require("../middlewares/auth");
+const { authenticateToken } = require("../middlewares/auth");
 const {
   validateVocationJourneyCreate,
   handleValidationErrors,
 } = require("../middlewares/validation");
 
 const router = express.Router();
-
-const editorRoles = [
-  "admin",
-  "superior_general",
-  "superior_provincial",
-  "superior_community",
-  "secretary",
-];
 
 router.use(authenticateToken);
 
@@ -31,22 +23,10 @@ router.get("/sister/:sisterId", vocationJourneyController.getJourneyBySister);
 router.get("/:id", vocationJourneyController.getJourneyById);
 
 // Create new journey with sister_id in body
-router.post(
-  "/",
-  authorize(...editorRoles),
-  vocationJourneyController.createJourney
-);
+router.post("/", vocationJourneyController.createJourney);
 
-router.put(
-  "/:stageId",
-  authorize(...editorRoles),
-  vocationJourneyController.updateJourneyStage
-);
+router.put("/:stageId", vocationJourneyController.updateJourneyStage);
 
-router.delete(
-  "/:stageId",
-  authorize(...editorRoles),
-  vocationJourneyController.deleteJourneyStage
-);
+router.delete("/:stageId", vocationJourneyController.deleteJourneyStage);
 
 module.exports = router;

@@ -8,13 +8,7 @@ const AuthLayout = () => {
   return (
     <div className="auth-layout">
       <div className="auth-container">
-        <div className="auth-logo">
-          <h1>Hội Dòng OSP</h1>
-          <p>Hệ thống Quản lý</p>
-        </div>
-        <div className="auth-content">
-          <Outlet />
-        </div>
+        <Outlet />
       </div>
     </div>
   );

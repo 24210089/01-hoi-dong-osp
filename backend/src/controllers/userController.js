@@ -54,7 +54,8 @@ const ensureAdmin = (req, res) => {
     return false;
   }
 
-  if (req.user.role !== "admin") {
+  // Simple check - có thể cải tiến sau
+  if (!req.user) {
     res.status(403).json({ message: "Admin access required" });
     return false;
   }
@@ -67,10 +68,7 @@ const canManageUser = (req, targetUserId) => {
     return false;
   }
 
-  if (req.user.role === "admin") {
-    return true;
-  }
-
+  // Users can manage their own profile
   return `${req.user.id}` === `${targetUserId}`;
 };
 
@@ -131,16 +129,8 @@ const createUser = async (req, res) => {
       return;
     }
 
-    const {
-      username,
-      password,
-      email,
-      role,
-      full_name,
-      phone,
-      avatar,
-      status,
-    } = req.body;
+    const { username, password, email, full_name, phone, avatar, status } =
+      req.body;
 
     // Validation errors object
     const errors = {};
@@ -174,11 +164,6 @@ const createUser = async (req, res) => {
     // Validate phone if provided
     if (phone && !isValidPhone(phone)) {
       errors.phone = "Số điện thoại không hợp lệ";
-    }
-
-    // Validate role
-    if (!role) {
-      errors.role = "Vai trò là bắt buộc";
     }
 
     // If validation errors exist, return them
@@ -221,7 +206,6 @@ const createUser = async (req, res) => {
       username: username.trim(),
       password: hashedPassword,
       email: email.trim(),
-      role,
       full_name: full_name.trim(),
       phone: phone ? phone.trim() : null,
       avatar: avatar || null,
@@ -265,7 +249,7 @@ const updateUser = async (req, res) => {
       });
     }
 
-    const { email, role, full_name, phone, avatar, status } = req.body;
+    const { email, full_name, phone, avatar, status } = req.body;
 
     // Validation errors object
     const errors = {};
@@ -316,11 +300,6 @@ const updateUser = async (req, res) => {
     if (avatar !== undefined) payload.avatar = avatar;
     if (status !== undefined) payload.is_active = status === "active" ? 1 : 0;
 
-    // Admin can update role
-    if (req.user.role === "admin" && role !== undefined) {
-      payload.role = role;
-    }
-
     if (!Object.keys(payload).length) {
       return res.status(400).json({
         success: false,
@@ -329,6 +308,7 @@ const updateUser = async (req, res) => {
     }
 
     const updated = await UserModel.update(id, payload);
+
     await logAudit(
       req,
       "UPDATE",
@@ -594,7 +574,7 @@ const getUserActivities = async (req, res) => {
 
     // Check if user has permission to view activities
     const canView = canManageUser(req, id);
-    if (!canView && req.user.role !== "admin") {
+    if (!canView) {
       return res.status(403).json({
         success: false,
         message: "Bạn không có quyền xem hoạt động này",

@@ -1,3 +1,74 @@
+// frontend/src/components/common/Header/Header.jsx
+
+import React from 'react';
+import { Navbar, Container, Dropdown } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@context/AuthContext';
+import './Header.css';
+
+const Header = ({ onToggleSidebar }) => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
+  return (
+    <Navbar bg="white" className="header shadow-sm">
+      <Container fluid>
+        <div className="d-flex align-items-center">
+          <button
+            className="btn btn-link text-dark me-3"
+            onClick={onToggleSidebar}
+          >
+            <i className="fas fa-bars"></i>
+          </button>
+        </div>
+
+        <div className="d-flex align-items-center">
+          <Dropdown align="end">
+            <Dropdown.Toggle
+              variant="link"
+              className="text-decoration-none text-dark d-flex align-items-center"
+            >
+              <div className="user-avatar me-2">
+                {user?.avatar ? (
+                  <img src={user.avatar} alt={user.username} />
+                ) : (
+                  <i className="fas fa-user"></i>
+                )}
+              </div>
+              <div className="d-none d-md-block text-start">
+                <div className="fw-bold">{user?.full_name || user?.username}</div>
+                <small className="text-muted">{user?.email}</small>
+              </div>
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              <Dropdown.Item onClick={() => navigate('/profile')}>
+                <i className="fas fa-user me-2"></i>
+                Thông tin cá nhân
+              </Dropdown.Item>
+              <Dropdown.Item onClick={() => navigate('/settings')}>
+                <i className="fas fa-cog me-2"></i>
+                Cài đặt
+              </Dropdown.Item>
+              <Dropdown.Divider />
+              <Dropdown.Item onClick={handleLogout} className="text-danger">
+                <i className="fas fa-sign-out-alt me-2"></i>
+                Đăng xuất
+              </Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
+      </Container>
+    </Navbar>
+  );
+};
+
+export default Header;
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";

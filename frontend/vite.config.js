@@ -12,47 +12,25 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       "@components": path.resolve(__dirname, "./src/components"),
       "@features": path.resolve(__dirname, "./src/features"),
-      "@layouts": path.resolve(__dirname, "./src/layouts"),
-      "@pages": path.resolve(__dirname, "./src/pages"),
       "@services": path.resolve(__dirname, "./src/services"),
+      "@context": path.resolve(__dirname, "./src/context"),
       "@hooks": path.resolve(__dirname, "./src/hooks"),
       "@utils": path.resolve(__dirname, "./src/utils"),
-      "@context": path.resolve(__dirname, "./src/context"),
-      "@config": path.resolve(__dirname, "./src/config"),
+      "@layouts": path.resolve(__dirname, "./src/layouts"),
+      "@routes": path.resolve(__dirname, "./src/routes"),
       "@assets": path.resolve(__dirname, "./src/assets"),
     },
   },
 
   // Server config
   server: {
-    port: 3000,
-    open: true, // Tự động mở browser
+    port: 5173,
     proxy: {
       // Proxy API requests to backend
       "/api": {
         target: "http://localhost:5000",
         changeOrigin: true,
-        secure: false,
       },
     },
   },
-
-  // Build config
-  build: {
-    outDir: "dist",
-    sourcemap: false,
-    // Optimize chunks
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          "react-vendor": ["react", "react-dom", "react-router-dom"],
-          "ui-vendor": ["bootstrap", "react-bootstrap"],
-          "utils-vendor": ["axios", "date-fns"],
-        },
-      },
-    },
-  },
-
-  // Environment variables prefix
-  envPrefix: "REACT_APP_",
 });

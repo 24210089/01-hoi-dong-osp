@@ -1,3 +1,29 @@
+/* frontend/src/components/common/Header/Header.css */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.header .user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  overflow: hidden;
+}
+
+.header .user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 /* ============================================
    HEADER MENU - AKKHOR STYLE
    ============================================ */

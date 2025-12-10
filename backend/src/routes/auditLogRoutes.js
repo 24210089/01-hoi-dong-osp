@@ -1,12 +1,10 @@
 const express = require("express");
 const auditLogController = require("../controllers/auditLogController");
-const { authenticateToken, authorize } = require("../middlewares/auth");
+const { authenticateToken } = require("../middlewares/auth");
 
 const router = express.Router();
 
-const privilegedRoles = ["admin", "superior_general"];
-
-router.use(authenticateToken, authorize(...privilegedRoles));
+router.use(authenticateToken);
 
 router.get("/", auditLogController.getAuditLogs);
 router.get("/user/:userId", auditLogController.getAuditLogsByUser);

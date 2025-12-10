@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const lookupController = require("../controllers/lookupController");
-const { authenticateToken, authorize } = require("../middlewares/auth");
+const { authenticateToken } = require("../middlewares/auth");
 
 // Journey Stages routes
 router.get(
@@ -18,19 +18,16 @@ router.get(
 router.post(
   "/journey-stages",
   authenticateToken,
-  authorize("admin", "be_tren_tong"),
   lookupController.createJourneyStage
 );
 router.put(
   "/journey-stages/:id",
   authenticateToken,
-  authorize("admin", "be_tren_tong"),
   lookupController.updateJourneyStage
 );
 router.delete(
   "/journey-stages/:id",
   authenticateToken,
-  authorize("admin", "be_tren_tong"),
   lookupController.deleteJourneyStage
 );
 
@@ -48,19 +45,16 @@ router.get(
 router.post(
   "/sister-statuses",
   authenticateToken,
-  authorize("admin", "be_tren_tong"),
   lookupController.createSisterStatus
 );
 router.put(
   "/sister-statuses/:id",
   authenticateToken,
-  authorize("admin", "be_tren_tong"),
   lookupController.updateSisterStatus
 );
 router.delete(
   "/sister-statuses/:id",
   authenticateToken,
-  authorize("admin", "be_tren_tong"),
   lookupController.deleteSisterStatus
 );
 

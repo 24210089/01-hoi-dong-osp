@@ -1,46 +1,76 @@
-const path = require("path");
 const express = require("express");
-const dotenv = require("dotenv");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
+require("dotenv").config();
 
-// Load environment variables as early as possible
-dotenv.config({ path: path.resolve(__dirname, ".env") });
-
-const registerRoutes = require("./src/routes");
-const { notFound, errorHandler } = require("./src/middlewares/errorHandler");
-const { applySecurityMiddlewares } = require("./src/middlewares/security");
-const db = require("./src/config/database");
-
-const PORT = process.env.PORT || 3000;
 const app = express();
 
-// Security middlewares (helmet, CORS, sanitizers, rate limiters)
-applySecurityMiddlewares(app);
-
-// Core middlewares for parsing and static assets
+// Middleware
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
 
-// Serve uploads with CORS headers
-app.use(
-  "/uploads",
-  (req, res, next) => {
-    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    next();
-  },
-  express.static(path.join(__dirname, "src", "uploads"))
-);
+// Routes
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/users", require("./routes/users"));
+app.use("/api/permissions", require("./routes/permissions"));
+app.use("/api/communities", require("./routes/communities"));
+app.use("/api/sisters", require("./routes/sisters"));
 
-app.use(express.static(path.join(__dirname, "frontend")));
+// ============================================
+// NEW ROUTES - Features liên quan đến Nữ Tu
+// ============================================
 
-// Attach all API routes
-registerRoutes(app);
+app.use("/api/journeys", require("./routes/journeys"));
+app.use("/api/education", require("./routes/education"));
+app.use("/api/missions", require("./routes/missions"));
+app.use("/api/health", require("./routes/health"));
+app.use("/api/evaluations", require("./routes/evaluations"));
 
-// Fallback handlers for unmatched routes and errors
-app.use(notFound);
-app.use(errorHandler);
+// Reports
+app.use("/api/reports", require("./routes/reports"));
 
-// Verify DB connectivity before accepting requests
+// Health check
+app.get("/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Server is running",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: "Route not found",
+  });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error("Server error:", err);
+  res.status(500).json({
+    success: false,
+    error: "Internal server error",
+  });
+});
+
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`📝 Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(`✅ Community-based filtering is enabled for all features`);
+});
 const startServer = async () => {
   try {
     const connection = await db.getConnection();

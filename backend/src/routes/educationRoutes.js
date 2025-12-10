@@ -1,6 +1,6 @@
 const express = require("express");
 const educationController = require("../controllers/educationController");
-const { authenticateToken, authorize } = require("../middlewares/auth");
+const { authenticateToken } = require("../middlewares/auth");
 const {
   validateEducationCreate,
   handleValidationErrors,
@@ -8,14 +8,6 @@ const {
 const { uploadDocument } = require("../middlewares/upload");
 
 const router = express.Router();
-
-const editorRoles = [
-  "admin",
-  "superior_general",
-  "superior_provincial",
-  "superior_community",
-  "secretary",
-];
 
 router.use(authenticateToken);
 
@@ -28,27 +20,17 @@ router.get("/:id", educationController.getEducationById);
 
 router.post(
   "/",
-  authorize(...editorRoles),
   validateEducationCreate,
   handleValidationErrors,
   educationController.addEducation
 );
 
-router.put(
-  "/:id",
-  authorize(...editorRoles),
-  educationController.updateEducation
-);
+router.put("/:id", educationController.updateEducation);
 
-router.delete(
-  "/:id",
-  authorize(...editorRoles),
-  educationController.deleteEducation
-);
+router.delete("/:id", educationController.deleteEducation);
 
 router.post(
   "/:id/certificate",
-  authorize(...editorRoles),
   uploadDocument,
   educationController.uploadCertificate
 );

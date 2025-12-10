@@ -1,6 +1,6 @@
 const express = require("express");
 const communityController = require("../controllers/communityController");
-const { authenticateToken, authorize } = require("../middlewares/auth");
+const { authenticateToken } = require("../middlewares/auth");
 const {
   validateCommunityCreate,
   handleValidationErrors,
@@ -8,14 +8,6 @@ const {
 const { cacheMiddleware } = require("../middlewares/cache");
 
 const router = express.Router();
-
-const editorRoles = [
-  "admin",
-  "superior_general",
-  "superior_provincial",
-  "superior_community",
-  "secretary",
-];
 
 router.use(authenticateToken);
 
@@ -25,7 +17,6 @@ router.get("/:id/members", communityController.getCommunityMembers);
 
 router.post(
   "/",
-  authorize(...editorRoles),
   validateCommunityCreate,
   handleValidationErrors,
   communityController.createCommunity
@@ -33,35 +24,18 @@ router.post(
 
 router.put(
   "/:id",
-  authorize(...editorRoles),
   validateCommunityCreate,
   handleValidationErrors,
   communityController.updateCommunity
 );
 
-router.delete(
-  "/:id",
-  authorize(...editorRoles),
-  communityController.deleteCommunity
-);
+router.delete("/:id", communityController.deleteCommunity);
 
 // Member management routes
-router.post(
-  "/:id/members",
-  authorize(...editorRoles),
-  communityController.addMember
-);
+router.post("/:id/members", communityController.addMember);
 
-router.put(
-  "/:id/members/:memberId",
-  authorize(...editorRoles),
-  communityController.updateMemberRole
-);
+router.put("/:id/members/:memberId", communityController.updateMemberRole);
 
-router.delete(
-  "/:id/members/:memberId",
-  authorize(...editorRoles),
-  communityController.removeMember
-);
+router.delete("/:id/members/:memberId", communityController.removeMember);
 
 module.exports = router;

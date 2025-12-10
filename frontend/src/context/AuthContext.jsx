@@ -5,24 +5,13 @@ import authService from "@services/authService";
 
 const AuthContext = createContext(null);
 
-// Role labels mapping
-const ROLE_LABELS = {
-  admin: "Quản trị viên",
-  superior_general: "Bề Trên Tổng",
-  superior_provincial: "Bề Trên Tỉnh",
-  superior_community: "Bề Trên Cộng Đoàn",
-  secretary: "Thư ký",
-  viewer: "Người xem",
-};
-
 // Helper to validate user data structure - defined outside component
 const isValidUserData = (data) => {
   // Valid user must NOT have password field
-  // If it has password, it's form data not user data
   if (!data || typeof data !== "object") return false;
   if (data.password !== undefined) return false;
-  // Must have at least one of: id, role, username
-  return !!(data.id || data.role || data.username);
+  // Must have at least one of: id, username
+  return !!(data.id || data.username);
 };
 
 // Get initial user from localStorage (runs BEFORE first render)
@@ -34,15 +23,9 @@ const getInitialUser = () => {
     if (userData && token) {
       const parsed = JSON.parse(userData);
 
-      // Validate the data
       if (isValidUserData(parsed)) {
-        // Add role_label if not present
-        if (!parsed.role_label && parsed.role) {
-          parsed.role_label = ROLE_LABELS[parsed.role] || parsed.role;
-        }
         return parsed;
       } else {
-        // Invalid data - clear it immediately
         console.warn("🔧 Invalid user data detected, clearing localStorage...");
         localStorage.removeItem("user");
         localStorage.removeItem("token");
@@ -76,16 +59,8 @@ export const AuthProvider = ({ children }) => {
       console.log("📡 Backend response:", response);
 
       if (response.success && response.data?.token && response.data?.user) {
-        // Add role_label to user data
-        const userData = {
-          ...response.data.user,
-          role_label:
-            ROLE_LABELS[response.data.user.role] || response.data.user.role,
-        };
+        const userData = response.data.user;
 
-        // authService đã lưu token và user vào localStorage
-        // Cập nhật lại với role_label
-        localStorage.setItem("user", JSON.stringify(userData));
         console.log("✅ Login successful:", userData.username);
 
         setUser(userData);
@@ -140,10 +115,6 @@ export const AuthProvider = ({ children }) => {
   const updateUser = useCallback((userData) => {
     setUser((prev) => {
       const newUser = { ...prev, ...userData };
-      // Add role_label if role changed
-      if (userData.role && !userData.role_label) {
-        newUser.role_label = ROLE_LABELS[userData.role] || userData.role;
-      }
       localStorage.setItem("user", JSON.stringify(newUser));
       return newUser;
     });
@@ -154,10 +125,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authService.getCurrentUser();
       if (response.success && response.data) {
-        const userData = {
-          ...response.data,
-          role_label: ROLE_LABELS[response.data.role] || response.data.role,
-        };
+        const userData = response.data;
         setUser(userData);
         localStorage.setItem("user", JSON.stringify(userData));
         return userData;
@@ -168,20 +136,17 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // Check permission
-  const hasPermission = useCallback(
-    (roles) => {
-      if (!roles || roles.length === 0) return true;
-      if (!user) return false;
-      return roles.includes(user.role);
-    },
-    [user]
-  );
+  // Simple check - always return true (no permission system)
+  const hasPermission = useCallback(() => true, []);
 
-  // Check if user is admin
-  const isAdmin = useCallback(() => {
-    return user?.role === "admin";
-  }, [user]);
+  // Simple check - always return true (no permission system)
+  const hasAllPermissions = useCallback(() => true, []);
+
+  // Simple check - always return true (no community system)
+  const hasCommunityAccess = useCallback(() => true, []);
+
+  // Simple check - always return true (no admin check)
+  const isAdmin = useCallback(() => true, []);
 
   const value = {
     user,

@@ -1,208 +1,83 @@
-// src/services/sisterService.js
-
 import api from "./api";
-import { API_ENDPOINTS } from "./apiEndpoints";
 
-const sisterService = {
+class SisterService {
   /**
-   * Get list of sisters with pagination and filters
-   * @param {Object} params - { page, limit, search, filter }
-   * @returns {Promise}
+   * Lấy danh sách nữ tu (có phân trang, lọc, search)
    */
-  getList: async (params = {}) => {
+  async getAll(params = {}) {
     try {
-      const response = await api.get(API_ENDPOINTS.SISTER.LIST, { params });
-      return response;
+      const response = await api.get("/sisters", { params });
+      return response.data;
     } catch (error) {
-      throw error;
-    }
-  },
-
-  /**
-   * Get sister detail by ID
-   * @param {string} id
-   * @returns {Promise}
-   */
-  getDetail: async (id) => {
-    try {
-      const response = await api.get(API_ENDPOINTS.SISTER.DETAIL(id));
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  /**
-   * Get sister by ID (alias for getDetail with success format)
-   * @param {string} id
-   * @returns {Promise}
-   */
-  getById: async (id) => {
-    try {
-      const response = await api.get(API_ENDPOINTS.SISTER.DETAIL(id));
       return {
-        success: true,
-        data: response.data || response,
+        success: false,
+        error: error?.response?.data?.error || "Không thể lấy danh sách nữ tu",
+        data: { items: [], total: 0, page: 1, limit: 20, totalPages: 0 },
       };
-    } catch (error) {
-      throw error;
     }
-  },
+  }
 
   /**
-   * Create new sister
-   * @param {Object} data
-   * @returns {Promise}
+   * Lấy chi tiết nữ tu theo ID
    */
-  create: async (data) => {
+  async getById(id) {
     try {
-      const response = await api.post(API_ENDPOINTS.SISTER.CREATE, data);
-      // API returns { sister: {...} }, transform to { success: true, data: {...} }
+      const response = await api.get(`/sisters/${id}`);
+      return response.data;
+    } catch (error) {
       return {
-        success: true,
-        data: response.sister || response.data || response,
+        success: false,
+        error: error?.response?.data?.error || "Không thể lấy thông tin nữ tu",
+        data: null,
       };
-    } catch (error) {
-      throw error;
     }
-  },
+  }
 
   /**
-   * Update sister
-   * @param {string} id
-   * @param {Object} data
-   * @returns {Promise}
+   * Tạo mới hồ sơ nữ tu
    */
-  update: async (id, data) => {
+  async create(data) {
     try {
-      const response = await api.put(API_ENDPOINTS.SISTER.UPDATE(id), data);
-      // API returns { sister: {...} }, transform to { success: true, data: {...} }
+      const response = await api.post("/sisters", data);
+      return response.data;
+    } catch (error) {
       return {
-        success: true,
-        data: response.sister || response.data || response,
+        success: false,
+        error: error?.response?.data?.error || "Không thể tạo hồ sơ nữ tu",
       };
-    } catch (error) {
-      throw error;
     }
-  },
+  }
 
   /**
-   * Delete sister
-   * @param {string} id
-   * @returns {Promise}
+   * Cập nhật hồ sơ nữ tu
    */
-  delete: async (id) => {
+  async update(id, data) {
     try {
-      const response = await api.delete(API_ENDPOINTS.SISTER.DELETE(id));
-      return response;
+      const response = await api.put(`/sisters/${id}`, data);
+      return response.data;
     } catch (error) {
-      throw error;
+      return {
+        success: false,
+        error:
+          error?.response?.data?.error || "Không thể cập nhật thông tin nữ tu",
+      };
     }
-  },
+  }
 
   /**
-   * Search sisters
-   * @param {string} keyword
-   * @returns {Promise}
+   * Xóa nữ tu (set is_active = false)
    */
-  search: async (keyword) => {
+  async delete(id) {
     try {
-      const response = await api.get(API_ENDPOINTS.SISTER.SEARCH, {
-        params: { q: keyword },
-      });
-      return response;
+      const response = await api.delete(`/sisters/${id}`);
+      return response.data;
     } catch (error) {
-      throw error;
+      return {
+        success: false,
+        error: error?.response?.data?.error || "Không thể xóa nữ tu",
+      };
     }
-  },
+  }
+}
 
-  /**
-   * Export sisters list to Excel
-   * @param {Object} filters
-   * @returns {Promise}
-   */
-  exportExcel: async (filters = {}) => {
-    try {
-      const response = await api.get(API_ENDPOINTS.SISTER.EXPORT, {
-        params: filters,
-        responseType: "blob",
-      });
-
-      // Create download link
-      const url = window.URL.createObjectURL(new Blob([response]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `sisters-list-${Date.now()}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      return { success: true };
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  /**
-   * Import sisters from Excel
-   * @param {File} file
-   * @returns {Promise}
-   */
-  importExcel: async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await api.post(API_ENDPOINTS.SISTER.IMPORT, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  /**
-   * Get statistics
-   * @returns {Promise}
-   */
-  getStatistics: async () => {
-    try {
-      const response = await api.get(API_ENDPOINTS.SISTER.STATISTICS);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  /**
-   * Upload avatar for sister
-   * @param {string} id - Sister ID
-   * @param {File} file - Image file
-   * @returns {Promise}
-   */
-  uploadAvatar: async (id, file) => {
-    try {
-      const formData = new FormData();
-      formData.append("photo", file);
-
-      const response = await api.post(
-        API_ENDPOINTS.SISTER.UPLOAD_AVATAR(id),
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-};
-
-export default sisterService;
+export default new SisterService();

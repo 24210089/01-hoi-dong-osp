@@ -1,7 +1,7 @@
 const express = require("express");
 const { body } = require("express-validator");
 const authController = require("../controllers/authController");
-const { authenticateToken, authorize } = require("../middlewares/auth");
+const { authenticateToken } = require("../middlewares/auth");
 const {
   validateUserCreate,
   validateLogin,
@@ -19,11 +19,10 @@ const validateChangePassword = [
     .withMessage("newPassword must be at least 6 characters"),
 ];
 
-// Chỉ admin mới có quyền đăng ký tài khoản mới
+// Registration route - simple authentication required
 router.post(
   "/register",
   authenticateToken,
-  authorize("admin"),
   ...validateUserCreate,
   handleValidationErrors,
   authController.register

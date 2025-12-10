@@ -5,8 +5,8 @@ import { toast } from "react-toastify";
 
 // Create axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
-  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT) || 30000,
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -43,7 +43,7 @@ api.interceptors.response.use(
       console.log("✅ Response:", response.config.url, response.data);
     }
 
-    return response.data;
+    return response;
   },
   (error) => {
     // Handle errors
